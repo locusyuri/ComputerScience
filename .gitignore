@@ -1,0 +1,71 @@
+# =========================
+# LaTeX temporary / build files
+# =========================
+
+# Core auxiliary files
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.synctex(busy)
+*.synctex.gz(busy)
+
+# Bibliography / index / glossary
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+*.idx
+*.ilg
+*.ind
+*.ist
+*.acn
+*.acr
+*.alg
+*.glg
+*.glo
+*.gls
+*.glsdefs
+
+# Lists / notes / misc aux
+*.lol
+*.loa
+*.lot
+*.thm
+*.nav
+*.snm
+*.vrb
+*.ptc
+*.listing
+
+# Engine / conversion byproducts
+*.xdv
+*.dvi
+*.ps
+*.pdfsync
+*.bak
+*.sav
+*.tmp
+*~
+
+# TikZ / externalization caches
+*.md5
+*.dep
+
+# latexmk and arara
+.latexmkrc.local
+*.lua
+
+# Minted / pygments caches
+_minted*
+
+# SVG package generated files
+svg-inkscape/
+
+# Build folders often used in this repo
+**/tmp/
