@@ -208,6 +208,7 @@
 \definecolor{color_accent}{RGB}{72, 112, 172} % 主题色: 科技蓝
 \definecolor{color_bg_light}{gray}{0.97}      % 浅背景: 暖白
 \definecolor{color_border_light}{gray}{0.85}  % 浅边框: 浅灰
+\definecolor{color_new_green}{RGB}{0, 160, 135} % 新增绿色: 明亮绿（用于六级、七级标题）
 
 % --- Callout 色彩 ---
 %! [QUICK-EDIT:CALLOUT-COLOR] Ctrl+F 搜索本标记可直接修改 callout 配色
@@ -487,7 +488,7 @@
 
 % --- \paragraph（六级标题，普通加粗顶格）---
 \titleformat{\paragraph}[hang]
-  {\normalfont\cnTitleFont\bfseries\fontsize{12pt}{16pt}\selectfont\color{color_accent}}
+  {\normalfont\cnTitleFont\bfseries\fontsize{12pt}{16pt}\selectfont\color{color_new_green}}
   {}
   {0pt}
   {#1}
@@ -496,7 +497,7 @@
 
 % --- \subparagraph（七级标题，普通加粗顶格）---
 \titleformat{\subparagraph}[hang]
-  {\normalfont\cnTitleFont\bfseries\fontsize{11pt}{15pt}\selectfont\color{color_accent}}
+  {\normalfont\cnTitleFont\bfseries\fontsize{11pt}{15pt}\selectfont\color{color_new_green}}
   {}
   {0pt}
   {#1}

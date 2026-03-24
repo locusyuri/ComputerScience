@@ -173,7 +173,7 @@ SpringBoot 3.2.4 版本是 3.2 系列的稳定补丁版，配套 Spring Framewor
     \item 微服务应用：服务地址是动态变化的。如果硬编码 IP 地址和端口，一旦服务重启、扩容或缩容，地址就会失效，导致整个系统瘫痪。
 \end{itemize}
 
-\highlight{服务注册与发现机制}就是为了解决这个问题而诞生的。它\emphasis{提供了一个动态、自动化的方式来管理服务间的通信地址}。
+\highlight{服务注册与发现机制 (Service Registration and Discovery)}就是为了解决这个问题而诞生的。它\emphasis{提供了一个动态、自动化的方式来管理服务间的通信地址}。
 
 \ssection{核心组件}
 服务注册与发现模式主要包含三个角色：
@@ -208,6 +208,7 @@ SpringBoot 3.2.4 版本是 3.2 系列的稳定补丁版，配套 Spring Framewor
 \end{description}
 
 
+\ssection{Nacos 实践示例}
 下面以 Nacos 为例，介绍服务注册与发现的基本使用 （更详细的教程可在\href{https://nacos.io}{Nacos 官方文档}中找到）。
 \paragraph{1. 搭建 Nacos 服务注册中心}
 推荐使用 Docker 快速搭建 Nacos 服务注册中心，默认 API 调用端口为 8848，控制台访问端口为 8080：
@@ -384,10 +385,354 @@ public class OrderService {
 
 
 \section{配置中心}
+在微服务架构中，每个服务都有自己的配置文件（如 \inline{application.yml}）。随着服务数量的增加，传统的配置方式会带来一系列严峻的挑战：
+\begin{itemize}
+    \item 配置分散：每个服务的配置都散落在其各自的代码库中。要修改一个通用配置（如数据库密码），可能需要修改几十个项目。
+    \item 更新繁琐且风险高：修改配置后，需要重新打包、部署和启动服务，流程繁琐且耗时。任何一个小小的配置错误都可能导致服务启动失败。 
+    \item 环境管理复杂：一套代码通常需要部署在开发(dev)、测试(test)、生产(prod)等多个环境中。管理这些不同环境的配置文件非常容易出错。
+    \item 安全隐患：将数据库连接、密钥等敏感信息直接放在代码库中，存在泄露风险。
+    \item 无法动态更新：服务在运行期间无法获取最新的配置，灵活性差。例如，无法在不重启服务的情况下动态调整日志级别或开关某个功能。
+\end{itemize}
 
-\section{API 网关}
+统一配置管理正是为了解决这些问题而生。它将所有服务的配置信息从应用程序中抽离出来，存放在一个中心的、外部的
+\highlight{配置中心 (Configuration Center)}进行统一管理。
 
-\section{服务调用}
+一个配置中心主要提供以下能力：
+
+\begin{enumerate}
+    \item 集中管理：提供一个中心化的存储库来管理所有应用、所有环境的配置。 
+    \item 版本控制：能够对配置的修改进行版本管理和追溯。
+    \item 环境隔离：轻松管理不同环境（dev/test/prod）的配置。
+    \item 动态刷新 (Dynamic Refresh)：在不重启服务的情况下，将配置的变更实时推送给正在运行的服务实例。这是配置中心最有价值的功能之一。
+    \item 权限控制：对配置的修改和读取进行精细的权限管理，保证安全。
+\end{enumerate}
+
+\ssection{主流实现}
+Spring Cloud 生态中主要有两个主流的配置中心解决方案：
+
+\begin{description}
+    \item[Spring Cloud Config] 由 Spring 官方提供，后端通常使用 Git（也支持 SVN、本地文件系统），与代码仓库结合紧密、版本管理清晰。
+        其动态刷新通常需要结合 Spring Cloud Bus（如 RabbitMQ、Kafka）来广播刷新事件，因此整体架构相对更重，且默认没有内置可视化控制台。
+        综合来看：方案成熟可用，但在新项目中不再是首选。
+    \item[Nacos Config] 由 Alibaba 提供，配置数据存储在 Nacos Server（可外挂 MySQL），并通过长轮询（Long Polling）+ 推送机制原生支持动态刷新。
+        它与服务注册发现一体化，支持 Namespace、Group、Data ID 维度管理，同时提供可视化控制台和版本、灰度发布等能力。
+        综合能力更完整，在 Spring Cloud Alibaba 体系中属于强烈推荐方案。
+\end{description}
+
+Nacos 配置中心工作流程如图(\ref{fig:nacos-config-workflow})所示：
+\begin{figure}[h]
+    \centering
+    \includesvg[width=0.8\textwidth, inkscapelatex=false]{img/config_center.svg}
+    \caption{Nacos 配置中心工作流程示意图}
+    \label{fig:nacos-config-workflow}
+\end{figure}
+
+\ssection{Nacos 配置中心实践示例}
+下面以目前最流行的 Nacos 为例，展示如何实现统一配置管理。
+
+\paragraph{1. 创建配置}
+启动 Nacos 服务注册中心后，访问控制台（http://localhost:8080/nacos）登录后进入 ``配置管理'' 页面，点击 ``发布配置'' 按钮创建一个新的配置项：
+\begin{itemize}
+    \item Data ID: 配置的唯一标识符。命名规则通常是
+        \newline\inline{\$\{spring.application.name\}-\$\{spring.profiles.active\}.\$\{file-extension\}}。
+        \newline 例如：\inline{order-service-dev.yml} 表示 ``order-service'' 服务在 ``dev'' 环境下的 YAML 格式配置。
+    \item Group: 配置组，用于隔离不同的项目或业务。默认为 \inline{DEFAULT\_GROUP}。
+    \item 配置格式: 选择 \inline{YAML} 或 \inline{Properties}。
+    \item 配置内容: 写入你的配置。
+\end{itemize}
+\begin{codeblock}[yml]{order-service-dev.yml}
+server:
+    port: 8081
+spring:
+    datasource:
+        url: jdbc:mysql://localhost:3306/order_db
+        username: root
+        password: password
+\end{codeblock}
+
+\paragraph{2. SpringBoot 客户端接入}
+在 SpringBoot 项目的 \inline{pom.xml} 中添加 Nacos Config 依赖：
+\begin{codeblock}[xml]{pom.xml}
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+</dependency>
+\end{codeblock}
+创建配置文件 \inline{bootstrap.yml}，配置 Nacos 连接信息：
+\begin{codeblock}[yml]{bootstrap.yml}
+spring:
+    application:
+        name: order-service # 应用名，用于匹配 Nacos 中的 Data ID
+    profiles:
+        active: dev # 环境标识，用于匹配 Nacos 中的 Data ID
+    cloud:
+        nacos:
+            config:
+                server-addr: 127.0.0.1:8848 # Nacos Server 地址
+                file-extension: yml # 指定配置文件格式
+                # group: DEFAULT_GROUP # 如果使用了非默认组，需要指定
+\end{codeblock}
+
+\caution{
+    对于 Spring Boot 2.4+ / Spring Cloud 2021+，更推荐在 \inline{application.yml} 中使用 \inline{spring.config.import: nacos:...} 的新配置加载方式。
+    若你仍使用 \inline{bootstrap.yml}，通常需要额外引入 \inline{spring-cloud-starter-bootstrap} 才能启用旧的 bootstrap 上下文机制。
+}
+
+根据以上配置，Spring Boot 会去 Nacos 中寻找 Data ID 为\inline{order-service-dev.yml} 的配置。
+
+启动应用后，应用会自动从 Nacos 加载配置并应用到 Spring 环境中。你可以在控制台看到加载日志，确认配置已成功加载。
+
+之后的使用和传统的 Spring Boot 配置完全一样，你可以通过 \inline{@Value} 注解或 \inline{@ConfigurationProperties} 类来访问这些配置值。
+
+\subparagraph{动态刷新}
+当修改 Nacos 中的配置后，客户端会通过长轮询感知变更并更新本地配置上下文，因此应用\emphasis{无需重启即可获取新配置}。
+
+但要注意，``获取到新配置'' 与 ``业务 Bean 立即使用新值'' 不是同一件事：
+\begin{itemize}
+    \item 配置层（Environment）通常会自动更新。
+    \item Bean 层是否立即生效取决于注入方式：使用 \inline{Environment.getProperty(...)} 动态读取时通常可直接生效；
+          使用 \inline{@Value} 注入到普通单例 Bean 时，通常需要配合 \inline{@RefreshScope} 才能在运行期拿到新值。
+    \item 对 \inline{@ConfigurationProperties} 而言，不同版本与接入方式下重绑定行为可能不同，建议结合当前项目版本实测验证。
+\end{itemize}
+
+\tip{
+    实践建议：将 ``Nacos 自动刷新'' 理解为\emphasis{配置源已更新}；而 ``业务代码实时生效'' 需要根据 Bean 的绑定方式决定是否引入 \inline{@RefreshScope}。
+}
+
+使用 \inline{@RefreshScope} 注解会为这个 Bean 创建一个代理（通常用在 Controller 或 Service 中）。
+当 Nacos 配置发生变化时，Spring Cloud 会销毁这个 Bean 的旧实例，然后根据最新的配置信息创建一个新实例。下次访问时，注入的就是新实例，从而获取到最新的配置值：
+\begin{codeblock}[java]{DynamicConfigBean.java}
+@RefreshScope
+@Component
+public class DynamicConfigBean {
+    
+    @Value("\${some.config.value}")
+    private String configValue;
+    
+    public String getConfigValue() {
+        return configValue;
+    }
+}
+\end{codeblock}
+
+\subparagraph{共享配置}
+在微服务中，经常有多个服务需要共享一些通用配置（如数据库连接、Redis 配置）。Nacos 提供了简单的方式来实现。
+可以在 \inline{bootstrap.yml} 中配置 \inline{shared-configs} 或 \inline{extension-configs}。
+\begin{codeblock}[yml]{bootstrap.yml}
+spring:
+  cloud:
+    nacos:
+      config:
+        server-addr: 127.0.0.1:8848
+        file-extension: yml
+        # 共享配置
+        shared-configs:
+          - data-id: common-db.yml # 共享的数据源配置
+            refresh: true # 当共享配置变化时，也动态刷新
+          - data-id: common-redis.yml
+            refresh: true
+        # 扩展配置（优先级高于共享配置）
+        extension-configs:
+          - data-id: order-service-extension.yml # order-service 的扩展配置
+            refresh: true
+\end{codeblock}
+
+\tip{
+    共享配置的 Data ID 可以是任意命名，但建议使用统一的命名规范（如 \inline{common-*.yml}）来区分不同类型的共享配置。
+    共享配置可以被多个服务同时引用，修改后会同时影响所有引用它们的服务。
+}
+\note{
+    这里有两层优先级：
+
+    第 1 层（Nacos 内部）：\emphasis{服务特定配置 > 扩展配置 > 共享配置 > 默认配置}。
+    这一层只用于决定``多个 Nacos 配置之间''同名属性谁生效。
+
+    第 2 层（应用整体属性源，常见场景）：\emphasis{启动参数 > Nacos 配置 > 本地 application.yml}。
+    这一层用于决定``启动参数、本地文件、远程配置中心''之间同名属性谁最终生效。
+}
+
+\section{API网关}
+在微服务架构中，系统被拆分为许多独立的服务。如果让客户端（如网页、移动 App）直接与几十甚至上百个微服务通信，会带来一系列问题：
+
+\begin{itemize}
+    \item 客户端复杂性：客户端需要知道每个微服务的地址，并分别管理与它们的通信，逻辑非常复杂。 
+    \item 认证和授权冗余：每个微服务都需要独立实现用户认证、权限校验、安全防护等逻辑，造成大量重复工作。
+    \item 跨域问题：如果前端应用和后端服务部署在不同域，每个服务都需要处理跨域请求 (CORS)。
+    \item 协议转换困难：如果某些内部服务使用 gRPC 或其他协议，而客户端只支持 HTTP，直接通信会很困难。
+    \item 服务重构困难：一旦后端对微服务进行拆分或合并，所有客户端都需要修改代码以适应新的服务地址。
+    \item 难以统一管理：无法对整个系统的流量进行统一的监控、日志记录和限流。
+\end{itemize}
+
+\highlight{API 网关}就是为了解决这些问题而诞生的。它作为整个系统的\textbf{唯一入口 (Single Point of Entry)}，
+像一个``前台接待''或``总机''，统一接收所有外部请求，然后根据规则将请求路由到正确的后端微服务。
+
+
+Spring Cloud 生态中主要有两个主流的网关实现：
+
+\begin{description}
+    \item[Zuul 1.x （Netflix）] 基于 Servlet 体系的阻塞式 I/O（Blocking I/O），实现方式以传统 Filter 链为主，配置能力相对基础。
+        在中高并发场景下，吞吐与资源利用率通常不如非阻塞网关；同时该方案已进入维护模式，Spring 官方也不再推荐用于新项目。
+
+    \item[Spring Cloud Gateway（Spring 官方团队）] 基于 Spring WebFlux/Reactor 的非阻塞式 I/O（Non-blocking I/O），
+        在高并发与高吞吐场景下表现更优。内置了更丰富的 Route Predicate 与 Gateway Filter，既支持属性化配置，也支持 Java Fluent API 编程式配置。
+        在当前 Spring Cloud 体系中，它是官方主推且更具长期演进价值的网关方案。
+
+    \item[Shenyu（Apache）] 由 Apache 基金会孵化的开源 API 网关，支持多种协议（HTTP、gRPC、WebSocket 等），功能丰富且高度可扩展。
+        适合对协议支持和定制化需求较高的场景，但相对于 Spring Cloud Gateway 来说，学习曲线更陡峭，社区生态也较小。
+\end{description}
+
+\info{
+    ``ShenYu (神禹) is the honorific name of Chinese ancient monarch Xia Yu (also known in later times as Da Yu), 
+    who left behind the touching story of the three times he crossed the Yellow River 
+    for the benefit of the people and successfully managed the flooding of the river. 
+    He is known as one of the three greatest kings of ancient China, along with Yao and Shun.''
+}
+
+\tip{
+    选型建议：存量系统若已深度使用 Zuul 1.x，可在稳定优先前提下逐步迁移；新项目应优先采用 Spring Cloud Gateway，
+    以获得更好的性能上限、扩展能力与社区支持；ShenYu 适合特定协议需求或对网关功能有高度定制化需求的场景。
+}
+
+API 网关通常负责处理所有与业务逻辑无关的\textbf{横切关注点 (Cross-Cutting Concerns)}：
+
+\begin{enumerate}
+    \item 请求路由 (Routing)：核心功能。根据请求的路径、域名、请求头等信息，将请求转发到指定的后端服务。 
+    \item 认证与授权 (Authentication \& Authorization)：在网关层统一进行身份验证（如校验 JWT Token），只有合法的请求才能进入后端系统。
+    \item 负载均衡 (Load Balancing)：网关与服务发现组件（如 Nacos）集成，当一个服务有多个实例时，能自动将请求分发到其中一个实例上。
+    \item 限流与熔断 (Rate Limiting \& Circuit Breaking)：保护后端服务不被突发流量冲垮。
+        可以对指定 API 设置访问频率限制，并在后端服务不可用时快速失败（熔断）。
+    \item 日志与监控 (Logging \& Monitoring)：集中记录所有入口流量的日志，便于审计和问题排查。
+    \item 协议转换 (Protocol Translation)：将外部的 HTTP 请求转换为内部服务使用的其他协议（如 gRPC）。
+    \item 请求/响应转换 (Request/Response Transformation)：在将请求转发给后端或将响应返回给客户端之前，修改请求头、请求体或响应体。
+\end{enumerate}
+
+\ssection{SpringCloud Gateway}
+Spring Cloud Gateway 是构建在 Spring WebFlux 和 Project Reactor 之上的，这使得它天然具备了非阻塞和响应式的能力。
+它的核心概念包括：
+\begin{description}
+    \item[Route（路由）] 定义了从请求到后端服务的映射关系，是网关最基本的构建块。
+        \emphasis{它由一个 ID、一个目标 URI、一组断言 (Predicate) 和一组过滤器 (Filter) 组成。}
+        如果所有断言都为 \inline{true}，则该路由匹配成功，请求将被转发到指定的 URI。
+    \item[Predicate（断言）] 这是一个 Java 8 的 Predicate。它的作用是匹配条件，决定一个请求是否应该被此路由处理。
+        Gateway 内置了丰富的 Predicate 工厂，可以匹配 HTTP 请求的任何内容，例如：
+        \begin{itemize}
+            \item Path（路径匹配）: 根据请求的 URL 路径进行匹配。 
+            \item Method（HTTP 方法匹配）: 根据请求的 HTTP 方法（GET、POST 等）进行匹配。
+            \item Header（请求头匹配）: 根据请求头的名称和值进行匹配。
+            \item Query（查询参数匹配）: 根据 URL 中的查询参数进行匹配。
+            \item Host（主机匹配）: 根据请求的 Host 头进行匹配。
+            \item After/Before/Between（时间匹配）: 根据请求的时间进行匹配，例如在某个时间段内生效。
+        \end{itemize}
+    \item[Filter（过滤器）] 在请求被路由到后端服务之前或响应返回给客户端之前，对请求或响应进行修改的组件。分为全局过滤器和路由过滤器两种。
+        常见功能为：添加/修改请求头、请求体，添加/修改响应头、响应体，记录日志，进行认证授权，限流等。
+\end{description}
+
+当一个请求到达 Spring Cloud Gateway 时，它的处理流程如下（如图~\ref{fig:spring-cloud-gateway-workflow}所示）：
+\begin{figure}[h]
+    \centering
+    \includesvg[width=0.6\textwidth, inkscapelatex=false]{img/spring_cloud_gateway.svg}
+    \caption{Spring Cloud Gateway 工作流程}
+    \label{fig:spring-cloud-gateway-workflow}
+\end{figure}
+\begin{enumerate}
+    \item Gateway Handler Mapping：根据请求信息（路径、方法等）和配置的 Predicate，找到匹配的路由。
+    \item Gateway Web Handler：将请求传递给一个特定的过滤器链 (Filter Chain)。
+    \item 执行过滤器链： 
+        \begin{itemize}
+            \item 请求会先经过所有 GlobalFilter 的 pre 阶段（前置处理）。 
+            \item 然后经过该路由特定的 GatewayFilter 的 pre 阶段。
+            \item 最后，代理请求被发送到目标服务。
+        \end{itemize}
+    \item 服务响应：目标服务返回响应。
+    \item 执行过滤器链（反向）：
+        \begin{itemize}
+            \item 响应会反向经过 GatewayFilter 的 post 阶段（后置处理）。 
+            \item 再反向经过 GlobalFilter 的 post 阶段。
+        \end{itemize}
+    \item 返回响应：最终将处理过的响应返回给客户端。
+\end{enumerate}
+
+
+
+\ssection{SpringCloud Gateway 实践示例}
+下面以 Spring Cloud Gateway 为例，展示如何实现一个简单的 API 网关。
+
+假设我们有两个后端服务：``user-service'' 和 ``order-service''，它们分别运行在不同的端口上。我们希望通过 API 网关将它们暴露给客户端。
+\paragraph{1. 添加依赖}
+在 API 网关项目的 \inline{pom.xml} 中添加 Spring Cloud Gateway 依赖：
+\begin{codeblock}[xml]{pom.xml}
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-gateway</artifactId>
+</dependency>
+<!-- 集成 Nacos 服务发现 -->
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+</dependency>
+<!-- 使用 lb:// 路由时建议显式引入 LoadBalancer -->
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+</dependency>
+\end{codeblock}
+
+\paragraph{2. 配置网关模块配置文件}
+在 \inline{application.yml} 中配置 Spring Cloud Gateway 和 Nacos 服务发现：
+\begin{codeblock}[yml]{application.yml}
+server:
+  port: 8888 # 网关端口
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848 # Nacos 地址
+
+    gateway:
+      routes:
+        # 路由规则1：访问用户服务
+        - id: user_service_route # 路由的唯一ID
+          uri: lb://user-service 
+          # Predicates (断言/匹配条件)，必须所有条件都满足
+          predicates:
+            # 当请求路径匹配 /user-api/** 时，此路由生效
+            - Path=/user-api/**
+          # Filters (过滤器)，对请求进行处理
+          filters:
+            # StripPrefix=1 会去掉路径中的第一个部分
+            # 例如：/user-api/users/1 -> /users/1
+            - StripPrefix=1
+            # 也可以添加请求头
+            - AddRequestHeader=X-Request-From, api-gateway
+
+        # 路由规则2：访问订单服务
+        - id: order_service_route
+          uri: lb://order-service
+          predicates:
+            - Path=/order-api/**
+          filters:
+            - StripPrefix=1
+\end{codeblock}
+\tip{
+    在路由配置中，\inline{uri: lb://user-service} 表示使用负载均衡（Load Balancing）方式调用服务注册中心中名为 ``user-service'' 的服务实例。
+    这样，当 ``user-service'' 有多个实例时，网关会自动将请求分发到其中一个实例上，实现了负载均衡。
+
+    本示例使用\textbf{显式路由}（）以便精确控制对外暴露的 API。
+    仅在需要按服务名自动暴露全部路由时，再考虑开启 \inline{spring.cloud.gateway.discovery.locator.enabled=true}。
+}
+
+通过以上配置：
+\begin{enumerate}
+    \item 当客户端访问 \inline{http://localhost:8888/user-api/users/123} 时，网关会匹配到 \inline{user\_service\_route}。
+    \item \inline{StripPrefix=1} 过滤器会将路径重写为 \inline{/users/123}。
+    \item 网关通过 Nacos 找到 \inline{user-service} 的一个健康实例（例如 \inline{http://192.168.1.10:8081}）。
+    \item 最终将请求 \inline{GET /users/123} 发送到该实例。
+\end{enumerate}
+
+
 
 \section{负载均衡与熔断降级}
 
