@@ -196,39 +196,192 @@ SpringBoot 3.2.4 版本是 3.2 系列的稳定补丁版，配套 Spring Framewor
 
 \ssection{主流实现}
 目前主流的服务注册与发现组件包括 Eureka、Nacos、Consul 和 Zookeeper 等。它们各有特点，适用于不同的场景和需求：
-\begin{itemize}
-    \item Eureka（Netflix）
-    \begin{itemize}
-        \item 经典服务注册中心，使用门槛低，易于上手。
-        \item AP 架构（高可用优先），采用服务端与客户端协作模式。
-        \item 节点之间采用对等复制（P2P）机制。
-        \item 当前处于维护模式（Maintenance Mode），新项目一般不推荐作为首选，但在存量系统中仍较常见。
-    \end{itemize}
+\begin{description}
+    \item[Eureka (Netflix)] 经典的服务注册中心，使用门槛低，易于上手。AP 架构（高可用优先），采用服务端与客户端协作模式，节点之间采用对等复制（P2P）机制。
+        当前处于维护模式（Maintenance Mode），新项目一般不推荐作为首选，但在存量系统中仍较常见。
+    \item[Nacos (Alibaba)] 同时提供服务注册与配置管理能力，一体化程度高。支持 CP/AP 模式切换，具备服务权重、健康检查、元数据管理等能力。
+        提供可视化控制台，运维体验较好。综合能力强、社区活跃，属于当前国内微服务体系中的主流推荐方案。
+    \item[Consul (HashiCorp)] 生态完整，除注册发现外还提供 KV 存储与多数据中心支持。以 CP 架构为主（强一致性优先），健康检查机制完善。
+        适合对一致性要求较高，或已采用 HashiCorp 技术栈的团队。
+    \item[Zookeeper (Apache)] 本质是分布式协调服务，也可用于服务注册发现。CP 架构（强一致性），采用树形节点数据模型。
+        方案相对传统、配置复杂度较高，在新微服务项目中通常不是首选。
+\end{description}
 
-    \item Nacos（Alibaba）
-    \begin{itemize}
-        \item 同时提供服务注册与配置管理能力，一体化程度高。
-        \item 支持 CP/AP 模式切换，具备服务权重、健康检查、元数据管理等能力。
-        \item 提供可视化控制台，运维体验较好。
-        \item 综合能力强、社区活跃，属于当前国内微服务体系中的\textbf{主流推荐方案}。
-    \end{itemize}
 
-    \item Consul（HashiCorp）
-    \begin{itemize}
-        \item 生态完整，除注册发现外还提供 KV 存储与多数据中心支持。
-        \item 以 CP 架构为主（强一致性优先），健康检查机制完善。
-        \item 适合对一致性要求较高，或已采用 HashiCorp 技术栈的团队。
-    \end{itemize}
+下面以 Nacos 为例，介绍服务注册与发现的基本使用 （更详细的教程可在\href{https://nacos.io}{Nacos 官方文档}中找到）。
+\paragraph{1. 搭建 Nacos 服务注册中心}
+推荐使用 Docker 快速搭建 Nacos 服务注册中心，默认 API 调用端口为 8848，控制台访问端口为 8080：
+\begin{codeblock}[yml]{docker-compose.yml}
+services:
+    nacos:
+    image: nacos/nacos-server:latest
+    container_name: nacos
+    ports:
+        - "8848:8848" # Nacos API 端口
+        - "8080:8080" # Nacos 控制台端口
+    environment:
+        # 设置自定义认证TOKEN: SecretKey012345678901234567890123456789
+        - NACOS_AUTH_TOKEN=U2VjcmV0S2V5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5
+        # 设置身份标识 (请确保这两个都已添加)
+        - NACOS_AUTH_IDENTITY_KEY=xxxxx
+        - NACOS_AUTH_IDENTITY_VALUE=xxxxxx
+        - MODE=standalone # 单机模式，适合开发测试
+        - SPRING_DATASOURCE_PLATFORM=mysql # 使用 MySQL 作为持久化存储
+        - MYSQL_SERVICE_HOST=mysql
+        - MYSQL_SERVICE_PORT=3306
+        - MYSQL_SERVICE_DB_NAME=nacos_config
+        - MYSQL_SERVICE_USER=root
+        - MYSQL_SERVICE_PASSWORD=123456
+    volumes:
+        - ./nacos-data:/home/nacos/data
+    depends_on:
+        - mysql
+\end{codeblock}
 
-    \item Zookeeper（Apache）
-    \begin{itemize}
-        \item 本质是分布式协调服务，也可用于服务注册发现。
-        \item CP 架构（强一致性），采用树形节点数据模型。
-        \item 方案相对传统、配置复杂度较高，在新微服务项目中通常不是首选。
-    \end{itemize}
-\end{itemize}
 
-下面以 Nacos 为例，介绍服务注册与发现的基本使用。
+\paragraph{2. 配置服务提供者}
+在 \inline{pom.xml} 中添加 Nacos Discovery 依赖（Gradle 同理）：
+
+\begin{codeblock}[xml]{pom.xml}
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+</dependency>
+\end{codeblock}
+
+\tip{
+    版本号由 Spring Cloud Alibaba BOM（物料清单）统一管理。
+    在 \inline{<dependencyManagement>} 中引入 \inline{spring-cloud-alibaba-dependencies} 坐标，
+    即可享受该 BOM 内所有依赖的版本定义，无需在每个依赖中重复指定版本号。
+}
+
+配置文件 \inline{application.yml} 中添加 Nacos 注册中心配置：
+\begin{codeblock}[yml]{application.yml}
+spring:
+    application:
+    name: user-service # 服务名称
+    cloud:
+        nacos:
+            discovery:
+                server-addr: localhost:8848 # Nacos 注册中心地址
+                username: nacos # Nacos 用户名（如果启用了认证）
+                password: nacos # Nacos 密码（如果启用了认证）
+\end{codeblock}
+
+在主类上添加 \inline{@EnableDiscoveryClient} 注解启用服务注册功能：
+\begin{codeblock}[java]{UserServiceApplication.java}
+@SpringBootApplication
+@EnableDiscoveryClient
+public class UserServiceApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(UserServiceApplication.class, args);
+    }
+}
+\end{codeblock}
+
+\tip{
+    Spring Cloud Alibaba 2023.0.x 版本后，\inline{@EnableDiscoveryClient} 注解已不再必需，
+    只要引入了 Nacos Discovery 依赖并正确配置，服务就会自动注册到 Nacos。
+    但是为了代码的可读性和明确性，建议仍然保留 \inline{@EnableDiscoveryClient} 注解。
+}
+
+启动应用后，访问 Nacos 控制台（http://localhost:8080/nacos）登录后可以看到 ``user-service'' 服务已经注册成功，
+并显示其实例信息（IP 地址、端口号、状态等）。
+
+\paragraph{3. 配置服务消费者}
+在服务消费者项目中同样添加 Nacos Discovery 依赖，并配置 Nacos 注册中心地址。
+\begin{codeblock}[yml]{application.yml}
+spring:
+    application:
+    name: order-service # 服务名称
+    cloud:
+        nacos:
+            discovery:
+                server-addr: localhost:8848 # Nacos 注册中心地址
+                username: nacos # Nacos 用户名（如果启用了认证）
+                password: nacos # Nacos 密码（如果启用了认证）
+    
+\end{codeblock}
+消费者想要调用 ``user-service'' 提供的接口时，通常使用 RestTemplate 或 OpenFeign 来发起 HTTP 请求，以后者为例：
+
+\info{
+    \textbf{RestTemplate} 是 Spring 提供的同步 HTTP 客户端工具类。使用 RestTemplate 调用远程服务时，
+    需要硬编码服务 URL（如 \inline{http://user-service-ip:8080/api/users}），
+    并需要自己实现负载均衡逻辑（如轮询、加权等）。虽然功能完整，但在微服务架构中显得较为繁琐。
+
+    \textbf{OpenFeign} 是 Netflix 提供的声明式 HTTP 客户端框架。
+    开发者只需按照 Java 接口规范定义调用方法，加上 \inline{@FeignClient} 注解指定服务名称，
+    OpenFeign 就会在运行时自动从 Nacos 查询服务地址并发起调用。同时集成了 Spring Cloud LoadBalancer 提供负载均衡功能，无需手动处理。
+
+    RestTemplate 适合固定地址的简单场景（如调用第三方 API），OpenFeign 更适合微服务间相互调用的场景，因为它充分利用了服务注册与发现的能力。
+    在 Spring Cloud 微服务项目中，推荐优先使用 OpenFeign。
+}
+
+首先在 \inline{pom.xml} 中添加 OpenFeign 依赖：
+\begin{codeblock}[xml]{pom.xml}
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-openfeign</artifactId>
+</dependency>
+\end{codeblock}
+
+定义 Feign 客户端接口，用于调用 ``user-service'' 提供的服务：
+\begin{codeblock}[java]{UserServiceClient.java}
+@FeignClient(name = "user-service")
+public interface UserServiceClient {
+    
+    @GetMapping("/api/users/{id}")
+    User getUserById(@PathVariable("id") Long id);
+    
+    @PostMapping("/api/users")
+    User createUser(@RequestBody User user);
+}
+\end{codeblock}
+
+在主类上添加 \inline{@EnableFeignClients} 注解启用 Feign 客户端：
+\begin{codeblock}[java]{OrderServiceApplication.java}
+@SpringBootApplication
+@EnableDiscoveryClient
+@EnableFeignClients
+public class OrderServiceApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(OrderServiceApplication.class, args);
+    }
+}
+\end{codeblock}
+
+\tip{
+    虽然 ``order-service'' 作为服务消费者，但它同样需要 \inline{@EnableDiscoveryClient} 注解。
+    原因是：消费者需要向 Nacos 查询 ``user-service'' 的可用实例地址（这就是``发现''）；
+    同时消费者本身也是一个微服务，也应该向 Nacos 注册自己，以便其他服务调用它。
+    在 Spring Cloud 2023.0.x 后已自动启用，但为了代码可读性建议显式添加。
+}
+
+然后在服务中注入并使用 Feign 客户端：
+\begin{codeblock}[java]{OrderService.java}
+@Service
+public class OrderService {
+    
+    @Autowired
+    private UserServiceClient userServiceClient;
+    
+    public Order createOrder(Order order) {
+        // 调用 user-service 获取用户信息
+        User user = userServiceClient.getUserById(order.getUserId());
+        order.setUserName(user.getName());
+        // 其他业务逻辑...
+        return order;
+    }
+}
+\end{codeblock}
+
+当 OpenFeign 客户端发起调用时，它会：
+\begin{enumerate}
+    \item 向 Nacos 注册中心查询 ``user-service'' 的可用实例列表。 
+    \item 根据负载均衡策略（默认是轮询）选择一个实例的地址。
+    \item 使用 HTTP 协议向选定的实例发起请求，完成服务调用。
+\end{enumerate}
+
 
 \section{配置中心}
 

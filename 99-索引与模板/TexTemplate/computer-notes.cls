@@ -187,10 +187,10 @@
 % --- 页面边距 ---
 % [QUICK-EDIT:PAGE-MARGIN] Ctrl+F 搜索本标记可直接修改页边距
 % 建议区间: 2.0cm ~ 2.6cm，越小版心越大
-\def\cnMarginTop{2.2cm}
-\def\cnMarginBottom{2.2cm}
-\def\cnMarginLeft{2.2cm}
-\def\cnMarginRight{2.2cm}
+\def\cnMarginTop{2.1cm}
+\def\cnMarginBottom{1.2cm}
+\def\cnMarginLeft{2.0cm}
+\def\cnMarginRight{2.0cm}
 
 % --- 字号参数 (单位 pt) ---
 % [QUICK-EDIT:MAIN-FONT] Ctrl+F 搜索本标记可直接修改正文字号
@@ -901,10 +901,346 @@
   keywordstyle=\color{color_accent}\bfseries
 }
 
+\lstdefinelanguage{YAML}{
+  keywords={true,false,null,yes,no,on,off},
+  sensitive=false,
+  morecomment=[l]{\#},
+  morestring=[b]",
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries
+}
+
+\lstdefinelanguage{yml}{
+  keywords={true,false,null,yes,no,on,off},
+  sensitive=false,
+  morecomment=[l]{\#},
+  morestring=[b]",
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries
+}
+
+\lstdefinelanguage{yaml}{
+  keywords={true,false,null,yes,no,on,off},
+  sensitive=false,
+  morecomment=[l]{\#},
+  morestring=[b]",
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries
+}
+
+\lstdefinelanguage{JSON}{
+  morestring=[b]",
+  showstringspaces=false,
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries,
+  literate=
+   *{:}{{{\textcolor{color_accent}{:}}}}{1}
+    {,}{{{\textcolor{color_accent}{,}}}}{1}
+    {\{}{{{\textcolor{color_accent}{\{}}}}{1}
+    {\}}{{{\textcolor{color_accent}{\}}}}}{1}
+    {[}{{{\textcolor{color_accent}{[}}}}{1}
+    {]}{{{\textcolor{color_accent}{]}}}}{1}
+}
+
+\lstdefinelanguage{Java}{
+  keywords={abstract,assert,boolean,break,byte,case,catch,char,class,const,continue,default,do,double,else,enum,extends,final,finally,float,for,goto,if,implements,import,instanceof,int,interface,long,native,new,package,private,protected,public,return,short,static,strictfp,super,switch,synchronized,this,throw,throws,transient,try,void,volatile,while,true,false,null,var,record,sealed,permits},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries
+}
+
+\lstdefinelanguage{Kotlin}{
+  keywords={as,as?,break,class,continue,do,else,false,for,fun,if,in,!in,interface,is,!is,null,object,package,return,super,this,throw,true,try,typealias,val,var,when,while,by,catch,constructor,delegate,dynamic,field,file,finally,get,import,init,param,property,receiver,set,setparam,where,actual,abstract,annotation,companion,const,crossinline,data,enum,expect,external,final,infix,inline,inner,internal,lateinit,noinline,open,operator,out,override,private,protected,public,reified,sealed,suspend,tailrec,vararg,where},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries
+}
+
+\lstdefinelanguage{XML}{
+  sensitive=true,
+  morecomment=[s]{<!--}{-->},
+  morestring=[b]",
+  morestring=[b]',
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries,
+  literate=
+   *{<}{{{\textcolor{color_accent}{<}}}}{1}
+    {>}{{{\textcolor{color_accent}{>}}}}{1}
+    {/}{{{\textcolor{color_accent}{/}}}}{1}
+}
+
+\lstdefinelanguage{JavaScript}{
+  keywords={break,case,catch,class,const,continue,debugger,default,delete,do,else,export,extends,false,finally,for,function,if,import,in,instanceof,let,new,null,return,super,switch,this,throw,true,try,typeof,var,void,while,with,yield,async,await},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]',
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries
+}
+
+\lstdefinelanguage{TypeScript}{
+  language=JavaScript,
+  keywords={any,as,boolean,constructor,declare,get,module,namespace,never,readonly,number,require,set,string,symbol,type,from,of,implements,interface,private,protected,public,enum}
+}
+
+\lstdefinelanguage{C}{
+  language=[ANSI]C,
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  keywordstyle=\color{color_accent}\bfseries,
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string}
+}
+
+\lstdefinelanguage{C++}{
+  language=[ISO]C++,
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  keywordstyle=\color{color_accent}\bfseries,
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string}
+}
+
+\lstdefinelanguage{cpp}{language=C++}
+\lstdefinelanguage{cxx}{language=C++}
+
+% 说明：listings 对 C# 建议使用 CSharp/csharp/cs 作为语言名
+\lstdefinelanguage{CSharp}{
+  language=[Sharp]C,
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  keywordstyle=\color{color_accent}\bfseries,
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string}
+}
+\lstdefinelanguage{csharp}{language=CSharp}
+\lstdefinelanguage{cs}{language=CSharp}
+
+\lstdefinelanguage{Rust}{
+  keywords={as,break,const,continue,crate,else,enum,extern,false,fn,for,if,impl,in,let,loop,match,mod,move,mut,pub,ref,return,self,Self,static,struct,super,trait,true,type,unsafe,use,where,while,async,await,dyn},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries
+}
+
+\lstdefinelanguage{Go}{
+  keywords={break,case,chan,const,continue,default,defer,else,fallthrough,for,func,go,goto,if,import,interface,map,package,range,return,select,struct,switch,type,var},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries
+}
+
+\lstdefinelanguage{PHP}{
+  keywords={abstract,and,array,as,break,callable,case,catch,class,clone,const,continue,declare,default,do,echo,else,elseif,empty,enddeclare,endfor,endforeach,endif,endswitch,endwhile,eval,exit,extends,final,finally,fn,for,foreach,function,global,goto,if,implements,include,include_once,instanceof,insteadof,interface,isset,list,match,namespace,new,or,print,private,protected,public,readonly,require,require_once,return,static,switch,throw,trait,try,unset,use,var,while,xor,yield,true,false,null},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[l]{\#},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries
+}
+
+\lstdefinelanguage{Ruby}{
+  keywords={BEGIN,END,alias,and,begin,break,case,class,def,defined?,do,else,elsif,end,ensure,false,for,if,in,module,next,nil,not,or,redo,rescue,retry,return,self,super,then,true,undef,unless,until,when,while,yield},
+  sensitive=true,
+  morecomment=[l]{\#},
+  morestring=[b]",
+  morestring=[b]',
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries
+}
+
+\lstdefinelanguage{Swift}{
+  keywords={associatedtype,class,deinit,enum,extension,fileprivate,func,import,init,inout,internal,let,open,operator,private,protocol,public,rethrows,static,struct,subscript,typealias,var,break,case,continue,default,defer,do,else,fallthrough,for,guard,if,in,repeat,return,switch,where,while,as,Any,false,is,nil,self,Self,super,throw,throws,true,try},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries
+}
+
+\lstdefinelanguage{R}{
+  keywords={if,else,repeat,while,function,for,in,next,break,TRUE,FALSE,NULL,NA,NaN,Inf},
+  sensitive=true,
+  morecomment=[l]{\#},
+  morestring=[b]",
+  morestring=[b]',
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries
+}
+
+\lstdefinelanguage{Scala}{
+  keywords={abstract,case,catch,class,def,do,else,extends,false,final,finally,for,forSome,if,implicit,import,lazy,match,new,null,object,override,package,private,protected,return,sealed,super,this,throw,trait,true,try,type,val,var,while,with,yield},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries
+}
+
+\lstdefinelanguage{Dart}{
+  keywords={abstract,as,assert,async,await,break,case,catch,class,const,continue,covariant,default,deferred,do,dynamic,else,enum,export,extends,extension,external,factory,false,final,finally,for,Function,get,hide,if,implements,import,in,interface,is,late,library,mixin,new,null,on,operator,part,rethrow,return,set,show,static,super,switch,sync,this,throw,true,try,typedef,var,void,while,with,yield},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries
+}
+
+\lstdefinelanguage{Lua}{
+  keywords={and,break,do,else,elseif,end,false,for,function,goto,if,in,local,nil,not,or,repeat,return,then,true,until,while},
+  sensitive=true,
+  morecomment=[l]{--},
+  morecomment=[s]{--[[}{]]},
+  morestring=[b]",
+  morestring=[b]',
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries
+}
+
+\lstdefinelanguage{PowerShell}{
+  keywords={begin,break,catch,class,continue,data,define,do,dynamicparam,else,elseif,end,exit,filter,finally,for,foreach,from,function,if,in,param,process,return,switch,throw,trap,try,until,using,var,while},
+  sensitive=false,
+  morecomment=[l]{\#},
+  morestring=[b]",
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries
+}
+
+\lstdefinelanguage{powershell}{language=PowerShell}
+
+\lstdefinelanguage{Dockerfile}{
+  keywords={FROM,RUN,CMD,LABEL,EXPOSE,ENV,ADD,COPY,ENTRYPOINT,VOLUME,USER,WORKDIR,ARG,ONBUILD,STOPSIGNAL,HEALTHCHECK,SHELL,AS},
+  sensitive=false,
+  morecomment=[l]{\#},
+  morestring=[b]",
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries
+}
+
+\lstdefinelanguage{Nginx}{
+  keywords={server,location,listen,server_name,root,index,try_files,proxy_pass,proxy_set_header,rewrite,return,if,set,upstream,include,error_page,access_log,error_log,gzip,types,default_type},
+  sensitive=false,
+  morecomment=[l]{\#},
+  morestring=[b]",
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries
+}
+
+\lstdefinelanguage{TOML}{
+  keywords={true,false},
+  sensitive=false,
+  morecomment=[l]{\#},
+  morestring=[b]",
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries,
+  literate=
+   *{=}{{{\textcolor{color_accent}{=}}}}{1}
+    {[}{{{\textcolor{color_accent}{[}}}}{1}
+    {]}{{{\textcolor{color_accent}{]}}}}{1}
+}
+
+\lstdefinelanguage{INI}{
+  sensitive=false,
+  morecomment=[l]{;},
+  morecomment=[l]{\#},
+  morestring=[b]",
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries,
+  literate=
+   *{=}{{{\textcolor{color_accent}{=}}}}{1}
+    {[}{{{\textcolor{color_accent}{[}}}}{1}
+    {]}{{{\textcolor{color_accent}{]}}}}{1}
+}
+
+\lstdefinelanguage{HCL}{
+  keywords={resource,data,variable,output,module,provider,terraform,locals,true,false,null},
+  sensitive=true,
+  morecomment=[l]{\#},
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries
+}
+
+\lstdefinelanguage{Makefile}{
+  keywords={ifeq,ifneq,ifdef,ifndef,else,endif,include,override,define,endef,export,unexport,vpath},
+  sensitive=true,
+  morecomment=[l]{\#},
+  morestring=[b]",
+  basicstyle=\ttfamily\fontsize{\cnFontsizeCode}{9pt}\selectfont\color{color_code_text},
+  commentstyle=\color{gray},
+  stringstyle=\color{color_code_string},
+  keywordstyle=\color{color_accent}\bfseries
+}
+
+\lstdefinelanguage{mk}{language=Makefile}
+
 % --- codeblock: 代码块主环境（推荐） ---
 % 功能: 语法高亮 + 行号 + 圆角边框 + 顶部文件名栏
 % 参数:
-%   #1 可选: 语言名（默认 Python，可用 Bash/SQL/C/C++/Java 等）
+%   #1 可选: 语言名（默认 Python，可用 Bash/SQL/YAML/yml/yaml/JSON/Java/Kotlin/C/C++/cpp/cxx/CSharp/csharp/cs/Rust/Go/PHP/Ruby/Swift/R/Scala/Dart/Lua/PowerShell/XML/JavaScript/TypeScript/Dockerfile/Nginx/TOML/INI/HCL/Makefile/mk 等）
 %   #2 必填: 文件名标题
 % 用法:
 %   \begin{codeblock}[Python]{main.py}
