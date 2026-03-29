@@ -23,11 +23,20 @@
 \newpage
 
 % 正文章节（可直接替换各章节内容）
+\part{Java \& Kotlin 核心基础} % Part 1：Java & Kotlin 核心基础
 \input{chapter/chap01.tex} % Java 语言基础
 \input{chapter/chap02.tex} % 面向对象编程
-\input{chapter/chap03.tex} % Java 标准库与常用库
-\input{chapter/chap04.tex} % 高级特性与函数式编程
-\input{chapter/chap05.tex} % 并发编程
+
+\part{JVM 标准库与常用工具} % Part 2：JVM 标准库与常用工具
+\input{chapter/字符串处理.tex} % 字符串处理
+\input{chapter/集合框架.tex} % 集合框架
+\input{chapter/异常处理.tex} % 异常处理
+
+
+\part{高级特性与函数式编程} % Part 3：高级特性与函数式编程
+\part{并发编程} % Part 4：并发编程（Java 线程 & Kotlin 协程）
+\part{网络编程与高性能 IO} % Part 5：网络编程与高性能 IO
+\part{JVM 底层原理与性能调优} % Part 6：JVM 底层原理与性能调优（Java & Kotlin 通用）
 \input{chapter/chap06.tex} % JVM
 % \input{chapter/chap07.tex}
 % \input{chapter/chap08.tex}
@@ -49,6 +58,7 @@
 % 5.1 类与对象：Java 类 / 封装 / 构造器 /this → Kotlin 类、主 / 次构造器、this 关键字5.2 静态特性：Java static 成员 → Kotlin object 单例、伴生对象、静态注解兼容5.3 继承与多态：Java extends/super/ 重写 / 向上转型 → Kotlin open 关键字、继承、多态实现5.4 抽象类与接口：Java abstract / 接口默认方法 → Kotlin 抽象类、接口、函数式接口兼容5.5 Kotlin 专属 OOP 特性：数据类、密封类、枚举类、内联类5.6 内部类、包机制与访问控制（Java+Kotlin 对照）5.7 Object 类与 Any 类：Java Object 核心方法 → Kotlin Any 类、两者兼容关系
 % Chapter 6：基础综合实战 ✅
 % 6.1 学生信息管理：Java 实现、Kotlin 实现6.2 Java 与 Kotlin 混合调用小案例
+
 % Part 2：JVM 标准库与常用工具（Java & Kotlin）
 % Chapter 1：字符串处理 🔶
 % 1.1 Java 字符串：String 不可变性、常量池、StringBuilder/StringBuffer、正则表达式1.2 Kotlin 字符串扩展：字符串模板、常用扩展函数、正则简化操作1.3 两者字符串互操作与最佳实践
@@ -62,6 +72,7 @@
 % 5.1 旧版 Date/Calendar 缺陷与基础用法5.2 Java java.time 包：核心类、格式化、时间计算、时区处理5.3 Kotlin 日期时间扩展函数与简化用法5.4 两者互操作兼容
 % Chapter 6：通用工具类 ✅
 % 6.1 Java 基础工具：Math、BigDecimal、Objects、Optional 空值处理6.2 Kotlin 标准库工具：作用域函数（let/run/with/apply/also）、空安全处理工具6.3 第三方常用库（Java+Kotlin 通用）：Apache Commons、Guava、Hutool ⚪
+
 % Part 3：高级特性与函数式编程
 % Chapter 1：泛型 🔶
 % 1.1 Java 泛型：泛型类 / 接口 / 方法、通配符上下界、类型擦除1.2 Kotlin 泛型：声明处型变、星投影、泛型约束、与 Java 泛型的互操作1.3 泛型常见问题与最佳实践
@@ -77,6 +88,7 @@
 % 6.1 Java Stream API：创建、中间操作、终端操作、Collectors 收集器、并行流6.2 Kotlin 序列 Sequence：与 Stream 的区别、惰性求值、集合流式操作6.3 两者性能对比与适用场景
 % Chapter 7：Kotlin 专属高级特性 🔶
 % 7.1 扩展函数与扩展属性7.2 委托：类委托、属性委托、懒加载 lazy7.3 运算符重载、infix 函数7.4 高级特性实战：用 Kotlin 扩展简化 Java 工具类
+
 % Part 4：并发编程（Java 线程 & Kotlin 协程）
 % Chapter 1：并发编程基础 🔶
 % 1.1 进程与线程、JVM 线程模型、并发三大特性（原子性 / 可见性 / 有序性）1.2 Java 线程：生命周期、创建方式、常用操作、守护线程1.3 Kotlin 线程基础：线程简化写法、与 Java 线程的完全兼容
@@ -90,6 +102,7 @@
 % 5.1 协程并发安全：互斥锁、并发限制5.2 Channel 通道、Flow 异步流5.3 协程与 Java 异步工具的互操作（CompletableFuture、线程池）
 % Chapter 6：并发实战 🔶
 % 6.1 多线程数据处理：Java 线程池实现、Kotlin 协程实现对比6.2 并发问题排查：死锁、竞态条件的定位与解决
+
 % Part 5：网络编程与高性能 IO
 % Chapter 1：网络编程基础 ✅
 % 1.1 网络核心概念：IP / 端口 / TCP/UDP 协议、OSI 七层模型1.2 InetAddress 网络地址操作（Java+Kotlin 通用）
@@ -101,6 +114,7 @@
 % 4.1 AIO 异步 IO 概述、实现示例4.2 零拷贝原理、mmap/sendfile 机制、JVM 上的实现
 % Chapter 5：高性能网络框架 ⚪
 % 5.1 Netty 框架入门：核心优势、架构、简易 TCP 通信实现5.2 Ktor 框架入门：Kotlin 原生高性能网络框架、服务端 / 客户端实现
+
 % Part 6：JVM 底层原理与性能调优（Java & Kotlin 通用）
 % 核心内容完全复用 JVM 体系，仅补充 Kotlin 特性的底层实现，无需修改原有核心逻辑
 % Chapter 1：JVM 整体架构 🔶
