@@ -1,581 +1,255 @@
 % ======================================================================
-%   文件名: main.tex
-%   功能: computer-notes.cls 完整示例与测试文档
-%   编译方式: xelatex main.tex (或 lualatex main.tex)
+%   文件名: example.tex
+%   功能: computer-notes.cls 的完整示例与测试文档
+%   编译方式: xelatex example.tex (或 lualatex)
 %   字符编码: UTF-8
 % ======================================================================
 \documentclass{computer-notes}
 
-% --- 文档元信息设置 ---
-\settitle{计算机科学笔记}
-\setauthor{By Your Name}
+% --- 文档元信息 ---
+\settitle{计算机科学笔记示例}
+\setauthor{Violet}
 \setdate{\today}
+
 % ======================================================================
 %   文档正文开始
 % ======================================================================
 
-
 \begin{document}
 
-% 生成封面
 \makecover
-
-% 生成目录
 \tableofcontents
 \newpage
 
-\part{Part 测试}
+\part{模板结构与排版}
 
+\chapter{模板概览}
 
-% ======================================================================
-%   第一章: 标题与正文演示
-% ======================================================================
+\section{设计目标}
+本示例用于演示 \texttt{computer-notes.cls} 的核心能力：标题层级、段落排版、列表样式、数学公式、提示框、代码块以及常用辅助命令。文档风格强调清晰、统一和可复用，适合作为后续笔记或课程讲义的起点。
 
-\chapter{测试}
+这里原本适合放一张文档结构总览图，用于展示封面、目录、章节和组件之间的关系。当前用文字说明代替，后续你可以在对应位置补入总览截图。
 
-\section{标题演示与正文格式}
+\ssection{标题层级示例}
+模板提供了七层标题体系，其中 \texttt{chapter}、\texttt{section}、\texttt{ssection}、\texttt{sssction}、\texttt{paragraph} 和 \texttt{subparagraph} 分别对应不同的视觉层级。实际写作时，建议把 \texttt{chapter} 用作主题分区，把 \texttt{section} 用作核心小节，再根据内容密度向下拆分。
 
-这是 \textbf{section} 级别的标题。\emphasis{本节演示文档的基本排版格式设置。}
+\sssction{五级标题}
+五级标题通常用于更细的知识拆分，适合在一节内部继续区分步骤、条件或注意事项。
 
+\paragraph{六级标题}
 
-计算机科学是一门理论与实践相结合的学科。学习编程需要掌握算法、数据结构、设计模式等核心概念。同时，实践能力的培养同样重要——通过大量的项目实践，我们可以深化对理论知识的理解。
+\subparagraph{七级标题}
+六级和七级标题适合用于说明教程步骤中的细节，比如说在 SpringBoot 中集成 Nacos 配置中心时，
+分步详细说明每个步骤的操作细节和注意事项。
 
-\ssection{三级标题示例}
+\ssection{正文与强调}
+正文默认使用统一的中文字体和适中的行距。需要重点强调时，建议优先使用 \emphasis{强调样式用于句子级别的表达}，而不是手动切换大量字体命令。对于需要视觉聚焦的专业术语首次出现时，可使用 \highlight{服务注册与发现}、\highlight{负载均衡} 这类高亮方式，后续重复出现时则恢复普通文本或使用加粗。
 
-这是 \textbf{ssection} 级别的标题。在实际编程中，代码的可读性至关重要。良好的命名规范、适当的注释和清晰的代码结构可以大大提升代码的可维护性。
+路径和文件名可以用 \file{src/main/java/App.java} 这样的方式标识，终端命令可用 \terminal{mvn clean package} 来显示。若只是想突出一个词，例如“\textbf{同步}”、“\textbf{异步}”或“\textbf{只读}”，更适合直接用加粗。
 
+\ssection{图片说明}
+如果某处暂时没有图片，可以先写成文字说明，例如“这里建议插入一张标题层级与排版效果的截图，用来展示蓝色标题盒、左侧竖线和正文缩进的整体观感”。这样不会让 LaTeX 把占位符当成非法语法处理。
 
-\sssction{四级标题示例}
+\chapter{列表、表格与公式}
 
-这是 \textbf{sssction} 级别的标题。四级标题通常用于更细粒度的内容分组。
-
-\paragraph{五级标题示例}
-
-这是 \textbf{paragraph} 级别的标题。适合非常细的小节说明。
-
-\subparagraph{六级标题示例}
-
-这是 \textbf{subparagraph} 级别的标题。适合补充型说明内容。
-
-% ======================================================================
-%   列表演示
-% ======================================================================
-
-
-\section{列表与排版}
-
-\ssection{无序列表}
-
-
-编程的基本要素包括：
-
+\section{列表示例}
 \begin{itemize}
-  \item 变量与数据类型
-  \item 控制流（if-else, loops）
-  \item 函数与模块化
-  \item 面向对象编程
-  \item 设计模式
-  \item 算法与复杂度分析
+  \item 一级无序列表用于罗列并列概念。
+  \item 二级无序列表适合展开说明。
+  \begin{itemize}
+    \item 子项 1
+    \item 子项 2
+  \end{itemize}
 \end{itemize}
-
-\ssection{有序列表}
-
-学习编程的推荐步骤：
 
 \begin{enumerate}
-  \item 学习基本语法和数据类型
-  \item 理解控制流和函数
-  \item 深入学习数据结构
-  \item 掌握常见算法
-  \item 学习面向对象编程
-  \item 应用设计模式
-  \item 进行大规模项目实践
+  \item 有序列表适合表达步骤。
+  \item 当步骤内部还需要分类时，可继续嵌套使用。
+  \begin{enumerate}
+    \item 子步骤 A
+    \item 子步骤 B
+  \end{enumerate}
 \end{enumerate}
 
-\ssection{嵌套列表}
+\begin{description}
+  \item[输入] 需要处理的数据。
+  \item[处理] 对数据进行计算或转换。
+  \item[输出] 给出结果或结论。
+\end{description}
 
-数据结构分类：
+\section{表格示例}
+下面给出一个更贴近实际阅读的对比表，用于说明常见 List 实现的差异。这里改用 \texttt{tblr}，这样后续如果需要扩展表头、调整列宽或添加更复杂的对齐方式，会比传统 \texttt{tabular} 更灵活。
 
-\begin{itemize}
-  \item \textbf{线性结构}
-    \begin{itemize}
-      \item 数组
-      \item 链表
-      \item 栈
-      \item 队列
-    \end{itemize}
-  \item \textbf{树形结构}
-    \begin{itemize}
-      \item 二叉树
-      \item 平衡树
-      \item 堆
-    \end{itemize}
-  \item \textbf{图形结构}
-    \begin{itemize}
-      \item 有向图
-      \item 无向图
-      \item 加权图
-    \end{itemize}
-\end{itemize}
+\begin{tblr}{
+  colspec = {|l|l|l|l|},
+  row{1} = {font=\bfseries},
+  hlines,
+  vlines,
+  hline{1} = {0.8pt}
+}
+实现类 & 底层结构 & 访问特点 & 适用场景 \\
+ArrayList & 动态数组 & 随机访问快 & 读多写少 \\
+LinkedList & 双向链表 & 插入删除更灵活 & 频繁头尾操作 \\
+Vector & 动态数组 & 同步方法较多 & 兼容旧代码 \\
+\end{tblr}
 
-% ======================================================================
-%   数学公式演示
-% ======================================================================
+上面的表格可以继续扩展为更多列，例如“是否线程安全”“是否支持随机访问”“典型时间复杂度”等，这样更适合做知识总结。
 
 \section{数学公式}
-
-\ssection{行内公式}
-
-复杂度分析中，我们常用大 O 记号。例如，线性搜索的时间复杂度为 $O(n)$，二分搜索为 $O(\log n)$。
-
-\ssection{方程式环境}
-
-二次方程的求根公式为：
+集合框架里经常会涉及复杂度分析。比如，哈希表平均查找复杂度接近 $O(1)$，红黑树查找复杂度通常为 $O(\log n)$。在实际笔记中，公式常用于说明“为什么这样选集合”，而不仅仅是展示符号本身。
 
 \begin{equation}
-  x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+  T(n) = T\left(\frac{n}{2}\right) + O(1)
 \end{equation}
 
-\ssection{多行公式}
-
-斐波那契数列的递推关系：
-
 \begin{align}
-  F(0) &= 0 \\
-  F(1) &= 1 \\
-  F(n) &= F(n-1) + F(n-2), \quad n \geq 2
+  O(1) &< O(\log n) < O(n) \\
+  O(n \log n) &< O(n^2)
 \end{align}
 
-\ssection{非编号公式}
-
-快速排序的分治策略为：
-
 \begin{equation*}
-  T(n) = \begin{cases}
-    O(1) & \text{if } n \leq 1 \\
-    T(q) + T(n-q-1) + O(n) & \text{if } n > 1
-  \end{cases}
+  \text{负载因子} = \frac{\text{元素数量}}{\text{数组容量}}
 \end{equation*}
 
+\part{组件与命令演示}
 
-% ======================================================================
-%   Callout 提示框演示 (7 种类型)
-% ======================================================================
-\chapter{测试2 - English Text} 
-\section{提示框系统 (Callout)}
+\chapter{提示框与定义}
 
-\ssection{笔记框}
+\section{提示框系统}
+模板内置了七种提示框，适合在不同语义层面上表达信息。它们的设计目标不是“把内容包起来”，而是让读者一眼识别内容性质：是补充说明、实践建议、背景知识，还是风险提醒。
 
 \note{%
-这是一个笔记框示例。使用 \texttt{\textbackslash{}note\{内容\}} 命令可以快速插入笔记。\\
-笔记框通常用于补充说明或重要备注。
+这是一个笔记框。它适合放补充说明、记忆点或背景信息。
 }
-
-\ssection{技巧框}
 
 \tip{%
-这是一个技巧框。使用 \texttt{\textbackslash{}tip\{内容\}} 命令。\\
-技巧框用于分享编程技巧或最佳实践。例如：使用 \texttt{const} 声明不可变变量，有利于编写更安全的代码。
+这是一个技巧框。适合放实现经验、优化建议或操作捷径。
 }
-
-\ssection{信息框}
 
 \info{%
-这是一个信息框。使用 \texttt{\textbackslash{}info\{内容\}} 命令。\\
-信息框用于传达一般性信息或背景知识。\\
-例如：JavaScript 最初设计用于浏览器端的脚本编程，现在已广泛用于服务器端和桌面应用。
+这是一个信息框。适合放背景知识或通用说明。
 }
-
-\ssection{警告框}
 
 \warning{%
-这是一个警告框。使用 \texttt{\textbackslash{}warning\{内容\}} 命令。\\
-警告框用于提醒注意某些可能的问题。例如：\textit{在使用指针时要小心内存泄漏问题。}
+这是一个警告框。适合放可能出错、需要谨慎处理的内容。
 }
-
-\ssection{注意框}
 
 \caution{%
-这是一个注意框。使用 \texttt{\textbackslash{}caution\{内容\}} 命令。\\
-注意框用于强调需要特别关注的事项。例如：修改全局变量可能导致程序状态混乱。
+这是一个注意框。适合强调容易忽略但影响较大的细节。
 }
-
-\ssection{危险框}
 
 \danger{%
-这是一个危险框。使用 \texttt{\textbackslash{}danger\{内容\}} 命令。\\
-危险框用于警告严重错误或不应采取的行动。例如：\textbf{不要在生产环境中禁用安全检查！}
+这是一个危险框。适合放高风险操作、错误示范或明确禁止的行为。
 }
-
-\ssection{待办框}
 
 \todo{%
-这是一个待办框。使用 \texttt{\textbackslash{}todo\{内容\}} 命令。\\
-待办框用于记录需要完成的任务。例如：实现异常处理机制。
+这是一个待办框。适合标记后续还要补充的内容。
 }
 
-% ======================================================================
-%   代码块演示
-% ======================================================================
+\section{定义与算法}
+\definition{集合}{由若干具有某种共同属性的对象组成的整体。这个定义框常用于放概念型内容，适合承接“是什么”而不是“怎么做”。}
 
-\section{代码块系统}
+\definition{算法}{解决问题的一组有限步骤，强调正确性、可执行性与效率。}
 
-\ssection{Python 代码块}
+\algorithm{%
+排序问题的一个基本思路：
+\begin{enumerate}
+  \item 从未排序区域中选择一个元素。
+  \item 将该元素插入到已排序区域的合适位置。
+  \item 重复直到所有元素都处理完成。
+\end{enumerate}
+}
 
-下面是一个 Python 函数示例，展示递归计算斐波那契数列：
+\chapter{代码与终端}
 
+\section{代码块}
+代码块环境支持语法高亮、行号和文件标题。示例中优先展示常见语言，便于检查排版和着色是否正常。若后续你要写课程笔记，建议每个代码块都尽量配一句“这段代码在说明什么”。
+
+\begin{codeblock}[Java]{ArrayListDemo.java}
+import java.util.ArrayList;
+import java.util.List;
+
+List<String> list = new ArrayList<>();
+list.add("A");
+list.add("B");
+list.add(1, "X");
+
+System.out.println(list);
+\end{codeblock}
 
 \begin{codeblock}[Python]{fibonacci.py}
 def fibonacci(n):
-    """计算第 n 个斐波那契数"""
     if n <= 1:
         return n
     return fibonacci(n - 1) + fibonacci(n - 2)
 
-# 调用示例
-result = fibonacci(10)
-print(f"第 10 个斐波那契数: {result}")
+print(fibonacci(10))
 \end{codeblock}
 
-\tip{%
-上面的递归实现虽然直观，但效率较低（时间复杂度 $O(2^n)$）。实际应用中应使用动态规划或迭代方式优化。
-}
-
-\ssection{Bash 脚本示例}
-
-\begin{codeblock}[Bash]{backup.sh}
+\begin{codeblock}[Bash]{build.sh}
 #!/bin/bash
-# 简单的备份脚本
+set -e
 
-SOURCE_DIR="/home/user/documents"
-BACKUP_DIR="/mnt/backup"
-DATE=$(date +%Y%m%d_%H%M%S)
-
-cp -r "$SOURCE_DIR" "$BACKUP_DIR/backup_$DATE"
-echo "备份完成: $BACKUP_DIR/backup_$DATE"
+xelatex example.tex
+xelatex example.tex
 \end{codeblock}
 
-\ssection{行内代码示例}
-
-当我们需要在正文中插入代码片段时，可以使用 \inline{inline code} 命令。例如，定义变量时使用 \inline{const x = 10;} 比 \inline{var x = 10;} 更安全。
-
-% ======================================================================
-%   其他组件演示
-% ======================================================================
-
-\section{其他实用组件}
-
-\ssection{行内代码与强调}
-
-编程中常见的特殊值包括:
-\begin{itemize}
-  \item \inline{null} 和 \inline{undefined}
-  \item \inline{true} 和 \inline{false}
-  \item \inline{NaN} (Not a Number)
-\end{itemize}
-
-强调内容: \emphasis{始终使用类型检查来避免类型转换的陷阱}。
-
-\ssection{定义框}
-
-\definition{算法}{%
-算法是一步步的过程描述，用于解决某个具体问题。一个好的算法应该具备：正确性、有限性、输入/输出和有效性。
+\begin{codeblock}[JSON]{config.json}
+{
+  "name": "computer-notes",
+  "version": "1.0.0",
+  "enabled": true
 }
-
-\definition{数据结构}{%
-数据结构是计算机中组织与存储数据的方式。选择合适的数据结构对提高程序性能至关重要。常见的数据结构包括数组、链表、树、图等。
-}
-
-\ssection{算法框}
-
-\algorithm{%
-\textbf{排序算法 - 冒泡排序}
-
-\begin{enumerate}
-  \item 遍历数组，比较相邻的两个元素
-  \item 若左元素 > 右元素，交换位置
-  \item 重复该过程直到数组有序
-  \item 时间复杂度：最坏 $O(n^2)$，最好 $O(n)$
-\end{enumerate}
-}
-
-
-\ssection{快捷键样式}
-
-保存文件: \shortcut{Ctrl + S}
-
-打开终端: \shortcut{Ctrl + `}
-
-全选: \shortcut{Ctrl + A}
-
-复制: \shortcut{Ctrl + C}
-
-粘贴: \shortcut{Ctrl + V}
-
-\ssection{终端命令}
-
-查看文件内容:
-
-\terminal{cat file.txt}
-
-列出目录内容:
-
-\terminal{ls -la /home/user}
-
-创建新文件:
-
-\terminal{touch myfile.txt}
-
-\ssection{文件路径示例}
-
-配置文件通常位于 \file{~/.config/app/config.yml}。
-
-系统日志在 \file{/var/log/system.log}。
-
-用户目录是 \file{/home/username}。
-
-\ssection{文本高亮}
-
-这是 \highlight{高亮显示的内容}。适用于需要特别强调的词汇或短语。
-
-% ======================================================================
-%   综合应用示例
-% ======================================================================
-
-\section{综合应用: Web 开发基础}
-
-\ssection{概述}
-
-Web 开发涉及前端、后端和数据库等多个层面。学习 Web 开发需要掌握 HTML、CSS、JavaScript 等基础技术。
-
-\ssection{前端技术栈}
-
-\note{%
-现代前端开发已不再是简单的 HTML + CSS + JavaScript 的组合。React、Vue、Angular 等框架的出现让前端开发变得更加结构化和高效。
-}
-
-前端常用技术：
-
-\begin{itemize}
-  \item \textbf{HTML5}: 结构与语义化标记
-  \item \textbf{CSS3}: 样式与布局
-  \item \textbf{JavaScript}: 交互逻辑
-  \item \textbf{前端框架}: React/Vue/Angular
-  \item \textbf{构建工具}: Webpack/Vite
-\end{itemize}
-
-\ssection{后端技术栈}
-
-\info{%
-后端的核心职责是处理业务逻辑、数据存储与验证。选择合适的语言和框架应根据项目需求而定。
-}
-
-后端常用技术：
-
-\begin{enumerate}
-  \item Node.js / Express (JavaScript)
-  \item Python / Django / Flask
-  \item Java / Spring Boot
-  \item Go / Gin
-  \item 数据库: MySQL / PostgreSQL / MongoDB
-\end{enumerate}
-
-\ssection{REST API 设计}
-
-RESTful API 设计的基本原则：
-
-\begin{itemize}
-  \item GET: 获取资源
-  \item POST: 创建资源
-  \item PUT: 更新资源
-  \item DELETE: 删除资源
-  \item PATCH: 部分更新
-\end{itemize}
-
-API 响应示例:
-
-\begin{codeblock}[Python]{api\_response.py}
-# 成功响应
-response = {
-    "status": 200,
-    "code": "SUCCESS",
-    "data": {
-        "id": 1,
-        "name": "用户名",
-        "email": "user@example.com"
-    },
-    "message": "操作成功"
-}
-
-# 错误响应
-error_response = {
-    "status": 400,
-    "code": "INVALID_INPUT",
-    "message": "参数验证失败",
-    "errors": [
-        {"field": "email", "message": "邮箱格式不正确"}
-    ]
-}
-  \end{codeblock}
-
-\warning{%
-API 设计中要特别注意安全问题：
-\begin{itemize}
-  \item 实施身份认证 (JWT / OAuth2)
-  \item 进行速率限制 (Rate Limiting)
-  \item 验证用户输入 (Input Validation)
-  \item 使用 HTTPS 加密传输
-\end{itemize}
-}
-
-\ssection{数据库基础}
-
-\definition{数据库}{%
-数据库是结构化数据的集合，通过数据库管理系统 (DBMS) 进行管理。关系数据库使用表格结构存储数据，并通过 SQL 语言进行查询。
-}
-
-关键概念：
-
-\begin{itemize}
-  \item \textbf{表}: 行和列的集合
-  \item \textbf{主键}: 唯一标识记录的字段
-  \item \textbf{外键}: 建立两个表之间的关系
-  \item \textbf{索引}: 加快查询速度的数据结构
-  \item \textbf{约束}: 确保数据完整性的规则
-\end{itemize}
-
-基础 SQL 操作：
-
-\begin{codeblock}[SQL]{sql\_examples.sql}
--- 创建表
-CREATE TABLE users (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 插入数据
-INSERT INTO users (name, email) VALUES ('Alice', 'alice@example.com');
-
--- 查询数据
-SELECT * FROM users WHERE id = 1;
-
--- 更新数据
-UPDATE users SET email = 'newemail@example.com' WHERE id = 1;
-
--- 删除数据
-DELETE FROM users WHERE id = 1;
 \end{codeblock}
 
-\tip{%
-使用 ORM (Object-Relational Mapping) 库如 SQLAlchemy (Python)、Sequelize (Node.js) 可以简化数据库操作，提高代码可读性。
-}
+\section{快捷命令}
+短代码如果需要展示成完整结构，建议仍然使用独立代码块，因为这样更稳定，也更容易和正文区分开来。
 
-% ======================================================================
-%   性能优化章节
-% ======================================================================
-
-\section{性能优化与最佳实践}
-
-\ssection{算法优化}
-
-\definition{时间复杂度}{%
-时间复杂度描述算法运行时间与输入规模的关系。通常使用 Big O 记号表示。
-}
-
-常见的时间复杂度从低到高排列：
-
-\begin{equation*}
-O(1) < O(\log n) < O(n) < O(n \log n) < O(n^2) < O(n^3) < O(2^n) < O(n!)
-\end{equation*}
-
-\caution{%
-避免使用低效的算法。例如，对大数据集的嵌套循环可能导致程序性能严重下降。应该优先选择更优的算法。
-}
-
-\ssection{代码优化技巧}
-
-\tip{%
-常见的代码优化技巧：
-\begin{enumerate}
-  \item 避免不必要的对象创建
-  \item 使用缓存减少重复计算
-  \item 选择合适的数据结构
-  \item 避免深度递归（可能导致栈溢出）
-  \item 使用异步编程处理 I/O 操作
-\end{enumerate}
-}
-
-记忆化 (Memoization) 优化斐波那契数列：
-
-\begin{codeblock}[Python]{fibonacci\_memo.py}
-# 使用字典缓存已计算的结果
-def fibonacci_memo(n, memo={}):
-    if n in memo:
-        return memo[n]
-    if n <= 1:
-        return n
-    result = fibonacci_memo(n - 1, memo) + fibonacci_memo(n - 2, memo)
-    memo[n] = result
-    return result
-
-# 时间复杂度降低到 O(n)
-print(fibonacci_memo(100))
+\begin{codeblock}[SQL]{query.sql}
+SELECT *
+FROM users
+WHERE id = 1;
 \end{codeblock}
 
-\danger{%
-不要过度优化。优化应该基于实际的性能瓶颈分析，而不是盲目猜测。使用分析工具 (Profiler) 来找出真正的性能问题。
-}
+\section{终端与辅助命令}
+终端样式适合展示构建命令、Git 命令或系统命令。它的用途更偏向“操作指引”，而不是纯展示命令本身。
 
-\ssection{内存管理}
+\terminal{git status}
 
-\info{%
-在 Python 等自动内存管理语言中，垃圾回收会自动释放不再使用的对象。但在 C/C++ 等手动管理的语言中，必须小心处理内存申请与释放。
-}
+\terminal{xelatex example.tex}
 
-内存泄漏的常见原因：
+此外，行内命令可以这样写：\inline{java -jar app.jar}。行内命令通常适合放在句子里，避免打断正文阅读节奏。
 
+\chapter{综合示例}
+
+\section{一个小型知识片段}
+下面用一个简短的主题把前面的组件串起来，模拟真实笔记中的写法。
+
+\subsection{问题描述}
+在 Java 中，集合框架的选择通常由四个维度决定：是否允许重复、是否需要顺序、是否需要随机访问、是否线程安全。若还要放到更接近工程实践的视角下看，通常还要考虑数据量大小、并发读写比例，以及后续是否需要排序或范围查询。
+
+例如，在分布式系统里，一个注册中心常涉及 \highlight{服务注册与发现}；一个网关或客户端侧组件则经常涉及 \highlight{负载均衡}。这些场景都会影响你选择 Map、Set 还是队列结构。
+
+\subsection{结论归纳}
 \begin{itemize}
-  \item 忘记释放动态分配的内存
-  \item 循环引用导致无法被垃圾回收
-  \item 监听器未注销
-  \item 缓存不适当的增长
+  \item 如果强调随机访问，优先考虑 \textbf{ArrayList}。
+  \item 如果强调去重，优先考虑 \textbf{HashSet}。
+  \item 如果强调排序，优先考虑 \textbf{TreeMap} 或 \textbf{TreeSet}。
+  \item 如果强调并发访问，优先考虑 \textbf{ConcurrentHashMap}。
 \end{itemize}
 
-% ======================================================================
-%   文档结尾
-% ======================================================================
+\subsection{补充说明}
+当需要强调某个关键结论时，可以写成：\emphasis{遍历中修改普通集合，应优先使用迭代器自身的删除方法，因为这能避免快速失败带来的异常。}
 
-\section{总结与展望}
+示例结束前，建议检查字体、页眉、目录和代码块是否都符合预期。特别是标题层级、表格边框、提示框标题和代码块标题栏，这些位置最容易暴露模板样式问题。
 
-本笔记涵盖了计算机科学的基础知识，包括编程基础、数据结构、算法、Web 开发等内容。
+这里原本可以放一张最终排版效果截图，用来对照封面、目录和正文区块之间的整体比例。当前先以文字说明替代，避免引入无效占位符。
 
-\definition{学习路径}{%
-一个系统的学习路径应该包括：
-\begin{enumerate}
-  \item 掌握编程基础与常用算法
-  \item 学习数据结构与复杂度分析
-  \item 深入学习特定领域 (Web、移动、AI 等)
-  \item 进行实战项目并不断积累经验
-  \item 阅读他人优秀代码，学习最佳实践
-\end{enumerate}
-}
-
-\todo{%
-持续学习的计划：
-\begin{itemize}
-  \item 每周阅读一篇技术文章
-  \item 每月完成一个小项目
-  \item 定期回顾基础知识
-  \item 参与开源项目贡献
-\end{itemize}
-}
-
-感谢阅读本笔记！祝您学习愉快！
+\section{结束语}
+这个示例文档的目标不是覆盖所有知识点，而是稳定展示模板的排版能力和常用命令。后续你可以直接基于这份结构复制出新的课程笔记文档。
 
 \end{document}
 
 % ======================================================================
-% main.tex 结束
+% example.tex 结束
 % ======================================================================
