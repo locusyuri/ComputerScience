@@ -102,7 +102,7 @@
 #let font-code-size = 10pt
 
 /// Callout 提示框内文字字号
-#let font-callout-size = 10.1pt
+#let font-callout-size = 10pt
 
 /// 中文字体 - 正文首选（霞鹜文楷）
 #let font-cjk-main = "LXGW WenKai"
@@ -112,6 +112,11 @@
 
 /// 幼圆字体 - 用于强调文字
 #let font-yuan = "未来圆SC"
+
+#let font-yuan2 = "极影毁片圆"
+
+// 苹方字体 - 用于 Callout 提示框
+#let font-pingfang = "PingFang SC"
 
 /// 拉丁文字体 - 正文（Cantarell）
 #let font-latin-main = "Cantarell"
@@ -434,7 +439,7 @@
         inset: (left: 1.2em, top: 0.8em, bottom: 0.6em, right: 0.8em),
         width: 100%,
       )[
-        #text(size: font-callout-size, font: font-cjk-fallback, fill: black, body)
+        #text(size: font-callout-size, font: font-pingfang, fill: black, body)
       ]
       // #v(0.3em)
       // 标题标签（使用 place 绝对定位）
@@ -662,6 +667,9 @@
   // ── 正文字体与语言 ──
   set text(font: (font-latin-main, font-cjk-main), size: font-main-size, fill: color-main-text, lang: "zh")
 
+  // ── 重写加粗样式（*xxx*）- 使用超粗字重 + 幼圆字体 ──
+  show strong: it => text(weight: 100, font: font-yuan2, fill: color-main-text)[#it]
+
   // ── 标题编号规则: level 1 不编号, level 2+ 只显示本级编号 ──
   set heading(numbering: (..nums) => {
     let vals = nums.pos()
@@ -772,10 +780,11 @@
   show link: it => text(fill: color-accent)[#it]
 
   // ── 行内代码样式 (`反引号`) ──
+  // 使用字体数组：英文等宽 + 中文回退
   show raw: it => box(
     fill: color-bg-light, stroke: 0.5pt + color-border-light, radius: 3pt,
     inset: (x: 6pt, y: 2pt),
-    text(size: 1.2em, font: "Consolas", fill: color-accent.darken(20%))[#it], baseline: 1.5pt,
+    text(size: 1.2em, font: (font-mono, font-cjk-main), fill: color-accent.darken(20%))[#it], baseline: 1.5pt,
   )
 
   // ── Codly 代码块美化 ──
@@ -1016,10 +1025,12 @@
     #table(
       columns: col-defs,
       align: center + horizon,
-      stroke: color-border-light.darken(30%),
+      stroke: gradient.linear(gray, silver),
+      gutter: 1.5pt,
       fill: (col, row) => {
         if row == 0 { silver } 
-        else if (calc.rem(row, 2) == 0) { gray.lighten(76%) } 
+        else if (col == 0) { silver }
+        // else if (calc.rem(row, 2) == 0) { gray.lighten(76%) } 
         else { white }
       },
       ..header-cells, ..body-cells,
