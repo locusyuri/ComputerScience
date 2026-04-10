@@ -223,10 +223,11 @@
           number: num, title: title, page: heading-page, location: it.element.location(),
         )
       } else if it.level == 2 {
-        outline-small-row(
-          text-weight: "regular", text-size: 9pt, text-color: black,
-          number: num, title: title, page: heading-page, location: it.element.location(),
-        )
+        // outline-small-row(
+        //   text-weight: "regular", text-size: 9pt, text-color: black,
+        //   number: num, title: title, page: heading-page, location: it.element.location(),
+        // )
+        // 取消渲染二级标题，保持小目录简洁
       }
     } else {
       v(-0.65em, weak: true)
@@ -498,7 +499,7 @@
     #block(
       fill: color-bg-light, stroke: color-border-light,
       width: 100%, inset: (x: 5pt, y: 5pt), radius: 4pt,
-    )[ #text(size: font-code-size, font: font-mono)[#code] ]
+    )[ #text(size: font-code-size, font: (font-mono, font-cjk-main))[#code] ]
   ]
 }
 
@@ -823,6 +824,10 @@
       dockerfile: (name: "Docker", icon: "🐳", color: rgb("#2496ED")),
     ),
   )
+
+  // ── 代码块字体覆盖 ──
+  // Codly 渲染后的代码块使用此样式设置字体（英文等宽 + 中文回退）
+  show raw.where(block: true): set text(font: (font-mono, font-cjk-main))
 
   // ── 脚注样式 ──
   set footnote.entry(separator: line(length: 28%, stroke: (thickness: 0.5pt, paint: color-border-light)))

@@ -28,10 +28,13 @@
 
 #part("Spring Boot 基础")
 
+
+
 #part("Spring Boot 核心")
 #include "chapters/Web开发核心.typ"
 #include "chapters/数据访问与持久层框架.typ"
 #include "chapters/安全与认证授权.typ"
+#include "chapters/定时任务与异步处理.typ"
 
 
 #part("微服务与中间件")

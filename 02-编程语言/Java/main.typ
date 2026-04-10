@@ -23,12 +23,15 @@
 )
 
 // 目录
-#make-outline(depth: 3)
+#make-outline(depth: 2)
 
 
 #part("Java & Kotlin 核心基础")
 
 #part("JVM 标准库与常用工具")
+#include "chapters/字符串处理.typ"
+#include "chapters/集合框架.typ"
+#include "chapters/异常处理.typ"
 
 #part("高级特性与函数式编程")
 
