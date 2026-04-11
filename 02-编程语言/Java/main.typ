@@ -36,6 +36,7 @@
 #part("高级特性与函数式编程")
 
 #part("并发编程")
+#include "chapters/并发编程.typ"
 
 #part("网络编程与高性能 IO")
 

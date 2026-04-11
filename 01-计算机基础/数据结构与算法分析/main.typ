@@ -39,8 +39,8 @@
 
 #part("查找与排序")
 #include "chapters/查找技术.typ"
-#include "chapters/树形查找结构.typ"
-#include "chapters/哈希表.typ"
+// #include "chapters/树形查找结构.typ"
+// #include "chapters/哈希表.typ"
 #include "chapters/内部排序算法.typ"
 #include "chapters/高级排序与外部排序.typ"
 
