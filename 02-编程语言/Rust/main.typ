@@ -3,7 +3,7 @@
 
 // ── 文档元信息 ──
 #set document(
-  title: "Java",
+  title: "Rust",
   author: "Violet",
   date: datetime.today(),
 )
@@ -11,13 +11,12 @@
 // 应用全局样式
 #show: apply-style
 
-
 // ══════════════════════════════════════════════════════════════════════
 // 封面
 // ══════════════════════════════════════════════════════════════════════
 
 #make-cover(
-  "Java",
+  "Rust",
   "Violet",
   date: datetime.today().display(),
 )
@@ -26,19 +25,15 @@
 #make-outline(depth: 2)
 
 
-#part("Java & Kotlin 核心基础")
+#part("Rust 核心基础")
+#include "chapters/Rust核心基础.typ"
 
-#part("JVM 标准库与常用工具")
-#include "chapters/字符串处理.typ"
-#include "chapters/集合框架.typ"
-#include "chapters/异常处理.typ"
+#part("核心标准库与常用工具")
 
-#part("高级特性与函数式编程")
+#part("高级特性与元编程")
 
 #part("并发编程")
-#include "chapters/并发编程.typ"
 
-#part("网络编程与高性能 IO")
+#part("网络编程")
 
-#part("JVM 底层原理与性能调优")
-#include "chapters/GraalVM.typ"
+#part("底层原理与性能调优")
