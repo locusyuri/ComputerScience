@@ -35,6 +35,10 @@
 #include "chapters/并发编程.typ"
 #include "chapters/分布式系统.typ"
 
+#part("设计模式")
+
+#part("计算机基础综合")
+#include "chapters/正则表达式.typ"
 
 
 // 章节结构
