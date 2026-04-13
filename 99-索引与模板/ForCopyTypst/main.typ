@@ -100,7 +100,7 @@
 模板提供了多种行内强调方式：
 
 - #emphasis[强调文字]：使用主题色和圆体字体，适合突出重点
-- #highlight[高亮文字]：带浅色背景，适合标记关键术语
+- #emphasis[高亮文字]：带浅色背景，适合标记关键术语
 - #file[src/main/App.java]：文件路径专用样式
 - #shortcut[Ctrl + C]：模拟键盘按键
 
@@ -535,7 +535,7 @@ CMD ["nginx", "-g", "daemon off;"]
 #tex-table(
   ("命令", "用途", "示例"),
   (file("path"), "文件路径", file("src/main/App.java")),
-  (highlight("text"), "高亮文字", highlight("重点")),
+  (emphasis[text], "高亮文字", emphasis[重点]),
   (emphasis("text"), "强调文字", emphasis("关键点")),
   (shortcut("keys"), "快捷键", shortcut("Ctrl + S")),
 )

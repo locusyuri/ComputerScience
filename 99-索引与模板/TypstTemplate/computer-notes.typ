@@ -38,6 +38,9 @@
 /// 正文文字颜色 - 段落默认文字色
 #let color-main-text = rgb("#262626")
 
+/// 高亮颜色 - 选中项、活动状态等
+#let color-highlight = rgb("#FFEB3B")
+
 /// 浅色背景 - 代码块、行内代码等背景
 #let color-bg-light = rgb("#F7F7F7")
 
@@ -520,8 +523,7 @@
 // │                                                                     │
 // │ 行内使用的辅助组件：                                                  │
 // │   file       - 文件路径样式                                          │
-// │   highlight  - 高亮文字（带底色）                                     │
-// │   emphasis   - 强调文字（主题色幼圆字体）                             │
+// │   emphasis   - 强调文字                            │
 // │   shortcut   - 快捷键样式（边框按钮）                                 │
 // │   algorithm  - 算法伪代码块                                          │
 // └────────────────────────────────────────────────────────────────────┘
@@ -530,12 +532,6 @@
 /// 使用方式: #file[src/main/java/App.java]
 #let file(path) = {
   return text(size: 9pt, font: font-mono, fill: color-accent)[#path]
-}
-
-/// 高亮文字 - 带浅色背景的强调文本
-/// 使用方式: #highlight[关键术语]
-#let highlight(body) = {
-  return [ #box(fill: color-accent.lighten(80%), inset: (x: 2pt, y: 2pt), baseline: 2pt, radius: 2pt)[#body] ]
 }
 
 /// 强调文字 - 使用主题色的特殊字体
