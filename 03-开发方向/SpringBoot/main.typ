@@ -36,6 +36,7 @@
 #include "chapters/安全与认证授权.typ"
 #include "chapters/定时任务与异步处理.typ"
 
+#include "chapters/日志监控.typ"
 
 #part("微服务与中间件")
 #include "chapters/微服务架构基础.typ"
