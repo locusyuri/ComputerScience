@@ -1,20 +1,14 @@
 #import "../../../99-索引与模板/TypstTemplate/computer-notes.typ": *
 
-= 日志、监控与可观测性
+= 日志系统详解
 
-日志是应用程序的“黑匣子”，记录系统运行状态；监控提供实时指标；可观测性帮助理解系统内部状态。三者结合构成完整的应用运维体系。
+日志是应用程序的*“黑匣子”*，记录系统运行状态。Spring Boot的日志设计遵循#emphasis[门面模式]，通过SLF4J统一接口，底层可以灵活切换实现框架，实现了日志系统的解耦和可扩展性。
 
-#note[
-  Spring Boot的日志设计遵循*门面模式*，通过SLF4J统一接口，底层可以灵活切换实现框架，实现了日志系统的解耦和可扩展性。
-]
-
-== SLF4J 与 Logback 配置
+== Java日志生态与SLF4J门面模式
 
 === Java日志生态演变
 
-==== 早期混乱局面
-
-在SLF4J出现之前，Java日志领域存在多个 competing 框架：
+在SLF4J出现之前，Java日志领域存在多个竞争框架：
 
 #tex-table(
   ("框架", "发布年份", "特点", "问题"),
@@ -24,13 +18,13 @@
   ("Log4j 2.x", "2014", "高性能", "API不兼容Log4j 1.x"),
 )
 
-*问题*：
+*存在的问题*：
 
 - 不同库使用不同的日志框架
 - 项目中可能出现多个日志实现
 - 配置复杂，难以统一管理
 
-==== SLF4J的解决方案
+=== SLF4J的解决方案
 
 SLF4J（Simple Logging Facade for Java）是一个*日志门面*（Logging Facade）。
 
@@ -66,9 +60,9 @@ public class UserService {
   永远使用SLF4J API，不要直接使用Logback或Log4j的API。这样可以在不修改代码的情况下切换日志实现。
 ]
 
-=== Spring Boot的日志架构
+== Spring Boot默认日志框架
 
-==== 默认日志框架
+=== 默认日志框架
 
 Spring Boot默认使用*Logback*作为日志实现。
 
@@ -133,7 +127,7 @@ Spring Boot默认使用*Logback*作为日志实现。
 └─────────────────────────────────────┘
 ```
 
-==== 日志桥接（Bridge）
+=== 日志桥接（Bridge）
 
 Spring Boot自动配置了日志桥接，将其他日志框架的输出重定向到SLF4J：
 
@@ -150,9 +144,9 @@ Spring Boot自动配置了日志桥接，将其他日志框架的输出重定向
   不要同时引入 `log4j-over-slf4j` 和 `slf4j-log4j12`，会导致循环依赖和StackOverflowError。
 ]
 
-=== Logback配置详解
+== Logback配置详解
 
-==== 配置文件位置
+=== 配置文件位置
 
 Spring Boot按以下顺序查找Logback配置：
 
@@ -162,7 +156,7 @@ Spring Boot按以下顺序查找Logback配置：
 
 *推荐*：使用 `logback-spring.xml`，因为它支持Spring的Profile和属性占位符。
 
-==== 基本配置结构
+=== 基本配置结构
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -208,7 +202,7 @@ Spring Boot按以下顺序查找Logback配置：
 </configuration>
 ```
 
-==== 日志级别
+=== 日志级别
 
 #tex-table(
   ("级别", "值", "用途", "生产环境"),
@@ -239,7 +233,7 @@ Spring Boot按以下顺序查找Logback配置：
 <logger name="com.example.service" level="TRACE"/>
 ```
 
-==== 日志格式模式
+=== 日志格式模式
 
 常用模式字符：
 
@@ -295,9 +289,9 @@ logging.level.tomcat=DEBUG
   对于复杂的日志配置（如多appender、滚动策略），建议使用 `logback-spring.xml`。
 ]
 
-=== 高级配置
+== 异步日志与性能优化
 
-==== 异步日志
+=== 异步日志
 
 异步日志可以提升性能，特别是高并发场景：
 
@@ -320,14 +314,14 @@ logging.level.tomcat=DEBUG
 
 *性能提升*：
 
-- 同步日志：~100K msg/s
-- 异步日志：~1M msg/s
+- 同步日志：约*$100K$* msg/s
+- 异步日志：约*$1M$* msg/s
 
 #caution[
   异步日志在应用关闭时可能丢失少量日志。设置 `queueSize` 时要权衡内存占用。
 ]
 
-==== 条件配置（Profile）
+=== 条件配置（Profile）
 
 `logback-spring.xml` 支持Spring Profile：
 
@@ -360,51 +354,7 @@ logging.level.tomcat=DEBUG
 </configuration>
 ```
 
-==== 自定义Appender
-
-可以将日志发送到自定义目标：
-
-```java
-import ch.qos.logback.core.AppenderBase;
-
-public class KafkaAppender extends AppenderBase<ILoggingEvent> {
-    private KafkaProducer<String, String> producer;
-    private String topic;
-
-    @Override
-    public void start() {
-        // 初始化Kafka Producer
-        producer = new KafkaProducer<>(...);
-        super.start();
-    }
-
-    @Override
-    protected void append(ILoggingEvent event) {
-        String message = String.format("[%s] %s - %s",
-            event.getLevel(),
-            event.getLoggerName(),
-            event.getFormattedMessage()
-        );
-        producer.send(new ProducerRecord<>(topic, message));
-    }
-
-    @Override
-    public void stop() {
-        producer.close();
-        super.stop();
-    }
-}
-```
-
-```xml
-<appender name="KAFKA" class="com.example.KafkaAppender">
-    <topic>application-logs</topic>
-</appender>
-```
-
-== 结构化日志与 MDC
-
-结构化日志是将日志以机器可读的格式（如JSON）输出，便于日志聚合和分析。
+== 结构化日志与JSON格式输出
 
 === 为什么需要结构化日志
 
@@ -445,6 +395,61 @@ public class KafkaAppender extends AppenderBase<ILoggingEvent> {
 #tip[
   微服务架构中，结构化日志是标配，强烈推荐使用。
 ]
+
+=== JSON格式化日志
+
+==== 使用logstash-logback-encoder
+
+```xml
+<dependency>
+    <groupId>net.logstash.logback</groupId>
+    <artifactId>logstash-logback-encoder</artifactId>
+    <version>7.4</version>
+</dependency>
+```
+
+*配置*：
+
+```xml
+<appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+        <!-- 自定义字段 -->
+        <customFields>{"app":"myapp","env":"${APP_ENV:-dev}"}</customFields>
+
+        <!-- 包含MDC -->
+        <includeMdcKeyName>trace_id</includeMdcKeyName>
+        <includeMdcKeyName>user_id</includeMdcKeyName>
+
+        <!-- 时间戳格式 -->
+        <timestampPattern>yyyy-MM-dd'T'HH:mm:ss.SSS'Z'</timestampPattern>
+        <timeZone>UTC</timeZone>
+    </encoder>
+</appender>
+
+<root level="INFO">
+    <appender-ref ref="JSON_CONSOLE"/>
+</root>
+```
+
+*输出*：
+
+```json
+{
+  "@timestamp": "2024-01-15T10:30:45.123Z",
+  "@version": "1",
+  "message": "Creating order",
+  "logger_name": "com.example.myapp.OrderService",
+  "thread_name": "http-nio-8080-exec-1",
+  "level": "INFO",
+  "level_value": 20000,
+  "app": "myapp",
+  "env": "dev",
+  "trace_id": "abc123def456",
+  "user_id": "user123"
+}
+```
+
+== MDC与链路追踪上下文
 
 === MDC（Mapped Diagnostic Context）
 
@@ -547,85 +552,150 @@ public class TraceIdFilter implements Filter {
   通过trace_id可以追踪一个请求在所有服务中的完整调用链路。
 ]
 
-=== JSON格式化日志
+== 敏感信息脱敏与安全日志
 
-==== 使用logback-contrib
+=== 为什么需要脱敏
 
-```xml
-<dependency>
-    <groupId>net.logstash.logback</groupId>
-    <artifactId>logstash-logback-encoder</artifactId>
-    <version>7.4</version>
-</dependency>
-```
+生产环境必须对敏感信息（手机号、身份证、银行卡等）进行脱敏，符合GDPR等法规要求。
 
-*配置*：
-
-```xml
-<appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-        <!-- 自定义字段 -->
-        <customFields>{"app":"myapp","env":"${APP_ENV:-dev}"}</customFields>
-
-        <!-- 包含MDC -->
-        <includeMdcKeyName>trace_id</includeMdcKeyName>
-        <includeMdcKeyName>user_id</includeMdcKeyName>
-
-        <!-- 时间戳格式 -->
-        <timestampPattern>yyyy-MM-dd'T'HH:mm:ss.SSS'Z'</timestampPattern>
-        <timeZone>UTC</timeZone>
-    </encoder>
-</appender>
-
-<root level="INFO">
-    <appender-ref ref="JSON_CONSOLE"/>
-</root>
-```
-
-*输出*：
-
-```json
-{
-  "@timestamp": "2024-01-15T10:30:45.123Z",
-  "@version": "1",
-  "message": "Creating order",
-  "logger_name": "com.example.myapp.OrderService",
-  "thread_name": "http-nio-8080-exec-1",
-  "level": "INFO",
-  "level_value": 20000,
-  "app": "myapp",
-  "env": "dev",
-  "trace_id": "abc123def456",
-  "user_id": "user123"
-}
-```
-
-==== 自定义JSON Encoder
+=== 实现方式
 
 ```java
-import net.logstash.logback.encoder.LogstashEncoder;
-import net.logstash.logback.fieldnames.LogstashFieldNames;
+import ch.qos.logback.classic.pattern.MessageConverter;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 
-public class CustomJsonEncoder extends LogstashEncoder {
+public class SensitiveDataConverter extends MessageConverter {
 
-    public CustomJsonEncoder() {
-        super();
+    @Override
+    public String convert(ILoggingEvent event) {
+        String message = event.getFormattedMessage();
 
-        // 自定义字段名
-        LogstashFieldNames fieldNames = getFieldNames();
-        fieldNames.setTimestamp("@timestamp");
-        fieldNames.setMessage("message");
-        fieldNames.setLogger("logger");
-        fieldNames.setThread("thread");
-        fieldNames.setLevel("level");
+        // 脱敏手机号
+        message = message.replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2");
 
-        // 添加固定字段
-        setCustomFields("{\"service\":\"order-service\",\"version\":\"1.0.0\"}");
+        // 脱敏邮箱
+        message = message.replaceAll("(\\w{3})\\w*@", "$1***@");
+
+        // 脱敏身份证
+        message = message.replaceAll("(\\d{6})\\d{8}(\\d{4})", "$1********$2");
+
+        return message;
     }
 }
 ```
 
-=== 最佳实践
+```xml
+<conversionRule conversionWord="msg"
+                converterClass="com.example.SensitiveDataConverter" />
+```
+
+#note[
+  生产环境必须对敏感信息（手机号、身份证、银行卡等）进行脱敏，符合GDPR等法规要求。
+]
+
+== 多环境日志配置
+
+=== 基于Profile的配置
+
+`logback-spring.xml` 支持Spring Profile，可以为不同环境配置不同的日志策略：
+
+```xml
+<configuration>
+
+    <!-- 开发环境 -->
+    <springProfile name="dev">
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+        <logger name="com.example" level="TRACE"/>
+    </springProfile>
+
+    <!-- 测试环境 -->
+    <springProfile name="test">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+        </root>
+    </springProfile>
+
+    <!-- 生产环境 -->
+    <springProfile name="prod">
+        <root level="WARN">
+            <appender-ref ref="ASYNC_FILE"/>
+        </root>
+        <logger name="com.example" level="INFO"/>
+    </springProfile>
+
+</configuration>
+```
+
+=== 动态调整日志级别
+
+Spring Boot Actuator提供了动态调整日志级别的端点：
+
+```bash
+# 查看当前日志级别
+curl http://localhost:8080/actuator/loggers
+
+# 修改某个包的日志级别
+curl -X POST http://localhost:8080/actuator/loggers/com.example \
+  -H "Content-Type: application/json" \
+  -d '{"configuredLevel": "DEBUG"}'
+```
+
+#tip[
+  生产环境可以通过Actuator动态调整日志级别，无需重启应用。
+]
+
+== 自定义Appender与日志扩展
+
+=== 自定义Appender
+
+可以将日志发送到自定义目标（如Kafka、Elasticsearch等）：
+
+```java
+import ch.qos.logback.core.AppenderBase;
+
+public class KafkaAppender extends AppenderBase<ILoggingEvent> {
+    private KafkaProducer<String, String> producer;
+    private String topic;
+
+    @Override
+    public void start() {
+        // 初始化Kafka Producer
+        producer = new KafkaProducer<>(...);
+        super.start();
+    }
+
+    @Override
+    protected void append(ILoggingEvent event) {
+        String message = String.format("[%s] %s - %s",
+            event.getLevel(),
+            event.getLoggerName(),
+            event.getFormattedMessage()
+        );
+        producer.send(new ProducerRecord<>(topic, message));
+    }
+
+    @Override
+    public void stop() {
+        producer.close();
+        super.stop();
+    }
+}
+```
+
+```xml
+<appender name="KAFKA" class="com.example.KafkaAppender">
+    <topic>application-logs</topic>
+</appender>
+
+<root level="INFO">
+    <appender-ref ref="KAFKA"/>
+</root>
+```
+
+=== 最佳实践总结
 
 ==== 1. 统一的日志工具类
 
@@ -688,42 +758,6 @@ public class LoggingAspect {
 }
 ```
 
-==== 3. 敏感信息脱敏
-
-```java
-import ch.qos.logback.classic.pattern.MessageConverter;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-
-public class SensitiveDataConverter extends MessageConverter {
-
-    @Override
-    public String convert(ILoggingEvent event) {
-        String message = event.getFormattedMessage();
-
-        // 脱敏手机号
-        message = message.replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2");
-
-        // 脱敏邮箱
-        message = message.replaceAll("(\\w{3})\\w*@", "$1***@");
-
-        // 脱敏身份证
-        message = message.replaceAll("(\\d{6})\\d{8}(\\d{4})", "$1********$2");
-
-        return message;
-    }
-}
-```
-
-```xml
-<conversionRule conversionWord="msg"
-                converterClass="com.example.SensitiveDataConverter" />
-```
-
-#note[
-  生产环境必须对敏感信息（手机号、身份证、银行卡等）进行脱敏，符合GDPR等法规要求。
-]
-
 #fancy-divider
 
-未完待续...
-
+本章详细介绍了Spring Boot的日志系统，从SLF4J门面模式到Logback配置，从异步优化到结构化日志，为构建可观测性系统打下基础。下一章将深入探讨监控与可观测性的其他两大支柱：指标和链路追踪。
