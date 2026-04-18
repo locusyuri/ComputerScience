@@ -33,6 +33,9 @@
 #include "chapters/集合框架.typ"
 #include "chapters/异常处理.typ"
 
+#part("构建工具与工程化")
+#include "chapters/构建工具.typ"
+
 #part("高级特性与函数式编程")
 
 #part("并发编程")
@@ -72,7 +75,31 @@
 // % Chapter 6：通用工具类 ✅
 // % 6.1 Java 基础工具：Math、BigDecimal、Objects、Optional 空值处理6.2 Kotlin 标准库工具：作用域函数（let/run/with/apply/also）、空安全处理工具6.3 第三方常用库（Java+Kotlin 通用）：Apache Commons、Guava、Hutool ⚪
 
-// % Part 3：高级特性与函数式编程
+// % Part 3：构建工具与工程化（Maven & Gradle）
+// % Chapter 1：构建工具概述
+// % 1.1 为什么需要构建工具：依赖管理、构建自动化、项目标准化
+// % 1.2 Maven vs Gradle：设计理念、优缺点对比、选型建议
+// % 1.3 构建生命周期：编译、测试、打包、部署的完整流程
+// % Chapter 2：Maven 核心概念
+// % 2.1 POM 文件结构：坐标、依赖、插件、继承与聚合
+// % 2.2 依赖管理：传递性依赖、依赖冲突解决、依赖范围
+// % 2.3 仓库管理：本地仓库、中央仓库、私有仓库（Nexus/Artifactory）
+// % 2.4 常用插件：compiler、surefire、jar、shade、assembly
+// % Chapter 3：Gradle 核心概念
+// % 3.1 build.gradle 配置：Groovy DSL vs Kotlin DSL
+// % 3.2 依赖声明：implementation/api/testImplementation、依赖配置
+// % 3.3 Task 系统：自定义 Task、Task 依赖、增量构建
+// % 3.4 插件系统：应用插件、自定义插件、插件市场
+// % Chapter 4：多模块项目管理
+// % 4.1 Maven 多模块：parent POM、模块依赖、聚合构建
+// % 4.2 Gradle 多模块：settings.gradle、子项目配置、依赖传递
+// % 4.3 版本统一管理：BOM、platform、dependencyManagement
+// % Chapter 5：构建优化与最佳实践
+// % 5.1 构建性能优化：并行构建、缓存机制、守护进程
+// % 5.2 持续集成：与 Jenkins/GitLab CI 集成、自动化构建流程
+// % 5.3 常见问题分析：依赖冲突、构建失败排查、内存溢出
+
+// % Part 4：高级特性与函数式编程
 // % Chapter 1：泛型 🔶
 // % 1.1 Java 泛型：泛型类 / 接口 / 方法、通配符上下界、类型擦除1.2 Kotlin 泛型：声明处型变、星投影、泛型约束、与 Java 泛型的互操作1.3 泛型常见问题与最佳实践
 // % Chapter 2：注解 🔶
@@ -88,7 +115,7 @@
 // % Chapter 7：Kotlin 专属高级特性 🔶
 // % 7.1 扩展函数与扩展属性7.2 委托：类委托、属性委托、懒加载 lazy7.3 运算符重载、infix 函数7.4 高级特性实战：用 Kotlin 扩展简化 Java 工具类
 
-// % Part 4：并发编程（Java 线程 & Kotlin 协程）
+// % Part 5：并发编程（Java 线程 & Kotlin 协程）
 // % 设计原则：
 // % 1) 先“线程与共享内存模型”再“工具与实战”；
 // % 2) 先 Java 并发基石，再 Kotlin 协程抽象；
@@ -118,7 +145,7 @@
 // % 6.2 并发问题排查：死锁、竞态、活锁、线程泄漏
 // % 6.3 监控与调优：线程 dump、阻塞分析、吞吐与延迟权衡
 
-// % Part 5：网络编程与高性能 IO
+// % Part 6：网络编程与高性能 IO
 // % Chapter 1：网络编程基础 ✅
 // % 1.1 网络核心概念：IP / 端口 / TCP/UDP 协议、OSI 七层模型1.2 InetAddress 网络地址操作（Java+Kotlin 通用）
 // % Chapter 2：BIO 编程 🔶
@@ -130,7 +157,7 @@
 // % Chapter 5：高性能网络框架 ⚪
 // % 5.1 Netty 框架入门：核心优势、架构、简易 TCP 通信实现5.2 Ktor 框架入门：Kotlin 原生高性能网络框架、服务端 / 客户端实现
 
-// % Part 6：JVM 底层原理与性能调优（Java & Kotlin 通用）
+// % Part 7：JVM 底层原理与性能调优（Java & Kotlin 通用）
 // % 核心内容完全复用 JVM 体系，仅补充 Kotlin 特性的底层实现，无需修改原有核心逻辑
 // % Chapter 1：JVM 整体架构 🔶
 // % 1.1 HotSpot JVM 核心组成：类加载子系统、运行时数据区、执行引擎1.2 Java & Kotlin 程序执行全流程：源码→字节码→JVM 执行1.3 主流 JVM 实现：HotSpot、OpenJ9
@@ -148,9 +175,4 @@
 // % 7.1 JVM 常用监控工具：jps/jstat/jmap/jstack/VisualVM7.2 OOM、CPU 占用过高问题排查实战7.3 JVM 核心参数配置、调优原则与实战案例7.4 Kotlin 代码的 JVM 调优注意事项
 // % Chapter 8：JDK & Kotlin 版本演进 ⚪
 // % 8.1 JDK LTS 版本核心特性（8/11/17）、版本迁移注意事项8.2 Kotlin 版本演进、与 JDK 版本的兼容性、新特性
-// % Part 7：Java & Kotlin 混合开发实战 ⚪
-// % Chapter 1：后端混合开发实战
-// % 1.1 Spring Boot 2.x/3.x 整合 Kotlin1.2 Java+Kotlin 混合开发的项目结构、最佳实践
-// % Chapter 2：Android 混合开发实战
-// % 2.1 Android 项目中 Java 与 Kotlin 的互操作2.2 现有 Java 项目迁移 Kotlin 的方案
 
