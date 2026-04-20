@@ -83,13 +83,16 @@
 
 // % Part 2：Spring Boot 企业级开发实战
 // % Chapter 5：Web 开发核心
-// % 5.1 RESTful API 设计规范与实践
-// % 5.2 参数接收与数据绑定（@PathVariable、@RequestParam、@RequestBody）
-// % 5.3 响应处理（ResponseEntity、统一响应结构）
-// % 5.4 全局异常处理（@ControllerAdvice + @ExceptionHandler）
-// % 5.5 参数校验（Bean Validation、@Valid、分组校验、自定义校验器）
-// % 5.6 拦截器与过滤器（HandlerInterceptor、Filter、OncePerRequestFilter）
-// % 5.7 跨域配置（CORS）
+// % 5.1 HTTP 协议与 RESTful API 设计（HTTP 基础、Spring MVC 架构、RESTful 规范）
+// % 5.2 请求处理：参数接收与数据绑定（@PathVariable、@RequestParam、@RequestBody、@RequestHeader）
+// % 5.3 请求处理：文件上传与下载（MultipartFile、大文件处理、断点续传）
+// % 5.4 响应处理：ResponseEntity 与统一响应结构（泛型封装、分页响应）
+// % 5.5 参数校验：Bean Validation 实战（@Valid、分组校验、自定义校验器、国际化错误消息）
+// % 5.6 全局异常处理：@ControllerAdvice + @ExceptionHandler（异常分类、错误码设计）
+// % 5.7 拦截器与过滤器：HandlerInterceptor、Filter、OncePerRequestFilter（执行顺序、应用场景）
+// % 5.8 跨域配置：CORS 原理与实现（@CrossOrigin、WebMvcConfigurer、过滤器方式）
+// % 5.9 内容协商与国际化：Accept Header、MessageSource、LocaleResolver
+// % 5.10 静态资源处理：ResourceHandler、WebJars、CDN 集成
 //
 // % Chapter 6：数据访问与持久层框架
 // % 6.1 数据源配置与连接池（HikariCP）
@@ -120,9 +123,8 @@
 // % 9.5 JSON 处理（Jackson 注解、Gson 对比、性能优化）
 // % 9.6 HTTP 客户端（RestTemplate、WebClient、OkHttp）
 // % 9.7 API 文档生成（SpringDoc OpenAPI 3.0、Swagger UI）
-// % 9.8 验证框架（Hibernate Validator、自定义注解）
-// % 9.9 日期时间处理（java.time、Jackson 序列化）
-// % 9.10 其他实用工具（Hutool、Apache POI、EasyExcel）
+// % 9.8 日期时间处理（java.time、Jackson 序列化）
+// % 9.9 其他实用工具（Hutool、Apache POI、EasyExcel）
 //
 // Chapter 10：响应式编程与 WebFlux
 // 10.1 响应式编程基础（Reactor 核心：Mono/Flux、背压机制）
