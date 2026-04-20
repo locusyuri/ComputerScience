@@ -1249,7 +1249,7 @@ private String generateFileName(String originalFileName) {
 public ResponseEntity<User> getUser(@PathVariable Long id) {
     User user = userService.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-    
+
     return ResponseEntity.ok(user);
 }
 ```
@@ -1279,9 +1279,9 @@ return new ResponseEntity<>(user, HttpStatus.OK);
 @PostMapping("/api/users")
 public ResponseEntity<User> createUser(@RequestBody User user) {
     User saved = userService.save(user);
-    
+
     URI location = URI.create("/api/users/" + saved.getId());
-    
+
     return ResponseEntity.created(location)
         .header("X-Custom-Header", "Custom Value")
         .body(saved);
@@ -1312,13 +1312,13 @@ public ResponseEntity<User> getUserWithEtag(
 ) {
     User user = userService.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-    
+
     String etag = "\"" + user.getVersion() + "\"";
-    
+
     if (etag.equals(ifNoneMatch)) {
         return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
     }
-    
+
     return ResponseEntity.ok()
         .eTag(etag)
         .lastModified(user.getUpdatedAt().toInstant().toEpochMilli())
@@ -1338,32 +1338,32 @@ public class ApiResponse<T> {
     private String message;     // 响应消息
     private T data;            // 响应数据
     private long timestamp;    // 时间戳
-    
+
     public ApiResponse(int code, String message, T data) {
         this.code = code;
         this.message = message;
         this.data = data;
         this.timestamp = System.currentTimeMillis();
     }
-    
+
     // 成功响应
     public static <T> ApiResponse<T> success(T data) {
         return new ApiResponse<>(200, "Success", data);
     }
-    
+
     public static <T> ApiResponse<T> success(String message, T data) {
         return new ApiResponse<>(200, message, data);
     }
-    
+
     // 失败响应
     public static <T> ApiResponse<T> error(int code, String message) {
         return new ApiResponse<>(code, message, null);
     }
-    
+
     public static <T> ApiResponse<T> error(String message) {
         return new ApiResponse<>(500, message, null);
     }
-    
+
     // getters and setters
 }
 ```
@@ -1374,21 +1374,21 @@ public class ApiResponse<T> {
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    
+
     @GetMapping("/{id}")
     public ApiResponse<User> getUser(@PathVariable Long id) {
         User user = userService.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        
+
         return ApiResponse.success(user);
     }
-    
+
     @PostMapping
     public ApiResponse<User> createUser(@Valid @RequestBody UserCreateRequest request) {
         User user = userService.create(request);
         return ApiResponse.success("User created successfully", user);
     }
-    
+
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteUser(@PathVariable Long id) {
         userService.delete(id);
@@ -1449,7 +1449,7 @@ public class PageResponse<T> {
     private int totalPages;        // 总页数
     private boolean first;         // 是否第一页
     private boolean last;          // 是否最后一页
-    
+
     public PageResponse(Page<T> page) {
         this.content = page.getContent();
         this.pageNumber = page.getNumber();
@@ -1459,7 +1459,7 @@ public class PageResponse<T> {
         this.first = page.isFirst();
         this.last = page.isLast();
     }
-    
+
     // getters
 }
 ```
@@ -1475,16 +1475,16 @@ public ApiResponse<PageResponse<User>> getUsers(
 ) {
     Sort sorting = Sort.by(
         sort.split(",")[0],
-        sort.split(",")[1].equalsIgnoreCase("desc") 
-            ? Sort.Direction.DESC 
+        sort.split(",")[1].equalsIgnoreCase("desc")
+            ? Sort.Direction.DESC
             : Sort.Direction.ASC
     );
-    
+
     Pageable pageable = PageRequest.of(page, size, sorting);
     Page<User> userPage = userService.findAll(pageable);
-    
+
     PageResponse<User> pageResponse = new PageResponse<>(userPage);
-    
+
     return ApiResponse.success(pageResponse);
 }
 ```
@@ -1528,14 +1528,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
 ```java
 @Service
 public class UserService {
-    
+
     @Autowired
     private UserRepository userRepository;
-    
+
     public Page<User> findAll(Pageable pageable) {
         return userRepository.findAll(pageable);
     }
-    
+
     public Page<User> searchByName(String name, Pageable pageable) {
         return userRepository.findByNameContaining(name, pageable);
     }
@@ -1553,7 +1553,7 @@ public ApiResponse<PageResponse<User>> searchUsers(
 ) {
     Pageable pageable = PageRequest.of(page, size);
     Page<User> userPage = userService.searchByName(name, pageable);
-    
+
     return ApiResponse.success(new PageResponse<>(userPage));
 }
 ```
@@ -1599,7 +1599,7 @@ public ResponseEntity<User> getUser(@PathVariable Long id) {
         .orElseThrow(() -> new ResourceNotFoundException(
             "User not found with id: " + id
         ));
-    
+
     return ResponseEntity.ok(user);
 }
 ```
@@ -1633,7 +1633,7 @@ Content-Type: application/json
 @GetMapping("/api/config")
 public ResponseEntity<Map<String, Object>> getConfig() {
     Map<String, Object> config = configService.getConfig();
-    
+
     return ResponseEntity.ok()
         .cacheControl(CacheControl.maxAge(3600, TimeUnit.SECONDS))
         .body(config);
@@ -1653,9 +1653,9 @@ Cache-Control: max-age=3600
 public ResponseEntity<User> getUserWithETag(@PathVariable Long id) {
     User user = userService.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-    
+
     String etag = "\"" + user.getVersion() + "\"";
-    
+
     return ResponseEntity.ok()
         .eTag(etag)
         .body(user);
@@ -1690,10 +1690,10 @@ HTTP/1.1 304 Not Modified
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
-    
+
     @Autowired
     private UserService userService;
-    
+
     // 查询列表（分页）
     @GetMapping
     public ApiResponse<PageResponse<UserDTO>> getUsers(
@@ -1704,27 +1704,27 @@ public class UserController {
     ) {
         Sort sorting = parseSort(sort);
         Pageable pageable = PageRequest.of(page, size, sorting);
-        
+
         Page<User> userPage;
         if (name != null && !name.isEmpty()) {
             userPage = userService.searchByName(name, pageable);
         } else {
             userPage = userService.findAll(pageable);
         }
-        
+
         List<UserDTO> dtos = userPage.getContent().stream()
             .map(this::convertToDTO)
             .collect(Collectors.toList());
-        
+
         Page<UserDTO> dtoPage = new PageImpl<>(
-            dtos, 
-            pageable, 
+            dtos,
+            pageable,
             userPage.getTotalElements()
         );
-        
+
         return ApiResponse.success(new PageResponse<>(dtoPage));
     }
-    
+
     // 查询单个
     @GetMapping("/{id}")
     public ApiResponse<UserDTO> getUser(@PathVariable Long id) {
@@ -1732,10 +1732,10 @@ public class UserController {
             .orElseThrow(() -> new ResourceNotFoundException(
                 "User not found with id: " + id
             ));
-        
+
         return ApiResponse.success(convertToDTO(user));
     }
-    
+
     // 创建
     @PostMapping
     public ResponseEntity<ApiResponse<UserDTO>> createUser(
@@ -1743,13 +1743,13 @@ public class UserController {
     ) {
         User user = userService.create(request);
         UserDTO dto = convertToDTO(user);
-        
+
         URI location = URI.create("/api/v1/users/" + user.getId());
-        
+
         return ResponseEntity.created(location)
             .body(ApiResponse.success("User created successfully", dto));
     }
-    
+
     // 更新
     @PutMapping("/{id}")
     public ApiResponse<UserDTO> updateUser(
@@ -1759,14 +1759,14 @@ public class UserController {
         User user = userService.update(id, request);
         return ApiResponse.success("User updated successfully", convertToDTO(user));
     }
-    
+
     // 删除
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Long id) {
         userService.delete(id);
         return ResponseEntity.noContent().build();
     }
-    
+
     private UserDTO convertToDTO(User user) {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
@@ -1775,7 +1775,7 @@ public class UserController {
         // 脱敏：不返回密码等敏感信息
         return dto;
     }
-    
+
     private Sort parseSort(String sort) {
         String[] parts = sort.split(",");
         return Sort.by(
