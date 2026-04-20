@@ -1,3 +1,5 @@
+#import "../../../99-索引与模板/TypstTemplate/computer-notes.typ": *
+
 = 微服务架构基础
 
 == 微服务架构概述
