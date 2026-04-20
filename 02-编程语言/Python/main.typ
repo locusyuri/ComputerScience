@@ -3,7 +3,7 @@
 
 // ── 文档元信息 ──
 #set document(
-  title: "JavaScript",
+  title: "Python",
   author: "Violet",
   date: datetime.today(),
 )
@@ -16,7 +16,7 @@
 // ══════════════════════════════════════════════════════════════════════
 
 #make-cover(
-  "JavaScript",
+  "Python",
   "Violet",
   date: datetime.today().display(),
 )
