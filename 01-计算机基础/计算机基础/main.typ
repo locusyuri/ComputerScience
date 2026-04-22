@@ -27,6 +27,7 @@
 
 #part("版本管理与开发工具")
 #include "chapters/Git.typ"
+#include "chapters/Shell.typ"
 
 #part("数据库系统")
 #include "chapters/数据库.typ"
@@ -43,24 +44,33 @@
 
 // 章节结构
 // Part 1: 版本管理与开发工具
-// Chapter 1: Git版本控制详解
-// 1.1 版本控制系统概述（集中式vs分布式）
-// 1.2 Git核心概念（仓库、工作区、暂存区、提交历史）
-// 1.3 Git基本操作（init、add、commit、status、log）
-// 1.4 分支管理（branch、checkout、merge、rebase）
-// 1.5 远程协作（remote、push、pull、fetch）
-// 1.6 高级操作（stash、cherry-pick、reset、reflog）
-// 1.7 标签管理（tag的创建与管理）
-// 1.8 Git工作流（Git Flow、GitHub Flow、GitLab Flow）
-// 1.9 .gitignore配置与最佳实践
-// 1.10 Git钩子（hooks）的应用
-// 1.11 常见问题与解决方案（冲突解决、历史修改）
-// 1.12 Git性能优化与大仓库管理
-//
-// Chapter 2: 其他版本管理工具
-// 2.1 SVN简介与适用场景
-// 2.2 Mercurial (Hg) 概述
-// 2.3 版本控制工具对比与选择
+// Chapter 1: Git 版本控制详解 🔶
+// 1.1 版本控制系统概述：集中式 vs 分布式、Git 的设计理念
+// 1.2 Git 核心概念：仓库、工作区、暂存区、提交历史、HEAD
+// 1.3 Git 基本操作：init、add、commit、status、log、diff
+// 1.4 分支管理：branch、checkout/switch、merge、rebase、冲突解决
+// 1.5 远程协作：remote、push、pull、fetch、upstream
+// 1.6 高级操作：stash、cherry-pick、reset/revert、reflog、bisect
+// 1.7 标签管理：轻量标签、附注标签、标签推送
+// 1.8 Git 工作流：Git Flow、GitHub Flow、GitLab Flow、Trunk-Based
+// 1.9 .gitignore 配置：规则语法、全局忽略、最佳实践
+// 1.10 Git 钩子（hooks）：pre-commit、post-merge、自定义脚本
+// 1.11 子模块与子树：git submodule、git subtree
+// 1.12 性能优化：浅克隆、稀疏检出、大文件存储（LFS）
+
+// Chapter 2: Shell 命令行与脚本编程 🔶
+// 2.1 Shell 概述：REPL、Shell 类型（Bash、Zsh、Fish、PowerShell）
+// 2.2 Shell 实现：POSIX 标准、Unix Shell、Windows Shell（CMD、PowerShell）
+// 2.3 基本命令：ls、cd、pwd、mkdir、rm、cp、mv、cat、echo
+// 2.4 文件权限：chmod、chown、umask、权限表示（rwx）
+// 2.5 输入输出重定向：stdin/stdout/stderr、管道、tee
+// 2.6 环境变量：PATH、HOME、export、env、配置文件（.bashrc、.zshrc）
+// 2.7 Shell 语法：变量、条件判断、循环、函数、数组
+// 2.8 文本处理工具：grep、sed、awk、sort、uniq、wc
+// 2.9 进程管理：ps、top、kill、jobs、bg/fg、nohup
+// 2.10 Shell 脚本编程：shebang、参数传递、错误处理、调试
+// 2.11 高级特性：命令替换、进程替换、here document、trap
+// 2.12 Shell 效率提升：别名、快捷键、自动补全、历史搜索
 //
 // Chapter 3: Vim编辑器精通
 // 3.1 Vim工作模式（普通、插入、可视、命令行）
