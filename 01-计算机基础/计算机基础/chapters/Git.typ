@@ -63,6 +63,35 @@ Git是目前最流行的分布式版本控制系统，由Linus Torvalds于2005�
   现代软件开发中，分布式版本控制已成为主流，Git占据了超过90%的市场份额。
 ]
 
+=== 其他版本管理工具简介
+
+虽然 Git 已成为行业标准，但了解其他工具仍有价值：
+
+*Subversion (SVN)*：
+
+- 最流行的集中式版本控制系统
+- 适合二进制文件管理（如设计资源）
+- 目录级权限控制更精细
+- 仍在一些传统企业中使用
+
+*Mercurial (Hg)*：
+
+- 分布式版本控制，与 Git 类似
+- 命令更简洁直观
+- Python 编写，跨平台性好
+- Bitbucket 早期默认支持
+
+*Perforce (P4)*：
+
+- 商业版本控制系统
+- 擅长处理大型二进制文件
+- 游戏开发行业广泛使用
+- 细粒度权限控制
+
+#note[
+  除非有特殊需求（如公司强制要求），否则建议直接使用 Git。它的生态系统最完善，社区支持最好。
+]
+
 === Git的发展历程
 
 - *2005年*：Linus Torvalds创建Git，替代BitKeeper
@@ -101,6 +130,13 @@ Git有四个主要的工作区域，理解它们是掌握Git的关键：
 - 存储在远程服务器上的仓库副本
 - 如GitHub、GitLab、Gitee等平台
 - 通过 `git push` 和 `git pull` 同步
+
+==== HEAD指针
+
+- 指向当前检出的提交或分支
+- 通常是一个符号引用，指向当前分支
+- 可以使用 `git log HEAD` 查看当前位置
+- 分离 HEAD 状态：直接指向某个提交而非分支
 
 ```text
 ┌─────────────┐     git add      ┌──────────┐    git commit    ┌──────────────┐
@@ -437,10 +473,10 @@ git branch feature-login abc1234
 ==== 切换分支
 
 ```bash
-# 切换到已有分支
+# 切换到已有分支（旧命令）
 git checkout feature-login
 
-# 或使用新命令
+# 或使用新命令（推荐）
 git switch feature-login
 
 # 切换回上一个分支
@@ -450,6 +486,56 @@ git switch -
 
 #tip[
   Git 2.23+引入了 `git switch` 和 `git restore`，使命令语义更清晰。`git checkout` 仍然可用但功能过于复杂。
+]
+
+==== 解决合并冲突
+
+当两个分支修改了同一文件的同一部分时，会产生冲突：
+
+*步骤1：查看冲突文件*
+
+```bash
+git status
+```
+
+*步骤2：手动编辑冲突文件*
+
+查找冲突标记：
+
+```text
+<<<<<<< HEAD
+你的修改
+别人的修改
+>>>>>>> feature-branch
+```
+
+保留需要的代码，删除冲突标记。
+
+*步骤3：标记冲突已解决*
+
+```bash
+git add resolved_file.txt
+```
+
+*步骤4：完成合并*
+
+```bash
+git commit
+```
+
+*使用可视化工具*：
+
+```bash
+# 使用内置合并工具
+git mergetool
+
+# 配置喜欢的合并工具
+git config --global merge.tool meld
+git mergetool
+```
+
+#tip[
+  推荐使用 VS Code、IntelliJ IDEA 等 IDE 的内置合并工具，界面友好，操作直观。
 ]
 
 ==== 删除分支
@@ -676,6 +762,28 @@ git branch -u origin/main
 git branch -vv
 ```
 
+==== upstream 追踪分支
+
+`upstream` 是指向原始仓库的远程引用，常用于 fork 工作流：
+
+```bash
+# 添加上游远程仓库
+git remote add upstream https://github.com/original/repo.git
+
+# 从上游拉取最新更改
+git fetch upstream
+
+# 合并上游更改到本地分支
+git merge upstream/main
+
+# 或使用 rebase 保持线性历史
+git rebase upstream/main
+```
+
+#tip[
+  在开源项目中，通常 `origin` 指向你的 fork，`upstream` 指向原始仓库。定期从 upstream 同步可以保持代码最新。
+]
+
 == 高级操作
 
 === Stash（储藏）
@@ -758,7 +866,7 @@ git reset HEAD file.txt
 
 === Reflog（引用日志）
 
-记录HEAD和分支引用的变化历史，是"后悔药"：
+记录HEAD和分支引用的变化历史，是“后悔药”：
 
 ```bash
 # 查看reflog
@@ -780,6 +888,52 @@ git reset --hard abc1234
 
 #tip[
   即使使用了 `git reset --hard` 或删除了分支，只要reflog还在，就有可能找回丢失的提交。
+]
+
+=== Revert（安全回退）
+
+创建新的提交来撤销之前的修改，不会改写历史：
+
+```bash
+# 撤销某次提交
+git revert <commit-hash>
+
+# 撤销多次提交
+git revert HEAD~3..HEAD
+
+# 撤销合并提交
+git revert -m 1 <merge-commit-hash>
+```
+
+#tip[
+  对于已经push到远程的提交，使用 `git revert` 而非 `git reset`，避免破坏共享历史。
+]
+
+=== Bisect（二分查找Bug）
+
+使用二分查找法定位引入 bug 的提交：
+
+```bash
+# 开始 bisect
+git bisect start
+
+# 标记当前提交为坏
+git bisect bad
+
+# 标记某个旧提交为好
+git bisect good abc1234
+
+# Git 会自动检出中间提交，测试后标记
+git bisect good  # 或 git bisect bad
+
+# 重复直到找到第一个坏提交
+
+# 结束 bisect
+git bisect reset
+```
+
+#tip[
+  `git bisect` 可以自动化测试：`git bisect run npm test`，自动定位导致测试失败的提交。
 ]
 
 == 标签管理
@@ -911,6 +1065,39 @@ git tag -a v1.0.0 abc1234 -m "Release version 1.0.0"
 - 需要同时维护多个版本
 - 有多个部署环境
 - 需要严格的发布管理
+
+=== Trunk-Based Development
+
+现代持续交付推荐的工作流，强调短生命周期分支：
+
+*核心原则*：
+
+- 所有开发者直接向 main（trunk）提交
+- 分支生命周期极短（不超过1-2天）
+- 频繁集成，每天多次合并
+- 使用功能开关（Feature Flags）控制新功能
+
+*工作流程*：
+
+```text
+1. 从 main 创建短期功能分支
+2. 快速开发（1-2天内完成）
+3. 通过 CI/CD 自动化测试
+4. 合并回 main
+5. 使用 Feature Flag 控制功能可见性
+6. 持续部署到生产环境
+```
+
+*优势*：
+
+- 减少合并冲突
+- 更快的反馈循环
+- 简化分支管理
+- 适合持续部署
+
+#note[
+  Google、Facebook 等大厂都采用 Trunk-Based Development，配合强大的 CI/CD 和 Feature Flag 系统。
+]
 
 === 选择建议
 
@@ -1101,6 +1288,92 @@ npx husky add .husky/commit-msg 'npx --no-install commitlint --edit "$1"'
   使用Husky + lint-staged可以在提交前自动运行linter和测试，确保代码质量。
 ]
 
+== 子模块与子树
+
+当项目需要依赖其他 Git 仓库时，可以使用子模块或子树。
+
+=== Git Submodule（子模块）
+
+子模块允许你将一个 Git 仓库作为另一个仓库的子目录：
+
+```bash
+# 添加子模块
+git submodule add https://github.com/user/lib.git libs/mylib
+
+# 初始化子模块
+git submodule init
+
+# 更新子模块
+git submodule update
+
+# 克隆包含子模块的仓库
+git clone --recursive https://github.com/user/repo.git
+
+# 查看子模块状态
+git submodule status
+
+# 更新所有子模块到最新版本
+git submodule update --remote
+```
+
+*优点*：
+
+- 子模块独立管理，有自己的历史
+- 可以锁定到特定提交
+- 适合大型依赖
+
+*缺点*：
+
+- 操作复杂，容易出错
+- 嵌套子模块难以管理
+- 团队成员需要额外学习成本
+
+#caution[
+  子模块是 Git 中最容易被误解和误用的功能之一。除非必要，否则考虑使用包管理器代替。
+]
+
+=== Git Subtree（子树）
+
+子树将外部仓库的内容合并到当前仓库中：
+
+```bash
+# 添加子树
+git subtree add --prefix=libs/mylib https://github.com/user/lib.git main --squash
+
+# 拉取子树更新
+git subtree pull --prefix=libs/mylib https://github.com/user/lib.git main --squash
+
+# 推送更改回子树
+git subtree push --prefix=libs/mylib https://github.com/user/lib.git main
+```
+
+*优点*：
+
+- 无需特殊命令，像普通文件一样操作
+- 单个仓库，简化协作
+- 不需要 `.gitmodules` 文件
+
+*缺点*：
+
+- 合并历史可能混乱
+- 大仓库会导致主仓库膨胀
+- 推送/拉取命令较长
+
+=== Submodule vs Subtree
+
+#tex-table(
+  ("特性", "Submodule", "Subtree"),
+  ("仓库独立性", "完全独立", "合并到主仓库"),
+  ("操作复杂度", "高", "中"),
+  ("学习成本", "高", "低"),
+  ("适用场景", "大型依赖、第三方库", "小型依赖、共享代码"),
+  ("团队协作", "需额外培训", "透明无缝"),
+)
+
+#tip[
+  对于现代项目，优先使用包管理器（npm、pip、maven等）。只有在包管理器无法满足需求时，才考虑 submodule 或 subtree。
+]
+
 == 常见问题与解决方案
 
 === 合并冲突解决
@@ -1201,24 +1474,84 @@ git remote prune origin
 
 === 大仓库优化
 
-==== 浅克隆
+==== 浅克隆（Shallow Clone）
+
+只克隆最近的历史，大幅减少下载时间：
 
 ```bash
-# 只克隆最近的历史
+# 只克隆最近的一次提交
 git clone --depth 1 https://github.com/user/repo.git
 
 # 克隆特定深度的历史
 git clone --depth 50 https://github.com/user/repo.git
+
+# 将浅克隆转换为完整克隆
+git fetch --unshallow
 ```
 
-==== 稀疏检出
+#tip[
+  在 CI/CD 环境中，使用 `--depth 1` 可以显著加快构建速度。
+]
+
+==== 稀疏检出（Sparse Checkout）
+
+只检出特定的目录或文件：
 
 ```bash
-# 只检出特定目录
+# 启用稀疏检出
 git clone --sparse https://github.com/user/repo.git
 cd repo
+
+# 指定要检出的目录
 git sparse-checkout set src/docs
+
+# 添加更多目录
+git sparse-checkout add src/tests
+
+# 查看当前稀疏检出配置
+git sparse-checkout list
 ```
+
+==== Git LFS（Large File Storage）
+
+专门用于管理大文件（如图片、视频、二进制文件）：
+
+```bash
+# 安装 Git LFS
+git lfs install
+
+# 跟踪大文件类型
+git lfs track "*.psd"
+git lfs track "*.mp4"
+git lfs track "models/*.bin"
+
+# 查看跟踪的文件类型
+git lfs track
+
+# 正常 add 和 commit
+git add .gitattributes
+git add large_file.psd
+git commit -m "Add large file with LFS"
+
+# 推送到远程（LFS 文件会单独上传）
+git push origin main
+
+# 查看 LFS 文件状态
+git lfs ls-files
+
+# 拉取 LFS 文件
+git lfs pull
+```
+
+*工作原理*：
+
+- LFS 文件存储在单独的服务器上
+- Git 仓库中只存储指针文件（几十字节）
+- 克隆时快速下载指针，按需下载实际文件
+
+#note[
+  GitHub 免费账户提供 1GB LFS 存储和 1GB/月带宽。超出需要付费。
+]
 
 === 加速Git操作
 
@@ -1227,6 +1560,8 @@ git sparse-checkout set src/docs
 ```bash
 git config core.fsmonitor true
 ```
+
+监视文件系统变化，加速 `git status`。
 
 ==== 使用SSD
 
