@@ -1,5 +1,6 @@
 ---
-trigger: always_on
+trigger: model_decision
+description: 补全/生成笔记时生效
 ---
 
 ## Typst 语法规范
