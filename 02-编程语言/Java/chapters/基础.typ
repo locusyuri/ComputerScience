@@ -662,3 +662,729 @@ outer@ for (i in 1..10) {
 = 函数（方法）与代码复用
 
 = 面向对象编程（OOP）核心
+
+面向对象编程是 Java 和 Kotlin 的核心范式。本章深入讲解类、对象、继承、多态等 OOP 核心概念，并对比两种语言的实现差异。
+
+== 类与对象
+
+=== Java 类定义
+
+```java
+public class Person {
+    // 字段
+    private String name;
+    private int age;
+
+    // 构造器
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    // 方法
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "Person{name='" + name + "', age=" + age + "}";
+    }
+}
+
+// 创建对象
+Person person = new Person("Alice", 25);
+```
+
+=== Kotlin 类定义
+
+```kotlin
+class Person(val name: String, var age: Int) {
+    // 主构造器直接在类声明中
+
+    // 次构造器
+    constructor(name: String) : this(name, 0)
+
+    // 方法
+    fun greet(): String {
+        return "Hello, I'm $name"
+    }
+
+    override fun toString(): String {
+        return "Person(name='$name', age=$age)"
+    }
+}
+
+// 创建对象（无需 new）
+val person = Person("Alice", 25)
+```
+
+#tip[
+  Kotlin 的主构造器语法更简洁，减少了样板代码。
+]
+
+=== 封装
+
+*Java 访问修饰符*：
+
+#tex-table(
+  ("修饰符", "同类", "同包", "子类", "其他"),
+  ("private", "✓", "✗", "✗", "✗"),
+  ("默认", "✓", "✓", "✗", "✗"),
+  ("protected", "✓", "✓", "✓", "✗"),
+  ("public", "✓", "✓", "✓", "✓"),
+)
+
+*Kotlin 访问修饰符*：
+
+#tex-table(
+  ("修饰符", "同类", "同模块", "子类", "其他"),
+  ("private", "✓", "✗", "✗", "✗"),
+  ("internal", "✓", "✓", "✗", "✗"),
+  ("protected", "✓", "✗", "✓", "✗"),
+  ("public", "✓", "✓", "✓", "✓"),
+)
+
+#note[
+  Kotlin 默认是 public，且没有包级私有，而是模块级私有（internal）。
+]
+
+=== this 关键字
+
+*Java*：
+
+```java
+public class Person {
+    private String name;
+
+    public Person(String name) {
+        this.name = name;  // 区分参数和字段
+    }
+
+    public Person getThis() {
+        return this;  // 引用当前对象
+    }
+}
+```
+
+*Kotlin*：
+
+```kotlin
+class Person(private val name: String) {
+    fun greet() {
+        println("Hello, I'm $name")  // 通常不需要 this
+    }
+
+    fun getThis(): Person {
+        return this  // 显式引用
+    }
+
+    // 标签 this
+    inner class Inner {
+        fun printOuter() {
+            println(this@Person.name)  // 引用外部类的 name
+        }
+    }
+}
+```
+
+== 静态特性
+
+=== Java static 成员
+
+```java
+public class MathUtils {
+    // 静态字段
+    public static final double PI = 3.14159;
+
+    // 静态方法
+    public static int add(int a, int b) {
+        return a + b;
+    }
+
+    // 静态代码块
+    static {
+        System.out.println("Class loaded");
+    }
+}
+
+// 调用
+int sum = MathUtils.add(1, 2);
+```
+
+=== Kotlin object 单例
+
+```kotlin
+// 对象声明（单例）
+object MathUtils {
+    const val PI = 3.14159
+
+    fun add(a: Int, b: Int): Int {
+        return a + b
+    }
+}
+
+// 调用
+val sum = MathUtils.add(1, 2)
+```
+
+=== Kotlin 伴生对象
+
+```kotlin
+class Person(val name: String) {
+    companion object {
+        const val SPECIES = "Homo Sapiens"
+
+        fun createAnonymous(): Person {
+            return Person("Anonymous")
+        }
+    }
+}
+
+// 调用（类似 Java 静态）
+val person = Person.createAnonymous()
+println(Person.SPECIES)
+```
+
+#tip[
+  Kotlin 用 `companion object` 替代 Java 的 static，更符合面向对象思想。
+]
+
+=== `@JvmStatic` 注解
+
+```kotlin
+class Utils {
+    companion object {
+        @JvmStatic
+        fun helper() {
+            println("Called from Java as Utils.helper()")
+        }
+    }
+}
+```
+
+#note[
+  使用 `@JvmStatic` 可以让 Java 代码像调用静态方法一样调用 Kotlin 伴生对象的方法。
+]
+
+== 继承与多态
+
+=== Java 继承
+
+```java
+// 父类
+public class Animal {
+    protected String name;
+
+    public Animal(String name) {
+        this.name = name;
+    }
+
+    public void speak() {
+        System.out.println("...");
+    }
+}
+
+// 子类
+public class Dog extends Animal {
+    public Dog(String name) {
+        super(name);  // 调用父类构造器
+    }
+
+    @Override
+    public void speak() {
+        System.out.println(name + " says: Woof!");
+    }
+}
+
+// 多态
+Animal animal = new Dog("Buddy");
+animal.speak();  // 输出：Buddy says: Woof!
+```
+
+=== Kotlin 继承
+
+```kotlin
+// 父类（需要 open 关键字）
+open class Animal(val name: String) {
+    open fun speak() {
+        println("...")
+    }
+}
+
+// 子类
+class Dog(name: String) : Animal(name) {
+    override fun speak() {
+        println("$name says: Woof!")
+    }
+}
+
+// 多态
+val animal: Animal = Dog("Buddy")
+animal.speak()  // 输出：Buddy says: Woof!
+```
+
+#caution[
+  Kotlin 类和成员默认是 final 的，必须显式使用 `open` 才能被继承或重写。这避免了意外的继承。
+]
+
+=== super 关键字
+
+*Java*：
+
+```java
+public class Cat extends Animal {
+    @Override
+    public void speak() {
+        super.speak();  // 调用父类方法
+        System.out.println(name + " says: Meow!");
+    }
+}
+```
+
+*Kotlin*：
+
+```kotlin
+class Cat(name: String) : Animal(name) {
+    override fun speak() {
+        super.speak()  // 调用父类方法
+        println("$name says: Meow!")
+    }
+}
+```
+
+=== 向上转型与向下转型
+
+*Java*：
+
+```java
+// 向上转型（自动）
+Animal animal = new Dog("Buddy");
+
+// 向下转型（需要检查）
+if (animal instanceof Dog) {
+    Dog dog = (Dog) animal;
+    // 使用 dog
+}
+```
+
+*Kotlin*：
+
+```kotlin
+// 向上转型（自动）
+val animal: Animal = Dog("Buddy")
+
+// 智能转换
+if (animal is Dog) {
+    println(animal.name)  // 自动转换为 Dog
+}
+
+// 安全转换
+val dog = animal as? Dog
+```
+
+== 抽象类与接口
+
+=== Java 抽象类
+
+```java
+public abstract class Shape {
+    protected String color;
+
+    public Shape(String color) {
+        this.color = color;
+    }
+
+    // 抽象方法
+    public abstract double area();
+
+    // 具体方法
+    public void display() {
+        System.out.println("Color: " + color + ", Area: " + area());
+    }
+}
+
+public class Circle extends Shape {
+    private double radius;
+
+    public Circle(String color, double radius) {
+        super(color);
+        this.radius = radius;
+    }
+
+    @Override
+    public double area() {
+        return Math.PI * radius * radius;
+    }
+}
+```
+
+=== Kotlin 抽象类
+
+```kotlin
+abstract class Shape(val color: String) {
+    // 抽象方法
+    abstract fun area(): Double
+
+    // 具体方法
+    fun display() {
+        println("Color: $color, Area: ${area()}")
+    }
+}
+
+class Circle(val radius: Double, color: String) : Shape(color) {
+    override fun area(): Double {
+        return Math.PI * radius * radius
+    }
+}
+```
+
+=== Java 接口
+
+```java
+// Java 8+ 接口可以有默认方法
+public interface Drawable {
+    void draw();  // 抽象方法
+
+    default void erase() {
+        System.out.println("Erasing...");
+    }
+
+    static void info() {
+        System.out.println("Drawable interface");
+    }
+}
+
+public class Rectangle implements Drawable {
+    @Override
+    public void draw() {
+        System.out.println("Drawing rectangle");
+    }
+}
+```
+
+=== Kotlin 接口
+
+```kotlin
+interface Drawable {
+    fun draw()  // 抽象方法
+
+    fun erase() {  // 默认实现
+        println("Erasing...")
+    }
+
+    companion object {
+        fun info() {
+            println("Drawable interface")
+        }
+    }
+}
+
+class Rectangle : Drawable {
+    override fun draw() {
+        println("Drawing rectangle")
+    }
+}
+```
+
+#tip[
+  Kotlin 接口不能有状态（不能有字段），这与 Java 8+ 一致。
+]
+
+=== 函数式接口
+
+*Java*：
+
+```java
+@FunctionalInterface
+public interface Calculator {
+    int calculate(int a, int b);
+}
+
+// Lambda 表达式
+Calculator add = (a, b) -> a + b;
+```
+
+*Kotlin*：
+
+```kotlin
+// 函数类型（更灵活）
+val add: (Int, Int) -> Int = { a, b -> a + b }
+
+// SAM 转换（Java 接口）
+val runnable = Runnable { println("Running") }
+```
+
+== Kotlin 专属 OOP 特性
+
+=== 数据类（data class）
+
+```kotlin
+data class User(val id: Int, val name: String, val email: String)
+
+// 自动生成：equals(), hashCode(), toString(), copy(), componentN()
+val user1 = User(1, "Alice", "alice@example.com")
+val user2 = user1.copy(email = "new@example.com")  // 复制并修改
+
+// 解构
+val (id, name, email) = user1
+```
+
+*等价 Java*：
+
+```java
+// 需要手动编写或使用 Lombok
+public class User {
+    private final int id;
+    private final String name;
+    private final String email;
+
+    // 构造器、getter、equals、hashCode、toString...
+}
+```
+
+#tip[
+  数据类大幅减少样板代码，是 Kotlin 最受欢迎的特性之一。
+]
+
+=== 密封类（sealed class）
+
+```kotlin
+sealed class Result {
+    data class Success(val data: String) : Result()
+    data class Error(val message: String) : Result()
+    object Loading : Result()
+}
+
+// when 表达式 exhaustive
+fun handleResult(result: Result): String {
+    return when (result) {
+        is Result.Success -> "Data: ${result.data}"
+        is Result.Error -> "Error: ${result.message}"
+        Result.Loading -> "Loading..."
+    }
+}
+```
+
+#note[
+  密封类限制了继承层次，编译器可以检查 when 是否 exhaustive，避免遗漏分支。
+]
+
+=== 枚举类（enum class）
+
+```kotlin
+enum class Color(val rgb: Int) {
+    RED(0xFF0000),
+    GREEN(0x00FF00),
+    BLUE(0x0000FF);
+
+    fun toHex(): String {
+        return String.format("#%06X", rgb)
+    }
+}
+
+// 使用
+val color = Color.RED
+println(color.toHex())  // #FF0000
+```
+
+=== 内联类（inline class / value class）
+
+```kotlin
+@JvmInline
+value class Password(val value: String)
+
+fun login(password: Password) {
+    // 编译后直接传递 String，无额外对象开销
+}
+
+val pwd = Password("secret")
+login(pwd)
+```
+
+#tip[
+  内联类在编译后被擦除，提供类型安全但无运行时开销。
+]
+
+== 内部类、包机制与访问控制
+
+=== 内部类
+
+*Java*：
+
+```java
+public class Outer {
+    private String outerField = "Outer";
+
+    // 内部类（持有外部类引用）
+    public class Inner {
+        public void accessOuter() {
+            System.out.println(outerField);  // 可以访问
+        }
+    }
+
+    // 静态嵌套类
+    public static class StaticNested {
+        // 不能访问外部类实例成员
+    }
+}
+```
+
+*Kotlin*：
+
+```kotlin
+class Outer {
+    private val outerField = "Outer"
+
+    // 内部类（需要 inner 关键字）
+    inner class Inner {
+        fun accessOuter() {
+            println(outerField)  // 可以访问
+        }
+    }
+
+    // 嵌套类（默认，不持有外部类引用）
+    class Nested {
+        // 不能访问外部类实例成员
+    }
+}
+```
+
+#note[
+  Kotlin 默认嵌套类是静态的，需要用 `inner` 关键字才能访问外部类成员，这与 Java 相反。
+]
+
+=== 包机制
+
+*Java*：
+
+```java
+package com.example.app;
+
+import java.util.List;
+import java.util.ArrayList;
+
+public class MyClass {
+    // ...
+}
+```
+
+*Kotlin*：
+
+```kotlin
+package com.example.app
+
+import java.util.List
+import java.util.ArrayList
+
+class MyClass {
+    // ...
+}
+```
+
+=== 访问控制总结
+
+#tex-table(
+  ("特性", "Java", "Kotlin"),
+  ("默认可见性", "包私有", "public"),
+  ("模块级私有", "✗", "internal"),
+  ("继承控制", "默认允许", "默认禁止（需 open）"),
+  ("内部类", "默认持有引用", "默认不持有（需 inner）"),
+)
+
+== Object 类与 Any 类
+
+=== Java Object 核心方法
+
+```java
+public class MyClass {
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        MyClass other = (MyClass) obj;
+        return field.equals(other.field);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(field);
+    }
+
+    @Override
+    public String toString() {
+        return "MyClass{field='" + field + "'}";
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+}
+```
+
+*Object 常用方法*：
+
+- `equals()`：对象相等性
+- `hashCode()`：哈希码
+- `toString()`：字符串表示
+- `getClass()`：获取 Class 对象
+- `clone()`：克隆对象
+- `finalize()`：垃圾回收前调用（已废弃）
+
+=== Kotlin Any 类
+
+```kotlin
+class MyClass(val field: String) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is MyClass) return false
+        return field == other.field
+    }
+
+    override fun hashCode(): Int {
+        return field.hashCode()
+    }
+
+    override fun toString(): String {
+        return "MyClass(field='$field')"
+    }
+}
+```
+
+*Any vs Object*：
+
+#tex-table(
+  ("方法", "Java Object", "Kotlin Any"),
+  ("equals", "✓", "✓"),
+  ("hashCode", "✓", "✓"),
+  ("toString", "✓", "✓"),
+  ("getClass", "✓", "::class"),
+  ("clone", "✓", "✗"),
+  ("finalize", "✓", "✗"),
+  ("wait/notify", "✓", "✗"),
+)
+
+#note[
+  Kotlin 的 Any 更精简，移除了不推荐使用的 finalize 和线程相关的 wait/notify。
+]
+
+=== Java 与 Kotlin 互操作
+
+```kotlin
+// Kotlin 调用 Java Object 方法
+val obj: Any = "Hello"
+println(obj.javaClass)  // 获取 Java Class
+
+// Java 调用 Kotlin Any
+Object obj = "Hello";
+System.out.println(obj.getClass());
+```
+
+#fancy-divider
+
+本章完

@@ -30,9 +30,7 @@
 #include "chapters/基础.typ"
 
 #part("JVM 标准库与常用工具")
-#include "chapters/字符串处理.typ"
-#include "chapters/集合框架.typ"
-#include "chapters/异常处理.typ"
+#include "chapters/标准库.typ"
 
 #part("构建工具与工程化")
 #include "chapters/构建工具.typ"
