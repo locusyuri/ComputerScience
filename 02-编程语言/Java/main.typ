@@ -27,6 +27,7 @@
 
 
 #part("Java & Kotlin 核心基础")
+#include "chapters/基础.typ"
 
 #part("JVM 标准库与常用工具")
 #include "chapters/字符串处理.typ"
