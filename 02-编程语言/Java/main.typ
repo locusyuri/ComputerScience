@@ -145,16 +145,14 @@
 // % 6.3 监控与调优：线程 dump、阻塞分析、吞吐与延迟权衡
 
 // % Part 6：网络编程与高性能 IO
-// % Chapter 1：网络编程基础 ✅
-// % 1.1 网络核心概念：IP / 端口 / TCP/UDP 协议、OSI 七层模型1.2 InetAddress 网络地址操作（Java+Kotlin 通用）
-// % Chapter 2：BIO 编程 🔶
-// % 2.1 TCP BIO 通信：Java Socket/ServerSocket 实现、多线程 BIO2.2 Kotlin BIO 简化实现2.3 UDP 编程基础、BIO 性能瓶颈分析
-// % Chapter 3：NIO 编程 🔶
-// % 3.1 NIO 三大核心：Channel/Buffer/Selector3.2 非阻塞 NIO 通信实现（Java+Kotlin 对照）3.3 NIO 与 BIO 的对比、适用场景
-// % Chapter 4：AIO 与零拷贝 ⚪
-// % 4.1 AIO 异步 IO 概述、实现示例4.2 零拷贝原理、mmap/sendfile 机制、JVM 上的实现
-// % Chapter 5：高性能网络框架 ⚪
-// % 5.1 Netty 框架入门：核心优势、架构、简易 TCP 通信实现5.2 Ktor 框架入门：Kotlin 原生高性能网络框架、服务端 / 客户端实现
+// % Chapter 1：BIO 阻塞式 IO 🔶
+// % 1.1 Socket 编程：ServerSocket/Socket API、连接建立与关闭1.2 多线程 BIO 服务器：线程池模型、客户端并发处理1.3 UDP 通信：DatagramSocket/DatagramPacket1.4 Kotlin 简化实现：扩展函数、协程封装1.5 BIO 性能瓶颈：线程开销、上下文切换
+// % Chapter 2：NIO 非阻塞式 IO 🔶
+// % 2.1 NIO 核心组件：Channel、Buffer、Selector2.2 Buffer 详解：分配、读写模式、直接缓冲区2.3 Channel 类型：FileChannel、SocketChannel、ServerSocketChannel2.4 Selector 多路复用：注册、选择键、事件驱动2.5 非阻塞 NIO 服务器实现（Java+Kotlin）2.6 NIO vs BIO：性能对比、适用场景
+// % Chapter 3：AIO 异步 IO 与零拷贝 ⚪
+// % 3.1 AIO 异步通道：AsynchronousSocketChannel、CompletionHandler3.2 Future 与回调两种模式3.3 零拷贝技术：mmap、sendfile、transferTo3.4 JVM 零拷贝实现：FileChannel.transferTo、MappedByteBuffer
+// % Chapter 4：高性能网络框架 ⚪
+// % 4.1 Netty 框架：EventLoop、ChannelPipeline、ByteBuf4.2 Netty 实战：TCP 服务器、编解码器、心跳检测4.3 Ktor 框架：Kotlin 原生异步框架、路由、中间件4.4 Ktor 客户端：HTTP 请求、WebSocket
 
 // % Part 7：JVM 底层原理与性能调优（Java & Kotlin 通用）
 // % 核心内容完全复用 JVM 体系，仅补充 Kotlin 特性的底层实现，无需修改原有核心逻辑
