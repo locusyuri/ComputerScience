@@ -232,3 +232,24 @@
 // 4.3 Spot 实例：中断处理、混合部署
 // 4.4 成本监控：Kubecost、Cloud Health
 // 4.5 FinOps 实践：预算控制、成本分摊
+
+#part("Linux 系统运维基础")
+#include "chapters/Linux基础.typ"
+
+#part("容器化技术")
+#include "chapters/容器化.typ"
+
+#part("云原生基础")
+#include "chapters/云原生基础.typ"
+
+#part("Kubernetes 核心")
+#include "chapters/Kubernetes核心.typ"
+
+#part("Kubernetes 进阶")
+#include "chapters/Kubernetes进阶.typ"
+
+#part("云平台与基础设施")
+#include "chapters/云平台.typ"
+
+#part("生产实践与故障排查")
+#include "chapters/生产实践.typ"
