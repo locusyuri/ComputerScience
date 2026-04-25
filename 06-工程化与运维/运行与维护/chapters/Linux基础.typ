@@ -713,4 +713,866 @@ sudo nmtui
 
 = Shell 脚本自动化
 
+Shell 脚本是 Linux 运维自动化的核心工具，通过编写脚本可以批量执行任务、定时调度、系统备份等。
+
+== Shell 编程进阶
+
+=== 函数定义与调用
+
+```bash
+#!/bin/bash
+
+# 基本函数
+
+greet() {
+    echo "Hello, $1!"
+}
+
+# 调用函数
+
+greet "Alice"
+greet "Bob"
+
+# 带返回值
+
+add() {
+    local result=$(($1 + $2))
+    echo $result
+}
+
+sum=$(add 5 3)
+echo "Sum: $sum"  # Sum: 8
+
+# 检查函数是否存在
+
+if declare -f greet > /dev/null; then
+    echo "Function greet exists"
+fi
+```
+
+#tip[
+  使用 `local` 关键字声明局部变量，避免污染全局命名空间。
+]
+
+=== 数组操作
+
+```bash
+#!/bin/bash
+
+# 定义数组
+
+fruits=("apple" "banana" "cherry")
+numbers=(1 2 3 4 5)
+
+# 访问元素
+
+echo ${fruits[0]}       # apple
+echo ${fruits[@]}       # 所有元素
+echo ${#fruits[@]}      # 数组长度（3）
+
+# 修改数组
+
+fruits[1]="orange"      # 修改元素
+fruits+=("grape")       # 追加元素
+
+# 遍历数组
+
+for fruit in "${fruits[@]}"; do
+    echo "Fruit: $fruit"
+done
+
+# 带索引遍历
+
+for i in "${!fruits[@]}"; do
+    echo "$i: ${fruits[$i]}"
+done
+
+# 切片
+
+echo ${fruits[@]:1:2}   # 从索引1开始，取2个元素
+
+# 关联数组（Bash 4+）
+
+declare -A colors
+colors["red"]="#FF0000"
+colors["green"]="#00FF00"
+colors["blue"]="#0000FF"
+
+for key in "${!colors[@]}"; do
+    echo "$key: ${colors[$key]}"
+done
+```
+
+=== 正则表达式
+
+```bash
+#!/bin/bash
+
+# 基本匹配
+
+if [[ "hello world" =~ ^hello ]]; then
+    echo "Starts with hello"
+fi
+
+# 提取匹配内容
+
+email="user@example.com"
+if [[ $email =~ ([a-zA-Z0-9._%+-]+)@([a-zA-Z0-9.-]+)\.([a-zA-Z]{2,}) ]]; then
+    echo "Username: ${BASH_REMATCH[1]}"
+    echo "Domain: ${BASH_REMATCH[2]}"
+    echo "TLD: ${BASH_REMATCH[3]}"
+fi
+
+# 常用正则模式
+
+# 验证IP地址
+ip_pattern="^([0-9]{1,3}\.){3}[0-9]{1,3}$"
+if [[ "192.168.1.1" =~ $ip_pattern ]]; then
+    echo "Valid IP"
+fi
+
+# 验证日期格式
+date_pattern="^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+if [[ "2024-01-15" =~ $date_pattern ]]; then
+    echo "Valid date format"
+fi
+
+# 验证手机号
+phone_pattern="^1[3-9][0-9]{9}$"
+if [[ "13812345678" =~ $phone_pattern ]]; then
+    echo "Valid phone number"
+fi
+```
+
+#note[
+  Bash 的正则使用 `=~` 运算符，匹配结果存储在 `BASH_REMATCH` 数组中。
+]
+
+=== 字符串处理
+
+```bash
+#!/bin/bash
+
+str="Hello World"
+
+# 长度
+
+echo ${#str}            # 11
+
+# 截取
+
+echo ${str:0:5}         # Hello
+echo ${str:6}           # World
+echo ${str: -5}         # World（注意空格）
+
+# 替换
+
+echo ${str/World/Unix}  # Hello Unix
+echo ${str//l/L}        # HeLLo WorLd（全部替换）
+
+# 删除
+
+echo ${str#Hello }      # World（删除前缀）
+echo ${str% World}      # Hello（删除后缀）
+
+# 大小写转换
+
+echo ${str,,}           # hello world（转小写）
+echo ${str^^}           # HELLO WORLD（转大写）
+echo ${str^}            # Hello world（首字母大写）
+
+# 默认值
+
+var=""
+echo ${var:-default}    # default（如果var为空，使用default）
+echo ${var:=default}    # 同时赋值
+echo ${var:+exists}     # 如果var非空，返回exists
+```
+
+== 文本处理
+
+=== awk 高级用法
+
+```bash
+#!/bin/bash
+
+# 内置变量
+
+awk '{print NR, NF, $0}' file.txt  # NR:行号, NF:字段数
+
+# 条件过滤
+
+awk '$3 > 100 {print $1, $3}' data.txt
+
+# 数学运算
+
+awk '{sum += $1} END {print "Sum:", sum, "Avg:", sum/NR}' numbers.txt
+
+# 格式化输出
+
+awk '{printf "%-10s %5d %8.2f\n", $1, $2, $3}' data.txt
+
+# 多分隔符
+
+awk -F'[: ]' '{print $1, $3}' file.txt  # 以:或空格分隔
+
+# 关联数组
+
+awk '{count[$1]++} END {for (word in count) print word, count[word]}' words.txt
+
+# 外部变量
+
+threshold=100
+awk -v thresh=$threshold '$1 > thresh {print $0}' data.txt
+
+# 实战：分析日志
+
+# 统计HTTP状态码
+awk '{print $9}' access.log | sort | uniq -c | sort -rn
+
+# 统计IP访问次数
+awk '{print $1}' access.log | sort | uniq -c | sort -rn | head -10
+```
+
+#tip[
+  awk 是一门完整的编程语言，适合复杂的文本处理任务。掌握 awk 可以大幅提升数据处理效率。
+]
+
+=== sed 高级用法
+
+```bash
+#!/bin/bash
+
+# 多重编辑
+
+sed -e 's/foo/bar/g' -e 's/baz/qux/g' file.txt
+
+# 范围选择
+
+sed '2,5d' file.txt              # 删除2-5行
+sed '/start/,/end/d' file.txt    # 删除start到end之间的行
+
+# 插入和追加
+
+sed '2i\New Line Before' file.txt     # 在第2行前插入
+sed '2a\New Line After' file.txt      # 在第2行后追加
+sed '2c\Replace Line 2' file.txt      # 替换第2行
+
+# 标签和分支（实现循环）
+
+# 删除空行
+sed '/^$/d' file.txt
+
+# 合并连续空行为一行
+sed '/^$/{N;/^\n$/d}' file.txt
+
+# 反转文件行序
+
+sed '1!G;h;$!d' file.txt
+
+# 实战：批量修改配置文件
+
+# 修改所有.conf文件中的端口
+find /etc -name "*.conf" -exec sed -i 's/port=8080/port=9090/g' {} \;
+
+# 注释掉特定行
+sed -i '/^PermitRootLogin/s/^/#/' /etc/ssh/sshd_config
+```
+
+=== grep 高级用法
+
+```bash
+#!/bin/bash
+
+# 扩展正则
+
+grep -E "(error|warning|critical)" logfile.txt
+grep -E "^[0-9]{4}-[0-9]{2}-[0-9]{2}" logfile.txt
+
+# Perl正则
+
+grep -P "\d{4}-\d{2}-\d{2}" logfile.txt
+
+# 上下文
+
+grep -A 5 "error" logfile.txt    # 显示匹配行及后5行
+grep -B 5 "error" logfile.txt    # 显示匹配行及前5行
+grep -C 5 "error" logfile.txt    # 显示匹配行及前后5行
+
+# 递归搜索
+
+grep -r "TODO" src/              # 递归搜索目录
+grep -rl "TODO" src/             # 只显示文件名
+
+# 排除文件
+
+grep -r "pattern" --exclude="*.log" --exclude-dir="node_modules" .
+
+# 计数和统计
+
+grep -c "error" logfile.txt      # 统计匹配行数
+grep -o "error" logfile.txt | wc -l  # 统计匹配次数
+
+# 实战：日志分析
+
+# 查找最近1小时的错误
+grep "$(date -d '1 hour ago' '+%Y-%m-%d %H')" /var/log/syslog | grep error
+
+# 统计各级别日志数量
+grep -oP '\b(ERROR|WARN|INFO|DEBUG)\b' app.log | sort | uniq -c
+```
+
+== 定时任务
+
+=== cron：周期性任务
+
+```bash
+# 编辑当前用户的 crontab
+
+crontab -e
+
+# 查看当前用户的 crontab
+
+crontab -l
+
+# 删除当前用户的 crontab
+
+crontab -r
+
+# 格式：分 时 日 月 周 命令
+# *   *   *   *   * command
+# |   |   |   |   |
+# |   |   |   |   +-- 星期 (0-7, 0和7都是周日)
+# |   |   |   +------ 月份 (1-12)
+# |   |   +---------- 日期 (1-31)
+# |   +-------------- 小时 (0-23)
+# +------------------ 分钟 (0-59)
+
+# 示例
+
+# 每天凌晨2点执行
+0 2 * * * /usr/local/bin/backup.sh
+
+# 每15分钟执行
+*/15 * * * * /usr/local/bin/check_health.sh
+
+# 每周一上午9点执行
+0 9 * * 1 /usr/local/bin/weekly_report.sh
+
+# 每月1号凌晨3点执行
+0 3 1 * * /usr/local/bin/monthly_cleanup.sh
+
+# 工作日每小时执行
+0 * * * 1-5 /usr/local/bin/hourly_task.sh
+
+# 特殊字符串
+@reboot /usr/local/bin/startup.sh          # 开机时执行
+@yearly 0 0 1 1 * /usr/local/bin/yearly.sh # 每年执行
+@monthly 0 0 1 * * /usr/local/bin/monthly.sh # 每月执行
+@weekly 0 0 * * 0 /usr/local/bin/weekly.sh # 每周执行
+@daily 0 0 * * * /usr/local/bin/daily.sh   # 每天执行
+@hourly 0 * * * * /usr/local/bin/hourly.sh # 每小时执行
+```
+
+#caution[
+  cron 的环境变量很少，建议在脚本中使用绝对路径，或在 crontab 开头设置 PATH。
+]
+
+=== at：一次性任务
+
+```bash
+# 在指定时间执行
+
+at 14:30
+at> /usr/local/bin/task.sh
+at> <EOT>   # Ctrl+D 结束
+
+# 延迟执行
+
+at now + 1 hour
+at> command
+at> <EOT>
+
+at now + 3 days
+at> command
+at> <EOT>
+
+# 查看待执行任务
+
+atq
+
+# 删除任务
+
+atrm 123  # 删除任务ID为123的任务
+
+# 从文件读取任务
+
+echo "/usr/local/bin/task.sh" | at 15:00
+```
+
+=== systemd timers：现代定时任务
+
+```bash
+# 创建 timer 单元文件
+
+sudo tee /etc/systemd/system/backup.timer << EOF
+[Unit]
+Description=Daily Backup Timer
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+# 创建对应的 service 单元文件
+
+sudo tee /etc/systemd/system/backup.service << EOF
+[Unit]
+Description=Daily Backup
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/backup.sh
+EOF
+
+# 启用并启动 timer
+
+sudo systemctl enable backup.timer
+sudo systemctl start backup.timer
+
+# 查看 timer 状态
+
+systemctl list-timers
+systemctl list-timers --all
+
+# 查看下次执行时间
+
+systemctl status backup.timer
+```
+
+#tip[
+  systemd timers 比 cron 更强大，支持更精确的时间控制、持久化、依赖管理等。
+]
+
+== 系统备份
+
+=== tar：归档压缩
+
+```bash
+#!/bin/bash
+
+# 创建备份
+
+tar czf backup-$(date +%Y%m%d).tar.gz /home/user/data
+
+# 增量备份（需要配合 find）
+
+find /home/user/data -mtime -1 -type f | tar czf incremental.tar.gz -T -
+
+# 排除特定目录
+
+tar czf backup.tar.gz --exclude='/tmp' --exclude='*.log' /home/user
+
+# 查看归档内容
+
+tar tzf backup.tar.gz
+
+# 解压
+
+tar xzf backup.tar.gz
+tar xzf backup.tar.gz -C /target/dir  # 指定解压目录
+
+# 保留权限
+
+tar czpf backup.tar.gz /etc  # p 保留权限
+
+# 分卷压缩（适合大文件）
+
+tar czf - /large/dir | split -b 1G - backup.tar.gz.part.
+
+# 恢复分卷
+
+cat backup.tar.gz.part.* | tar xzf -
+```
+
+=== rsync：增量同步
+
+```bash
+#!/bin/bash
+
+# 本地同步
+
+rsync -avz /source/ /destination/
+
+# 远程同步（SSH）
+
+rsync -avz -e ssh /source/ user@remote:/destination/
+rsync -avz -e ssh user@remote:/source/ /destination/
+
+# 删除目标多余文件
+
+rsync -avz --delete /source/ /destination/
+
+# 排除文件
+
+rsync -avz --exclude='*.log' --exclude='tmp/' /source/ /destination/
+
+# 带宽限制
+
+rsync -avz --bwlimit=1000 /source/ /destination/  # 1MB/s
+
+# 断点续传
+
+rsync -avz --partial --progress /source/ /destination/
+
+# 备份脚本示例
+
+#!/bin/bash
+
+BACKUP_DIR="/backup"
+SOURCE_DIR="/home/user/data"
+DATE=$(date +%Y%m%d_%H%M%S)
+
+# 创建备份目录
+mkdir -p $BACKUP_DIR
+
+# 执行备份
+rsync -avz --delete \
+    --exclude='*.tmp' \
+    --exclude='cache/' \
+    $SOURCE_DIR/ \
+    $BACKUP_DIR/backup-$DATE/
+
+# 删除7天前的备份
+find $BACKUP_DIR -maxdepth 1 -name "backup-*" -mtime +7 -exec rm -rf {} \;
+
+echo "Backup completed: backup-$DATE"
+```
+
+#tip[
+  rsync 只传输变化的部分，非常适合增量备份和大文件同步。
+]
+
+=== 备份策略
+
+```bash
+#!/bin/bash
+
+# 完整备份 + 增量备份策略
+
+BACKUP_BASE="/backup"
+SOURCE="/data"
+DATE=$(date +%Y%m%d)
+WEEKDAY=$(date +%u)  # 1-7 (Monday-Sunday)
+
+# 每周日完整备份
+if [ $WEEKDAY -eq 7 ]; then
+    echo "Performing full backup..."
+    tar czf $BACKUP_BASE/full-$DATE.tar.gz $SOURCE
+else
+    echo "Performing incremental backup..."
+    # 基于昨天的备份进行增量
+    YESTERDAY=$(date -d "yesterday" +%Y%m%d)
+    if [ -f "$BACKUP_BASE/full-$YESTERDAY.tar.gz" ]; then
+        find $SOURCE -newer $BACKUP_BASE/full-$YESTERDAY.tar.gz | \
+            tar czf $BACKUP_BASE/incr-$DATE.tar.gz -T -
+    fi
+fi
+
+# 清理旧备份（保留30天）
+find $BACKUP_BASE -name "*.tar.gz" -mtime +30 -delete
+
+echo "Backup completed on $(date)"
+```
+
+*备份策略建议*：
+
+#tex-table(
+  ("策略", "频率", "优点", "缺点"),
+  ("完全备份", "每周", "恢复简单", "占用空间大"),
+  ("增量备份", "每天", "节省空间", "恢复复杂"),
+  ("差异备份", "每天", "折中方案", "后期备份变大"),
+  ("快照备份", "实时", "快速一致", "需要文件系统支持"),
+)
+
+== 自动化部署脚本
+
+=== SSH 免密登录
+
+```bash
+#!/bin/bash
+
+# 生成密钥对（如果不存在）
+
+if [ ! -f ~/.ssh/id_rsa ]; then
+    ssh-keygen -t rsa -b 4096 -N "" -f ~/.ssh/id_rsa
+fi
+
+# 复制公钥到远程服务器
+
+ssh-copy-id user@remote-server
+
+# 手动配置
+
+cat ~/.ssh/id_rsa.pub | ssh user@remote-server "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
+
+# 测试免密登录
+
+ssh user@remote-server "echo 'Success!'"
+```
+
+#tip[
+  使用 `ssh-agent` 管理密钥，避免每次输入 passphrase。
+]
+
+=== 批量执行命令
+
+```bash
+#!/bin/bash
+
+# 服务器列表
+
+SERVERS=(
+    "user@server1.example.com"
+    "user@server2.example.com"
+    "user@server3.example.com"
+)
+
+# 批量执行命令
+
+for server in "${SERVERS[@]}"; do
+    echo "Executing on $server..."
+    ssh $server "uname -a && df -h && free -m"
+    echo "---"
+done
+
+# 并行执行（使用 background jobs）
+
+for server in "${SERVERS[@]}"; do
+    (
+        echo "Executing on $server..."
+        ssh $server "command"
+    ) &
+done
+
+wait  # 等待所有后台任务完成
+
+# 使用 parallel 工具（更高效）
+
+parallel ssh {} "command" ::: "${SERVERS[@]}"
+```
+
+=== 自动化部署脚本
+
+```bash
+#!/bin/bash
+
+set -euo pipefail  # 严格模式
+
+# 配置
+
+APP_NAME="myapp"
+APP_DIR="/opt/$APP_NAME"
+REPO_URL="git@github.com:user/myapp.git"
+BRANCH="main"
+BACKUP_DIR="/backup/$APP_NAME"
+DATE=$(date +%Y%m%d_%H%M%S)
+
+# 颜色输出
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+log_info() {
+    echo -e "${GREEN}[INFO]${NC} $1"
+}
+
+log_warn() {
+    echo -e "${YELLOW}[WARN]${NC} $1"
+}
+
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# 备份当前版本
+
+backup_current() {
+    log_info "Backing up current version..."
+    mkdir -p $BACKUP_DIR
+    if [ -d "$APP_DIR" ]; then
+        tar czf $BACKUP_DIR/backup-$DATE.tar.gz -C $(dirname $APP_DIR) $(basename $APP_DIR)
+        log_info "Backup created: backup-$DATE.tar.gz"
+    fi
+}
+
+# 拉取最新代码
+
+deploy_code() {
+    log_info "Deploying code..."
+
+    if [ ! -d "$APP_DIR" ]; then
+        git clone $REPO_URL $APP_DIR
+    else
+        cd $APP_DIR
+        git fetch origin
+        git reset --hard origin/$BRANCH
+    fi
+
+    log_info "Code deployed from branch: $BRANCH"
+}
+
+# 安装依赖
+
+install_dependencies() {
+    log_info "Installing dependencies..."
+    cd $APP_DIR
+
+    # 根据项目类型选择
+    if [ -f "requirements.txt" ]; then
+        pip install -r requirements.txt
+    elif [ -f "package.json" ]; then
+        npm install --production
+    elif [ -f "pom.xml" ]; then
+        mvn clean package -DskipTests
+    fi
+
+    log_info "Dependencies installed"
+}
+
+# 重启服务
+
+restart_service() {
+    log_info "Restarting service..."
+    sudo systemctl restart $APP_NAME
+    sudo systemctl status $APP_NAME --no-pager
+    log_info "Service restarted"
+}
+
+# 健康检查
+
+health_check() {
+    log_info "Performing health check..."
+    sleep 5
+
+    if curl -f http://localhost:8080/health > /dev/null 2>&1; then
+        log_info "Health check passed"
+        return 0
+    else
+        log_error "Health check failed"
+        return 1
+    fi
+}
+
+# 回滚函数
+
+rollback() {
+    log_warn "Rolling back to previous version..."
+
+    LATEST_BACKUP=$(ls -t $BACKUP_DIR/backup-*.tar.gz | head -1)
+    if [ -n "$LATEST_BACKUP" ]; then
+        tar xzf $LATEST_BACKUP -C /
+        sudo systemctl restart $APP_NAME
+        log_info "Rollback completed"
+    else
+        log_error "No backup found for rollback"
+        exit 1
+    fi
+}
+
+# 主流程
+
+main() {
+    log_info "Starting deployment of $APP_NAME"
+
+    backup_current
+    deploy_code
+    install_dependencies
+    restart_service
+
+    if health_check; then
+        log_info "Deployment successful!"
+    else
+        log_error "Deployment failed, rolling back..."
+        rollback
+        exit 1
+    fi
+}
+
+# 执行
+
+main "$@"
+```
+
+#caution[
+  生产环境部署建议使用专业的 CI/CD 工具（Jenkins、GitLab CI、GitHub Actions），而非手写脚本。
+]
+
+=== 监控告警脚本
+
+```bash
+#!/bin/bash
+
+# 磁盘空间监控
+
+check_disk() {
+    THRESHOLD=90
+
+    while read -r line; do
+        usage=$(echo $line | awk '{print $5}' | sed 's/%//')
+        mount=$(echo $line | awk '{print $6}')
+
+        if [ $usage -gt $THRESHOLD ]; then
+            echo "WARNING: Disk usage ${usage}% on $mount" | \
+                mail -s "Disk Alert" admin@example.com
+        fi
+    done < <(df -h | tail -n +2)
+}
+
+# 内存监控
+
+check_memory() {
+    THRESHOLD=90
+
+    used=$(free | awk '/Mem:/ {printf "%.0f", $3/$2 * 100}')
+
+    if [ $used -gt $THRESHOLD ]; then
+        echo "WARNING: Memory usage ${used}%" | \
+            mail -s "Memory Alert" admin@example.com
+    fi
+}
+
+# 服务监控
+
+check_service() {
+    SERVICE=$1
+
+    if ! systemctl is-active --quiet $SERVICE; then
+        echo "CRITICAL: Service $SERVICE is not running" | \
+            mail -s "Service Alert: $SERVICE" admin@example.com
+
+        # 尝试重启
+        systemctl restart $SERVICE
+    fi
+}
+
+# 执行检查
+
+check_disk
+check_memory
+check_service nginx
+check_service mysql
+
+echo "Monitoring checks completed at $(date)"
+```
+
+#fancy-divider
+
+本章完
+
 = 服务管理与高可用
