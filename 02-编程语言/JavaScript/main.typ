@@ -37,9 +37,11 @@
 
 #part("浏览器端 JavaScript")
 
-#part("Node.js")
+#part("Node.js 与 Bun")
+#include "chapters/Nodejs与Bun.typ"
 
 #part("JavaScript 工程化")
+#include "chapters/工程化.typ"
 
 #part("JavaScript 底层原理")
 
@@ -193,48 +195,54 @@
 // 4.4 Web Workers：多线程、SharedArrayBuffer、转移所有权
 
 // ─────────────────────────────────────────────────────────────────────
-// Part 6：Node.js
+// Part 6：Node.js 与现代运行时（Node.js + Bun）
 // ─────────────────────────────────────────────────────────────────────
 
-// Chapter 1：Node.js 基础 🔶
-// 1.1 Node.js 架构：单线程、非阻塞 I/O、libuv
-// 1.2 模块系统：CommonJS、ES Modules、内置模块
-// 1.3 全局对象：global、process、__dirname、__filename
-// 1.4 命令行工具：argv、stdin/stdout、child_process
+// Chapter 1：Node.js 基础与演进 🔶
+// 1.1 Node.js 架构：单线程、非阻塞 I/O、libuv、事件驱动
+// 1.2 版本演进：LTS 策略、重要版本特性（v14/v16/v18/v20/v22）
+// 1.3 模块系统：CommonJS、ES Modules、内置模块、混合使用
+// 1.4 全局对象：global、process、__dirname、__filename、import.meta
 
-// Chapter 2：文件系统与路径 🔶
-// 2.1 fs 模块：同步/异步 API、Stream、Watch
-// 2.2 path 模块：路径拼接、解析、规范化
-// 2.3 文件操作：读写、追加、删除、权限
-// 2.4 目录操作：遍历、创建、删除、统计
+// Chapter 2：Bun 现代运行时 🔶
+// 2.1 Bun 简介：为什么需要 Bun、性能对比、设计理念
+// 2.2 Bun vs Node.js：架构差异、API 兼容性、性能优势
+// 2.3 Bun 特有 API：Bun.serve、Bun.file、Bun.spawn、JSC 引擎
+// 2.4 迁移指南：Node.js → Bun、兼容性问题、最佳实践
 
-// Chapter 3：HTTP 服务器 🔶
-// 3.1 http 模块：创建服务器、请求/响应对象
-// 3.2 路由处理：URL 解析、方法判断、中间件模式
-// 3.3 RESTful API：CRUD、状态码、错误处理
-// 3.4 静态文件服务：mime 类型、缓存头、范围请求
+// Chapter 3：文件系统与路径 🔶
+// 3.1 fs 模块：同步/异步 API、Stream、Watch、Promise API
+// 3.2 path 模块：路径拼接、解析、规范化、URL 支持
+// 3.3 文件操作：读写、追加、删除、权限、大文件处理
+// 3.4 目录操作：遍历、创建、删除、统计、递归操作
 
-// Chapter 4：Express/Koa 框架 ⚪
-// 4.1 Express 基础：路由、中间件、模板引擎
-// 4.2 Koa 核心：Context、洋葱模型、async/await
-// 4.3 数据库集成：MongoDB、MySQL、ORM
-// 4.4 身份认证：JWT、Session、OAuth
+// Chapter 4：HTTP 服务器 🔶
+// 4.1 http 模块：创建服务器、请求/响应对象、流式处理
+// 4.2 路由处理：URL 解析、方法判断、中间件模式
+// 4.3 RESTful API：CRUD、状态码、错误处理、版本控制
+// 4.4 静态文件服务：mime 类型、缓存头、范围请求、压缩
 
-// Chapter 5：Node.js 高级主题 ⚪
-// 5.1 Stream：Readable、Writable、Transform、Duplex
-// 5.2 Buffer：二进制数据、编码转换、性能
-// 5.3 Cluster：多进程、负载均衡、IPC
-// 5.4 调试与性能：Inspector、Profiler、Benchmark
+// Chapter 5：Express/Koa 框架 ⚪
+// 5.1 Express 基础：路由、中间件、模板引擎、错误处理
+// 5.2 Koa 核心：Context、洋葱模型、async/await、中间件
+// 5.3 数据库集成：MongoDB、MySQL、ORM（Prisma、TypeORM）
+// 5.4 身份认证：JWT、Session、OAuth、Passport
+
+// Chapter 6：Node.js/Bun 高级主题 ⚪
+// 6.1 Stream：Readable、Writable、Transform、Duplex、管道
+// 6.2 Buffer：二进制数据、编码转换、性能优化
+// 6.3 Cluster/Worker Threads：多进程、多线程、负载均衡
+// 6.4 调试与性能：Inspector、Profiler、Benchmark、火焰图
 
 // ─────────────────────────────────────────────────────────────────────
 // Part 7：JavaScript 工程化
 // ─────────────────────────────────────────────────────────────────────
 
 // Chapter 1：包管理器 🔶
-// 1.1 npm：package.json、scripts、依赖管理
-// 1.2 yarn：lock 文件、workspaces、缓存
-// 1.3 pnpm：硬链接、符号链接、磁盘空间优化
-// 1.4 私有仓库：Nexus、Verdaccio、scoped packages
+// 1.1 npm：package.json、scripts、依赖管理、workspace
+// 1.2 yarn：lock 文件、workspaces、缓存、Plug'n'Play
+// 1.3 pnpm：硬链接、符号链接、磁盘空间优化、严格模式
+// 1.4 Bun：内置包管理器、极速安装、锁文件、兼容性
 
 // Chapter 2：构建工具 🔶
 // 2.1 Webpack：Entry、Output、Loader、Plugin
