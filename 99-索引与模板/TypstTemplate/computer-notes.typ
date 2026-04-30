@@ -222,8 +222,13 @@
       if it.level == 1 {
         v(0.3cm, weak: true)
         outline-small-row(
-          text-weight: "bold", text-size: 10pt, text-color: color-accent,
-          number: num, title: title, page: heading-page, location: it.element.location(),
+          text-weight: "bold",
+          text-size: 10pt,
+          text-color: color-accent,
+          number: num,
+          title: title,
+          page: heading-page,
+          location: it.element.location(),
         )
       } else if it.level == 2 {
         // outline-small-row(
@@ -297,34 +302,43 @@
 
       // 背景填充
       #place(block(
-        width: 100%, height: 100%,
+        width: 100%,
+        height: 100%,
         outset: (x: 3cm, bottom: 2.5cm, top: 3cm),
         fill: color-accent.lighten(70%),
       ))
 
       // 左上角: 罗马数字编号
       #place(top + left, dx: 3cm, dy: 3cm, context text(
-        fill: color-accent, size: part-num-size, weight: "bold",
+        fill: color-accent,
+        size: part-num-size,
+        weight: "bold",
         numbering("I", part-counter.at(here()).first()),
       ))
 
       // 右上角: Part 标题
       #place(top + right, dx: -2cm, dy: 4cm, text(fill: black, size: part-font-size, weight: "bold", box(
-        width: 60%, title,
+        width: 60%,
+        title,
       )))
 
     ] else if part-style == 1 [
       // 样式 B: 左侧垂直布局
 
       #place(block(
-        width: 100%, height: 100%,
+        width: 100%,
+        height: 100%,
         outset: (x: 3cm, bottom: 2.5cm, top: 3cm),
         fill: color-accent.lighten(70%),
       ))
 
       #place(top + left)[
-        #block(context text(fill: black, size: 2.5em, weight: "bold",
-          "Part " + numbering("I", part-counter.at(here()).first())))
+        #block(context text(
+          fill: black,
+          size: 2.5em,
+          weight: "bold",
+          "Part " + numbering("I", part-counter.at(here()).first()),
+        ))
         #v(1cm, weak: true)
         #move(dx: -4pt, block(text(fill: color-accent, size: 6em, weight: "bold", title)))
       ]
@@ -351,14 +365,20 @@
 
 /// 单行目录条目渲染
 #let outline-row(
-  text-size: 11pt, text-weight: "regular", text-color: black,
-  number: none, title: none, page: "0", location: none,
+  text-size: 11pt,
+  text-weight: "regular",
+  text-color: black,
+  number: none,
+  title: none,
+  page: "0",
+  location: none,
 ) = {
   set text(size: text-size, fill: text-color, weight: text-weight)
   box(width: 100%)[
     #grid(
       columns: (1.2cm, 1fr, auto),
-      align: (left + top, left, left), gutter: 0pt,
+      align: (left + top, left, left),
+      gutter: 0pt,
       number,
       [ #link(location, title) #box(width: 1fr, repeat(text(weight: "regular")[· #h(4pt)])) ],
       [ #h(4pt) #link(location, page) ],
@@ -392,25 +412,84 @@
         let is-new-part = (p-location != none) and (counter-int.first() == p-first-ch)
 
         if (is-new-part) {
-          v(0.5cm, weak: true)
-          box(width: 1.1cm, height: 0.7cm, fill: color-accent.lighten(80%), inset: 2pt,
-            align(center, text(size: 1.3em, weight: "bold", fill: color-accent.lighten(30%),
-              numbering("I", p-counter.first()))))
-          h(0.1cm)
-          box(width: 100% - 1.2cm, fill: color-accent.lighten(60%), inset: 5pt,
-            align(center, link(p-location, text(size: 1.3em, weight: "bold", p-state))))
-          v(0.3cm, weak: true)
+          // v(0.5cm, weak: true)
+          // box(width: 1.1cm, height: 0.7cm, fill: color-accent.lighten(80%), inset: 2pt, align(center, text(
+          //   size: 1.3em,
+          //   weight: "bold",
+          //   fill: color-accent.lighten(30%),
+          //   numbering("I", p-counter.first()),
+          // )))
+          // h(0.1cm)
+          // box(width: 100% - 1.2cm, fill: color-accent.lighten(60%), inset: 5pt, align(center, link(p-location, text(
+          //   size: 1.3em,
+          //   weight: "bold",
+          //   p-state,
+          // ))))
+          // v(0.3cm, weak: true)
+          grid(
+            columns: (1.2cm, 1fr),
+            align: (center + horizon),
+            gutter: 0pt,
+            rect(
+              width: 1.2cm,
+              height: 0.7cm,
+              fill: color-accent.lighten(80%),
+              inset: 2pt,
+              align(center, text(
+                size: 1.3em,
+                weight: "bold",
+                fill: color-accent.lighten(30%),
+                font: font-latin-title,
+                numbering("I", p-counter.first()),
+              )),
+            ),
+            rect(
+              width: 100% - 0.2cm,
+              fill: color-accent.lighten(60%),
+              inset: 5pt,
+              align(center, link(p-location, text(
+                size: 1.3em,
+                weight: "bold",
+                font: font-latin-title,
+                p-state,
+              ))),
+            ),
+          )
         } else {
           v(0.3cm, weak: true)
         }
-        outline-row(text-weight: "bold", text-size: 13pt, text-color: color-accent,
-          number: num, title: title, page: heading-page, location: it.element.location())
+        // 渲染 Chapter 标题
+        outline-row(
+          text-weight: "bold",
+          text-size: 13pt,
+          text-color: color-accent,
+          number: num,
+          title: title,
+          page: heading-page,
+          location: it.element.location(),
+        )
       } else if it.level == 2 {
-        outline-row(text-weight: "bold", text-size: 11pt, text-color: black,
-          number: num, title: title, page: heading-page, location: it.element.location())
+        // Section 层级
+        outline-row(
+          text-weight: "bold",
+          text-size: 11pt,
+          text-color: black,
+          number: num,
+          title: title,
+          page: heading-page,
+          location: it.element.location(),
+        )
       } else if it.level == 3 {
-        outline-row(text-weight: "regular", text-size: 10pt, text-color: black,
-          number: num, title: title, page: heading-page, location: it.element.location())
+        // Subsection 层级
+        outline-row(
+          text-weight: "regular",
+          text-size: 10pt,
+          text-color: black,
+          number: num,
+          title: title,
+          page: heading-page,
+          location: it.element.location(),
+        )
       }
     }
     #outline(title: "目 录", depth: depth, indent: 0em)
@@ -455,11 +534,11 @@
           inset: (x: 0.5em, y: 0.25em),
           text(
             font: font-latin-title,
-            size: {font-callout-size - 1.2pt},
+            size: { font-callout-size - 1.2pt },
             weight: "bold",
             fill: white,
-            upper(title)
-          )
+            upper(title),
+          ),
         )
       ]
     ]
@@ -500,8 +579,11 @@
 #let codeblock(lang, code) = {
   return [
     #block(
-      fill: color-bg-light, stroke: color-border-light,
-      width: 100%, inset: (x: 5pt, y: 5pt), radius: 4pt,
+      fill: color-bg-light,
+      stroke: color-border-light,
+      width: 100%,
+      inset: (x: 5pt, y: 5pt),
+      radius: 4pt,
     )[ #text(size: font-code-size, font: (font-mono, font-cjk-main))[#code] ]
   ]
 }
@@ -511,8 +593,11 @@
 #let terminal(command) = {
   return [
     #block(
-      fill: color-terminal-bg, stroke: rgb("#3C3C3C"),
-      width: 100%, inset: (x: 8pt, y: 6pt), radius: 3pt,
+      fill: color-terminal-bg,
+      stroke: rgb("#3C3C3C"),
+      width: 100%,
+      inset: (x: 8pt, y: 6pt),
+      radius: 3pt,
     )[ #text(size: 8.5pt, font: font-mono, fill: color-terminal-text)[#command] ]
   ]
 }
@@ -545,8 +630,11 @@
 #let shortcut(keys) = {
   return [
     #box(
-      stroke: color-accent, fill: color-accent.lighten(90%),
-      inset: (x: 6pt, y: 3pt), radius: 3pt, baseline: 1.5pt,
+      stroke: color-accent,
+      fill: color-accent.lighten(90%),
+      inset: (x: 6pt, y: 3pt),
+      radius: 3pt,
+      baseline: 1.5pt,
     )[ #text(size: 9pt, font: font-mono)[#keys] ]
   ]
 }
@@ -559,7 +647,8 @@
       fill: gradient.linear(color-algorithm-bg, color-algorithm-bg.lighten(70%)),
       stroke: 1.3pt + color-algorithm-border,
       inset: (left: 1em, top: 0.5em, bottom: 0.5em, right: 0.8em),
-      width: 100%, breakable: true,
+      width: 100%,
+      breakable: true,
       radius: 7pt,
     )[
       #v(0.2em)
@@ -602,15 +691,17 @@
 
 /// 应用全部全局样式
 #let apply-style(doc) = {
-
   // ── 页面设置 ──
   set page(
     paper: "a4",
     margin: (
-      top: page-margin-top, bottom: page-margin-bottom,
-      left: page-margin-left, right: page-margin-right,
+      top: page-margin-top,
+      bottom: page-margin-bottom,
+      left: page-margin-left,
+      right: page-margin-right,
     ),
-    header-ascent: -5%, footer-descent: 20%,
+    header-ascent: -5%,
+    footer-descent: 20%,
   )
 
   // 页眉: 左Chapter右页码，底部有横线
@@ -619,7 +710,7 @@
       // 获取当前页的第一个和最后一个 heading
       let all-chapters = query(heading.where(level: 1))
       let current-page = here().page()
-      
+
       // 检查当前页是否有 chapter 开始
       let has-chapter-start = false
       for ch in all-chapters {
@@ -628,12 +719,12 @@
           break
         }
       }
-      
+
       // 如果是 chapter 第一页，不显示页眉
       if has-chapter-start {
         return none
       }
-      
+
       // 否则显示页眉
       let elems = query(heading.where(level: 1).before(here()))
       if elems.len() > 0 {
@@ -670,8 +761,7 @@
   // ── 标题编号规则: level 1 不编号, level 2+ 只显示本级编号 ──
   set heading(numbering: (..nums) => {
     let vals = nums.pos()
-    if vals.len() == 1 { return none }
-    else { str(vals.last()) }
+    if vals.len() == 1 { return none } else { str(vals.last()) }
   })
 
   // ── Level 1: Chapter (#=) ──
@@ -724,7 +814,10 @@
   // 左侧蓝色竖线装饰
   show heading.where(level: 4): it => {
     v(0.3em)
-    grid(columns: (auto, 1fr), align: (center + horizon, left + horizon), gutter: 8pt,
+    grid(
+      columns: (auto, 1fr),
+      align: (center + horizon, left + horizon),
+      gutter: 8pt,
       box(width: 3pt, height: 1.1em, fill: color-info-border, radius: 1.5pt),
       text(13pt, font: font-cjk-fallback, weight: "bold", fill: color-accent)[#it.body],
     )
@@ -752,24 +845,29 @@
   show list: it => {
     set list(marker: ([•], [◦], [▪]))
     el.default-list.with(
-      list-spacing: 0.5em, 
+      list-spacing: 0.5em,
       item-spacing: 0.3em,
       label-baseline: auto,
-      )(it)
+    )(it)
     v(0.3em)
   }
 
   // 有序列表增强（itemize 包）+ 列表后间距
   show enum: it => {
     el.default-enum-list.with(
-      enum-margin: array, item-spacing: 0.5em, enum-spacing: 0.5em, label-align: auto,
+      enum-margin: array,
+      item-spacing: 0.5em,
+      enum-spacing: 0.5em,
+      label-align: auto,
     )(it)
     v(0.3em)
   }
 
   // Checklist 复选列表（itemize 包）
   show: el.config.checklist.with(
-    baseline: auto, enable-format: true, extras: true,
+    baseline: auto,
+    enable-format: true,
+    extras: true,
     format-map: ("!": text.with(fill: blue, weight: "bold")),
   )
 
@@ -779,9 +877,12 @@
   // ── 行内代码样式 (`反引号`) ──
   // 使用字体数组：英文等宽 + 中文回退
   show raw: it => box(
-    fill: color-bg-light, stroke: 0.5pt + color-border-light, radius: 3pt,
+    fill: color-bg-light,
+    stroke: 0.5pt + color-border-light,
+    radius: 3pt,
     inset: (x: 6pt, y: 2pt),
-    text(size: 1.2em, font: (font-mono, font-cjk-main), fill: color-accent.darken(20%))[#it], baseline: 1.5pt,
+    text(size: 1.2em, font: (font-mono, font-cjk-main), fill: color-accent.darken(20%))[#it],
+    baseline: 1.5pt,
   )
 
   // ── Codly 代码块美化 ──
@@ -901,15 +1002,14 @@
     style: (fill: tree-colors),
     outer: (
       stroke: it => {
-        if it.level == 1 { auto }
-        else if (it.n == it.n-last and it.n-last >= 2) { auto }
-        else { (left: 1pt) }
+        if it.level == 1 { auto } else if (it.n == it.n-last and it.n-last >= 2) { auto } else { (left: 1pt) }
       },
       outset: it => {
-        if it.level == 1 { auto }
-        else if it.n-last == 1 { (left: -.5em + 1pt, top: .8em - 1pt, bottom: -100%) }
-        else if it.n == it.n-last - 1 { (left: -.5em + 1pt, top: .8em - 1pt, bottom: .7em) }
-        else { (left: -.5em + 1pt, top: .8em - 1pt) }
+        if it.level == 1 { auto } else if it.n-last == 1 {
+          (left: -.5em + 1pt, top: .8em - 1pt, bottom: -100%)
+        } else if it.n == it.n-last - 1 { (left: -.5em + 1pt, top: .8em - 1pt, bottom: .7em) } else {
+          (left: -.5em + 1pt, top: .8em - 1pt)
+        }
       },
     ),
   ),
@@ -917,7 +1017,9 @@
 
 /// 圆圈 + 连接线有序列表样式
 #let circle-line-enum = el.default-enum-list.with(
-  size: (1.5em, auto), fill: (red, auto), body-indent: .5em,
+  size: (1.5em, auto),
+  fill: (red, auto),
+  body-indent: .5em,
   label-align: (center + horizon, auto),
   label-baseline: auto,
   label-format: (circle.with(stroke: 1pt + blue, fill: white, width: 1.3em), auto),
@@ -981,11 +1083,9 @@
       stroke: (x, y) => if y == 0 {
         (bottom: 0.7pt + black)
         (top: 0.7pt + black)
-      }
-      else if y == data-rows.len() {
+      } else if y == data-rows.len() {
         (bottom: 0.7pt + black)
-      }
-      else {
+      } else {
         none
       },
       ..header-cells, ..body-cells,
@@ -1029,9 +1129,7 @@
       stroke: gradient.linear(gray, silver),
       gutter: 1.5pt,
       fill: (col, row) => {
-        if row == 0 { silver } 
-        else if (col == 0) { silver }
-        // else if (calc.rem(row, 2) == 0) { gray.lighten(76%) } 
+        if row == 0 { silver } else if (col == 0) { silver } // else if (calc.rem(row, 2) == 0) { gray.lighten(76%) }
         else { white }
       },
       ..header-cells, ..body-cells,
@@ -1043,7 +1141,6 @@
 #let default-table-style = (
   inset: (x: 8pt, y: 5pt),
   stroke: color-border-light,
-
 )
 
 /// 精美渐变分隔线 - 带三个圆点装饰
@@ -1056,8 +1153,10 @@
       // 渐变线条
       #place(box(width: 100%, height: 1.5pt, fill: gradient.linear(
         (color-border-light.lighten(50%), 0%),
-        (color-accent, 30%), (color-accent, 70%),
-        (color-border-light.lighten(50%), 100%))))
+        (color-accent, 30%),
+        (color-accent, 70%),
+        (color-border-light.lighten(50%), 100%),
+      )))
       // 三个圆点装饰（中间最大）
       #place(center, dx: -20%, dy: -0.5pt, circle(radius: 2pt, fill: color-accent.lighten(30%)))
       #place(center, dx: 0%, dy: -1pt, circle(radius: 2.5pt, fill: color-accent))
