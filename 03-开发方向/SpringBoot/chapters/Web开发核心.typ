@@ -1321,6 +1321,8 @@ async function createUser(userData: CreateUserRequest): Promise<User> {
 
 ==== 可选请求体
 
+*后端代码*：
+
 ```java
 @PostMapping("/api/users")
 public ResponseEntity<User> createUser(
@@ -1334,9 +1336,20 @@ public ResponseEntity<User> createUser(
 }
 ```
 
+*前端代码*：
+
+```typescript
+async function createUser(userData?: CreateUserRequest): Promise<User> {
+  const response = await axios.post<User>('/api/users', userData || {});
+  return response.data;
+}
+```
+
 ==== 验证请求体
 
 结合 `@Valid` 进行参数校验：
+
+*后端代码*：
 
 ```java
 @PostMapping("/api/users")
@@ -1348,8 +1361,78 @@ public ResponseEntity<User> createUser(
 }
 ```
 
+*User 类（带验证注解）*：
+
+```java
+public class User {
+    @NotBlank(message = "姓名不能为空")
+    private String name;
+
+    @Email(message = "邮箱格式不正确")
+    private String email;
+
+    @Min(value = 0, message = "年龄不能为负数")
+    @Max(value = 150, message = "年龄不合理")
+    private Integer age;
+
+    // getters and setters
+}
+```
+
+*前端代码（带表单验证）*：
+
+```typescript
+// 使用 zod 进行前端验证
+import { z } from 'zod';
+
+const CreateUserSchema = z.object({
+  name: z.string().min(1, '姓名不能为空'),
+  email: z.string().email('邮箱格式不正确'),
+  age: z.number().min(0, '年龄不能为负数').max(150, '年龄不合理')
+});
+
+type CreateUserInput = z.infer<typeof CreateUserSchema>;
+
+async function createUser(userData: CreateUserInput): Promise<User> {
+  // 1. 前端验证
+  const result = CreateUserSchema.safeParse(userData);
+  if (!result.success) {
+    throw new Error('验证失败：' + result.error.errors[0].message);
+  }
+
+  // 2. 发送请求
+  try {
+    const response = await axios.post<User>('/api/users', result.data);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 400) {
+      // 后端验证失败
+      const errors = error.response.data.errors;
+      throw new Error('验证失败：' + errors.map((e: any) => e.message).join(', '));
+    }
+    throw error;
+  }
+}
+
+// 使用示例
+try {
+  const user = await createUser({
+    name: 'John Doe',
+    email: 'john@example.com',
+    age: 25
+  });
+  console.log('创建成功', user);
+} catch (error) {
+  console.error('创建失败', error.message);
+}
+```
+
 #caution[
   #text("@RequestBody") 只能使用一次，因为请求体只能读取一次。
+]
+
+#tip[
+  建议前后端都进行验证：前端验证提供即时反馈，后端验证保证数据安全。
 ]
 
 === #text("@RequestHeader")：请求头
@@ -1357,6 +1440,8 @@ public ResponseEntity<User> createUser(
 从 HTTP 请求头中提取信息。
 
 ==== 基本用法
+
+*后端代码*：
 
 ```java
 @GetMapping("/api/users")
@@ -1366,7 +1451,65 @@ public List<User> getUsers(@RequestHeader("Authorization") String token) {
 }
 ```
 
+*前端代码*：
+
+```typescript
+async function getUsers(token: string): Promise<User[]> {
+  const response = await axios.get<User[]>('/api/users', {
+    headers: {
+      'Authorization': token
+    }
+  });
+  return response.data;
+}
+
+// 使用示例
+const token = 'Bearer eyJhbGciOiJIUzI1NiIs...';
+const users = await getUsers(token);
+```
+
+*更实用的方式：使用 axios 拦截器*
+
+```typescript
+// 创建 axios 实例
+const apiClient = axios.create({
+  baseURL: '/api'
+});
+
+// 请求拦截器：自动添加 token
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// 响应拦截器：统一处理错误
+apiClient.interceptors.response.use(
+  (response) => response.data,
+  (error) => {
+    if (error.response?.status === 401) {
+      // token 过期，跳转到登录页
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+// 使用时无需手动传递 token
+async function getUsers(): Promise<User[]> {
+  return apiClient.get<User[]>('/users');
+}
+
+async function createUser(userData: CreateUserRequest): Promise<User> {
+  return apiClient.post<User>('/users', userData);
+}
+```
+
 ==== 可选请求头
+
+*后端代码*：
 
 ```java
 @GetMapping("/api/users")
@@ -1381,7 +1524,26 @@ public List<User> getUsers(
 }
 ```
 
+*前端代码*：
+
+```typescript
+async function getUsers(token?: string): Promise<User[]> {
+  const config = token ? {
+    headers: { 'Authorization': token }
+  } : {};
+
+  const response = await axios.get<User[]>('/api/users', config);
+  return response.data;
+}
+
+// 使用示例
+const publicUsers = await getUsers();           // 公开数据
+const privateUsers = await getUsers(token);     // 认证后数据
+```
+
 ==== 获取所有请求头
+
+*后端代码*：
 
 ```java
 @GetMapping("/api/debug")
@@ -1390,9 +1552,20 @@ public Map<String, String> getHeaders(@RequestHeader HttpHeaders headers) {
 }
 ```
 
+*前端代码*：
+
+```typescript
+async function debugHeaders(): Promise<Record<string, string>> {
+  const response = await axios.get<Record<string, string>>('/api/debug');
+  return response.data;
+}
+```
+
 === #text("@CookieValue")：Cookie 值
 
 从 Cookie 中提取值。
+
+*后端代码*：
 
 ```java
 @GetMapping("/api/profile")
@@ -1402,11 +1575,40 @@ public String getProfile(@CookieValue("sessionId") String sessionId) {
 }
 ```
 
+*前端代码*：
+
+```typescript
+// 浏览器会自动携带 Cookie，无需手动设置
+async function getProfile(): Promise<string> {
+  const response = await axios.get<string>('/api/profile');
+  return response.data;
+}
+
+// 如果需要手动设置 Cookie（较少见）
+import Cookies from 'js-cookie';
+
+async function getProfileWithCustomCookie(): Promise<string> {
+  const sessionId = Cookies.get('sessionId');
+  const response = await axios.get<string>('/api/profile', {
+    headers: {
+      'Cookie': `sessionId=${sessionId}`
+    }
+  });
+  return response.data;
+}
+```
+
+#note[
+  现代前端开发中，更推荐使用 JWT Token（放在 Authorization Header）而非 Session Cookie。
+]
+
 === #text("@ModelAttribute")：模型属性
 
 从请求参数或表单数据中绑定到对象。
 
 ==== 基本用法
+
+*后端代码*：
 
 ```java
 @PostMapping("/api/users")
@@ -1430,6 +1632,71 @@ public class UserForm {
 ```
 
 *请求*：`POST /api/users` with form data `name=John&email=john@example.com&age=25`
+
+*前端代码（表单提交）*：
+
+```typescript
+// 传统表单提交（非 AJAX）
+function submitForm() {
+  const form = document.getElementById('userForm') as HTMLFormElement;
+  form.submit();  // 浏览器自动序列化表单数据
+}
+
+// AJAX 表单提交（推荐）
+async function createUser(formData: FormData): Promise<void> {
+  const response = await axios.post('/api/users', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+  return response.data;
+}
+
+// 使用示例
+const form = new FormData();
+form.append('name', 'John Doe');
+form.append('email', 'john@example.com');
+form.append('age', '25');
+
+await createUser(form);
+```
+
+*Vue 3 示例*：
+
+```vue
+<template>
+  <form @submit.prevent="handleSubmit">
+    <input v-model="form.name" placeholder="姓名" />
+    <input v-model="form.email" placeholder="邮箱" />
+    <input v-model.number="form.age" type="number" placeholder="年龄" />
+    <button type="submit">提交</button>
+  </form>
+</template>
+
+<script setup lang="ts">
+import { reactive } from 'vue';
+import axios from 'axios';
+
+const form = reactive({
+  name: '',
+  email: '',
+  age: 0
+});
+
+async function handleSubmit() {
+  try {
+    await axios.post('/api/users', form);
+    alert('创建成功');
+  } catch (error) {
+    alert('创建失败');
+  }
+}
+</script>
+```
+
+#tip[
+  对于 JSON API，推荐使用 `@RequestBody` 而非 `@ModelAttribute`。`@ModelAttribute` 更适合传统的表单提交场景。
+]
 
 ==== 与 #text("@RequestBody") 的区别
 
