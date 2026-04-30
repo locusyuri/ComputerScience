@@ -6,66 +6,7 @@
   Spring Boot 的 Web 开发基于 Spring MVC 框架，提供了构建 RESTful API 和传统 Web 应用的完整解决方案。
 ]
 
-== HTTP 协议与 RESTful API 设计
-
-本节介绍 HTTP 协议基础、Spring MVC 架构以及 RESTful API 设计规范。
-
-=== HTTP 协议基础
-
-HTTP（HyperText Transfer Protocol）是无状态的应用层协议。
-
-==== HTTP 请求/响应模型
-
-*请求结构*：
-
-```
-GET /api/users/1 HTTP/1.1
-Host: example.com
-Accept: application/json
-Authorization: Bearer token123
-```
-
-*响应结构*：
-
-```
-HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-  "id": 1,
-  "name": "John Doe"
-}
-```
-
-==== HTTP 方法语义
-
-#tex-table(
-  ("方法", "幂等", "安全", "用途"),
-  ("GET", "✓", "✓", "查询资源"),
-  ("POST", "✗", "✗", "创建资源"),
-  ("PUT", "✓", "✗", "更新资源（全量）"),
-  ("PATCH", "✗", "✗", "更新资源（部分）"),
-  ("DELETE", "✓", "✗", "删除资源"),
-)
-
-*幂等性*：多次执行相同请求，结果一致
-
-*安全性*：不修改服务器状态
-
-==== HTTP 状态码
-
-#tex-table(
-  ("范围", "含义", "常用状态码"),
-  ("1xx", "信息性", "100 Continue"),
-  ("2xx", "成功", "200 OK, 201 Created, 204 No Content"),
-  ("3xx", "重定向", "301 Moved, 302 Found, 304 Not Modified"),
-  ("4xx", "客户端错误", "400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found"),
-  ("5xx", "服务器错误", "500 Internal Server Error, 502 Bad Gateway, 503 Service Unavailable"),
-)
-
-#tip[
-  正确使用 HTTP 方法和状态码是 RESTful API 设计的核心。
-]
+== RESTful API 设计
 
 === Spring MVC 架构
 
@@ -126,11 +67,25 @@ public class WebMvcAutoConfiguration {
 
 === RESTful API 设计规范
 
-REST（Representational State Transfer）是一种软件架构风格。
+REST（Representational State Transfer）是一种基于 HTTP 协议的 Web 架构风格，它通过资源定位、无状态通信和表现层状态转换，简化了 Web 应用的开发和维护。
+
+*RESTful API 的核心特点*：
+
+1. *资源定位*：使用 URI 唯一标识资源
+2. *表现层状态转换*：客户端通过修改资源状态实现状态转换
+3. *无状态*：每次请求都包含完整信息，服务器不保存客户端状态
+4. *统一接口*：使用标准 HTTP 方法操作资源
+5. *可缓存*：响应可以明确标注是否可缓存
+
+#tip[
+  RESTful API 已成为 Web 应用程序的标准 API 设计风格，被 Facebook、Twitter、GitHub 等主流互联网公司广泛采用。
+]
 
 ==== 资源命名规范
 
-*使用名词，不使用动词*：
+*1. 使用名词，不使用动词*
+
+RESTful API 将数据和操作转化为资源和 HTTP 动词，URI 应该只表示资源，操作由 HTTP 方法表达。
 
 ```text
 ✅ GET    /api/users          # 获取用户列表
@@ -139,65 +94,135 @@ REST（Representational State Transfer）是一种软件架构风格。
 ✅ PUT    /api/users/1        # 更新用户
 ✅ DELETE /api/users/1        # 删除用户
 
-❌ GET    /api/getUsers
-❌ POST   /api/createUser
-❌ POST   /api/deleteUser/1
+❌ GET    /api/getUsers       # 不要在 URI 中使用动词
+❌ POST   /api/createUser     # 操作应由 HTTP 方法表达
+❌ POST   /api/deleteUser/1   # 避免混淆
 ```
 
-*使用复数名词*：
+*2. 使用复数名词*
+
+保持一致性，所有资源都使用复数形式。
 
 ```text
 ✅ /api/users
 ✅ /api/orders
 ✅ /api/products
 
-❌ /api/user
-❌ /api/order
+❌ /api/user      # 不一致
+❌ /api/order     # 不一致
 ```
 
-*嵌套资源表示关系*：
+#note[
+  例外情况：如果资源本身就是单数概念（如 /api/info、/api/status），可以保持单数。
+]
+
+*3. 使用小写字母和连字符*
 
 ```text
-✅ GET /api/users/1/orders       # 获取用户 1 的订单
-✅ GET /api/users/1/orders/100   # 获取用户 1 的订单 100
+✅ /api/user-profiles
+✅ /api/order-items
+✅ /api/product-categories
+
+❌ /api/UserProfiles      # 避免驼峰
+❌ /api/user_profiles     # 避免下划线
+```
+
+*4. 嵌套资源表示关系*
+
+使用嵌套路径表示资源之间的从属关系，但层级不宜过深（建议不超过3层）。
+
+```text
+✅ GET /api/users/1/orders              # 获取用户 1 的订单
+✅ GET /api/users/1/orders/100          # 获取用户 1 的订单 100
+✅ GET /api/users/1/orders/100/items    # 获取订单 100 的商品项
+
+❌ GET /api/users/1/orders/100/items/5/details/extra  # 层级过深
+```
+
+*替代方案：使用查询参数*
+
+```text
+# 如果嵌套过深，可以使用查询参数
+✅ GET /api/order-items?orderId=100&userId=1
+```
+
+*5. 避免暴露内部实现*
+
+```text
+✅ /api/users
+✅ /api/articles
+
+❌ /api/getUsersFromDatabase    # 暴露实现细节
+❌ /api/json/users              # 暴露数据格式
 ```
 
 ==== HTTP 方法的正确使用
 
+HTTP 方法是 RESTful API 的核心，每个方法都有明确的语义。
+
 *GET*：查询资源（安全、幂等）
+
+- *安全*：不会修改服务器状态
+- *幂等*：多次执行结果相同
+- *可缓存*：响应可以被缓存
 
 ```java
 @GetMapping("/api/users")
-public List<User> getUsers() { ... }
+public ResponseEntity<List<User>> getUsers() {
+    List<User> users = userService.findAll();
+    return ResponseEntity.ok(users);
+}
 
 @GetMapping("/api/users/{id}")
-public User getUser(@PathVariable Long id) { ... }
+public ResponseEntity<User> getUser(@PathVariable Long id) {
+    User user = userService.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("用户不存在"));
+    return ResponseEntity.ok(user);
+}
 ```
+
+#caution[
+  GET 请求不应该有副作用，不要用于修改数据。GET 请求的参数应该放在 URL 中，而不是请求体中。
+]
 
 *POST*：创建资源（非幂等）
 
+- *非幂等*：多次执行可能创建多个资源
+- 返回 201 Created 状态码
+- 在 Location 头中返回新资源的 URI
+
 ```java
 @PostMapping("/api/users")
-public ResponseEntity<User> createUser(@RequestBody User user) {
-    User saved = userService.save(user);
-    return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+public ResponseEntity<User> createUser(@Valid @RequestBody CreateUserRequest request) {
+    User user = userService.createUser(request);
+
+    URI location = URI.create("/api/users/" + user.getId());
+    return ResponseEntity.created(location).body(user);
 }
 ```
 
 *PUT*：全量更新（幂等）
 
+- *幂等*：多次执行结果相同
+- 需要提供完整的资源表示
+- 如果资源不存在，可以创建（可选）
+
 ```java
 @PutMapping("/api/users/{id}")
 public ResponseEntity<Void> updateUser(
     @PathVariable Long id,
-    @RequestBody User user
+    @Valid @RequestBody UpdateUserRequest request
 ) {
-    userService.update(id, user);
+    userService.update(id, request);
     return ResponseEntity.noContent().build();
 }
 ```
 
 *PATCH*：部分更新（非幂等）
+
+- *非幂等*：多次执行可能产生不同结果
+- 只需要提供要更新的字段
+- 更适合实际应用场景
 
 ```java
 @PatchMapping("/api/users/{id}")
@@ -210,7 +235,14 @@ public ResponseEntity<Void> patchUser(
 }
 ```
 
+#tip[
+  在实际项目中，如果只需要更新部分字段，优先使用 PATCH 而非 PUT。PUT 适合表单提交等需要完整数据的场景。
+]
+
 *DELETE*：删除资源（幂等）
+
+- *幂等*：多次执行结果相同（第一次删除后，后续返回 404 或 204）
+- 通常返回 204 No Content
 
 ```java
 @DeleteMapping("/api/users/{id}")
@@ -220,92 +252,659 @@ public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
 }
 ```
 
-==== 状态码的正确使用
+*其他方法*：
 
 #tex-table(
-  ("场景", "状态码", "示例"),
-  ("查询成功", "200 OK", "GET /api/users"),
-  ("创建成功", "201 Created", "POST /api/users"),
-  ("删除成功", "204 No Content", "DELETE /api/users/1"),
-  ("参数错误", "400 Bad Request", "缺少必填字段"),
-  ("未认证", "401 Unauthorized", "Token 无效"),
-  ("无权限", "403 Forbidden", "权限不足"),
-  ("资源不存在", "404 Not Found", "用户 ID 不存在"),
-  ("冲突", "409 Conflict", "用户名已存在"),
-  ("服务器错误", "500 Internal Server Error", "未知异常"),
+  ("方法", "用途", "幂等", "示例"),
+  ("HEAD", "获取资源元信息", "是", "检查资源是否存在"),
+  ("OPTIONS", "获取支持的 HTTP 方法", "是", "CORS 预检请求"),
 )
+
+==== 状态码的正确使用
+
+HTTP 状态码是 RESTful API 的重要组成部分，客户端根据状态码判断请求结果。
+
+*成功状态码（2xx）*：
+
+#tex-table(
+  ("状态码", "含义", "使用场景"),
+  ("200 OK", "请求成功", "GET、PUT、PATCH 成功"),
+  ("201 Created", "资源创建成功", "POST 创建资源"),
+  ("204 No Content", "成功但无返回内容", "DELETE 成功"),
+  ("206 Partial Content", "部分内容", "分页、断点续传"),
+)
+
+*客户端错误（4xx）*：
+
+#tex-table(
+  ("状态码", "含义", "使用场景"),
+  ("400 Bad Request", "请求参数错误", "参数验证失败、JSON 格式错误"),
+  ("401 Unauthorized", "未认证", "Token 无效、未登录"),
+  ("403 Forbidden", "无权限", "权限不足、IP 被禁止"),
+  ("404 Not Found", "资源不存在", "URI 错误、资源已删除"),
+  ("405 Method Not Allowed", "方法不允许", "使用了不支持的 HTTP 方法"),
+  ("409 Conflict", "冲突", "用户名已存在、版本冲突"),
+  ("422 Unprocessable Entity", "语义错误", "参数逻辑错误、业务规则违反"),
+  ("429 Too Many Requests", "请求过多", "触发限流"),
+)
+
+*服务器错误（5xx）*：
+
+#tex-table(
+  ("状态码", "含义", "使用场景"),
+  ("500 Internal Server Error", "服务器内部错误", "未捕获的异常"),
+  ("502 Bad Gateway", "网关错误", "上游服务不可用"),
+  ("503 Service Unavailable", "服务不可用", "维护中、过载"),
+  ("504 Gateway Timeout", "网关超时", "上游服务超时"),
+)
+
+*实战示例*：
+
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    // 资源不存在 - 404
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex) {
+        ErrorResponse error = new ErrorResponse(
+            "NOT_FOUND",
+            ex.getMessage(),
+            LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    // 参数验证失败 - 400
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+            .map(error -> error.getField() + ": " + error.getDefaultMessage())
+            .collect(Collectors.joining(", "));
+
+        ErrorResponse error = new ErrorResponse(
+            "VALIDATION_ERROR",
+            message,
+            LocalDateTime.now()
+        );
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    // 业务冲突 - 409
+    @ExceptionHandler(BusinessConflictException.class)
+    public ResponseEntity<ErrorResponse> handleConflict(BusinessConflictException ex) {
+        ErrorResponse error = new ErrorResponse(
+            "CONFLICT",
+            ex.getMessage(),
+            LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    // 服务器错误 - 500
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(Exception ex) {
+        log.error("服务器内部错误", ex);
+
+        ErrorResponse error = new ErrorResponse(
+            "INTERNAL_ERROR",
+            "服务器内部错误，请稍后重试",
+            LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+}
+```
+
+*统一错误响应格式*：
+
+```json
+{
+  "code": "VALIDATION_ERROR",
+  "message": "email: 邮箱格式不正确, name: 姓名不能为空",
+  "timestamp": "2025-01-15T10:30:00",
+  "path": "/api/users",
+  "errors": [
+    {
+      "field": "email",
+      "message": "邮箱格式不正确"
+    },
+    {
+      "field": "name",
+      "message": "姓名不能为空"
+    }
+  ]
+}
+```
+
+#note[
+  生产环境中，500 错误的详细信息不应该暴露给客户端，只返回通用错误消息，详细日志记录在服务器端。
+]
+
+==== 数据格式规范
+
+*1. 使用 JSON 作为默认格式*
+
+JSON 是现代 Web API 的事实标准，具有良好的可读性和广泛的语言支持。
+
+```java
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+
+    // Spring Boot 默认使用 Jackson 序列化 JSON
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable Long id) {
+        return userService.findById(id).orElseThrow();
+    }
+}
+```
+
+*请求示例*：
+
+```json
+POST /api/users
+Content-Type: application/json
+
+{
+  "name": "张三",
+  "email": "zhangsan@example.com",
+  "age": 25
+}
+```
+
+*响应示例*：
+
+```json
+{
+  "id": 1,
+  "name": "张三",
+  "email": "zhangsan@example.com",
+  "age": 25,
+  "createdAt": "2025-01-15T10:30:00",
+  "updatedAt": "2025-01-15T10:30:00"
+}
+```
+
+*2. 日期时间格式*
+
+使用 ISO 8601 标准格式：
+
+```json
+{
+  "createdAt": "2025-01-15T10:30:00Z",        // UTC 时间
+  "birthDate": "1990-01-15",                   // 日期
+  "localTime": "2025-01-15T10:30:00+08:00"    // 带时区
+}
+```
+
+*3. 空值处理*
+
+```json
+// 推荐：省略 null 字段
+{
+  "id": 1,
+  "name": "张三",
+  "email": "zhangsan@example.com"
+  // age 为 null，直接省略
+}
+
+// 或者明确返回 null
+{
+  "id": 1,
+  "name": "张三",
+  "email": "zhangsan@example.com",
+  "age": null
+}
+```
+
+配置 Jackson 忽略 null 值：
+
+```java
+@Configuration
+public class JacksonConfig {
+
+    @Bean
+    public Jackson2ObjectMapperBuilderCustomizer customizer() {
+        return builder -> builder.serializationInclusion(JsonInclude.Include.NON_NULL);
+    }
+}
+```
 
 ==== 版本控制
 
-*URL 路径版本*（推荐）：
+API 版本控制是保证向后兼容和平滑升级的关键。
+
+*1. URL 路径版本*（推荐）
+
+最直观、最常用的方式，易于理解和调试。
 
 ```text
 /api/v1/users
 /api/v2/users
 ```
 
-*请求头版本*：
+```java
+@RestController
+@RequestMapping("/api/v1/users")
+public class UserControllerV1 {
+    @GetMapping
+    public List<UserV1> getUsers() {
+        // v1 版本的实现
+    }
+}
+
+@RestController
+@RequestMapping("/api/v2/users")
+public class UserControllerV2 {
+    @GetMapping
+    public List<UserV2> getUsers() {
+        // v2 版本的实现
+    }
+}
+```
+
+*优势*：
+- 直观明了，易于理解
+- 便于缓存（不同版本的 URL 不同）
+- 浏览器可以直接访问测试
+
+*劣势*：
+- URL 不够 RESTful（资源应该是 /users，而不是 /v1/users）
+- 版本升级需要修改 URL
+
+*2. 请求头版本*
 
 ```text
 GET /api/users
 Accept-Version: v1
+
+# 或者
+GET /api/users
+Api-Version: 2025-01-15
 ```
 
-*查询参数版本*：
+```java
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+
+    @GetMapping
+    public List<User> getUsers(@RequestHeader("Api-Version") String version) {
+        if ("v1".equals(version)) {
+            return userService.findAllV1();
+        } else {
+            return userService.findAllV2();
+        }
+    }
+}
+```
+
+*优势*：
+- URL 保持纯净
+- 更符合 RESTful 理念
+
+*劣势*：
+- 不易于调试（浏览器无法直接设置 Header）
+- 缓存策略复杂
+
+*3. 查询参数版本*
 
 ```text
 /api/users?version=1
+/api/users?v=2
+```
+
+*优势*：
+- 简单易用
+- 易于测试
+
+*劣势*：
+- 与过滤参数混淆
+- 不符合 RESTful 最佳实践
+
+*4. Content-Type 版本*
+
+```text
+GET /api/users
+Accept: application/vnd.myapp.v1+json
+
+POST /api/users
+Content-Type: application/vnd.myapp.v2+json
+```
+
+#tip[
+  *推荐选择*：大多数项目使用 URL 路径版本，因为它最直观、最易用。如果追求严格的 RESTful，可以选择请求头版本。
+]
+
+*版本管理策略*：
+
+```text
+v1: 2023年发布，当前稳定版本
+v2: 2024年发布，新增特性，向后不兼容
+v3: 2025年规划中
+
+策略：
+- 同时维护 v1 和 v2
+- v1 进入维护模式（只修复 bug，不新增功能）
+- 鼓励用户迁移到 v2
+- 提前 6-12 个月通知 v1 下线
 ```
 
 ==== 分页与过滤
 
-*分页*：
+处理大量数据时，分页和过滤是必不可少的。
+
+*1. 分页*
+
+*偏移量分页*（传统方式）：
 
 ```text
-GET /api/users?page=0&size=10&sort=name,asc
+GET /api/users?page=0&size=10
 
 Response:
 {
   "content": [...],
   "pageable": {
     "pageNumber": 0,
-    "pageSize": 10,
-    "sort": "name,asc"
+    "pageSize": 10
   },
   "totalElements": 100,
   "totalPages": 10
 }
 ```
 
-*过滤*：
+```java
+@GetMapping("/api/users")
+public ResponseEntity<Page<User>> getUsers(
+    @RequestParam(defaultValue = "0") int page,
+    @RequestParam(defaultValue = "10") int size,
+    @RequestParam(defaultValue = "id,asc") String sort
+) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
+    Page<User> users = userService.findAll(pageable);
+    return ResponseEntity.ok(users);
+}
+```
+
+*游标分页*（推荐，性能更好）：
+
+```text
+GET /api/users?limit=10&cursor=eyJpZCI6MTB9
+
+Response:
+{
+  "data": [...],
+  "pagination": {
+    "limit": 10,
+    "nextCursor": "eyJpZCI6MjB9",
+    "hasMore": true
+  }
+}
+```
+
+*优势*：
+- 性能更好（不需要计算总记录数）
+- 数据一致性更好（插入/删除不影响分页）
+
+*劣势*：
+- 实现复杂
+- 不支持跳转到指定页
+
+#tip[
+  对于大数据集（百万级），推荐使用游标分页。对于小数据集，偏移量分页更简单。
+]
+
+*2. 排序*
+
+```text
+GET /api/users?sort=name,asc
+GET /api/users?sort=createdAt,desc&sort=name,asc
+```
+
+```java
+@GetMapping("/api/users")
+public ResponseEntity<List<User>> getUsers(
+    @RequestParam(defaultValue = "id,asc") String sort
+) {
+    String[] sortParams = sort.split(",");
+    Sort sorting = Sort.by(Sort.Direction.fromString(sortParams[1]), sortParams[0]);
+    List<User> users = userService.findAll(sorting);
+    return ResponseEntity.ok(users);
+}
+```
+
+*3. 过滤*
+
+*简单过滤*：
 
 ```text
 GET /api/users?status=active&role=admin
-GET /api/users?createdAtAfter=2024-01-01
+GET /api/users?createdAtAfter=2024-01-01&createdAtBefore=2024-12-31
 ```
 
-*字段选择*：
+*高级过滤*（使用 RSQL 或类似语法）：
+
+```text
+GET /api/users?filter=status==active;age>18;name=like=*张*
+```
+
+```java
+@GetMapping("/api/users")
+public ResponseEntity<List<User>> getUsers(
+    @RequestParam(required = false) String status,
+    @RequestParam(required = false) String role,
+    @RequestParam(required = false) LocalDate createdAtAfter
+) {
+    Specification<User> spec = Specification.where(null);
+
+    if (status != null) {
+        spec = spec.and((root, query, cb) ->
+            cb.equal(root.get("status"), status));
+    }
+
+    if (role != null) {
+        spec = spec.and((root, query, cb) ->
+            cb.equal(root.get("role"), role));
+    }
+
+    if (createdAtAfter != null) {
+        spec = spec.and((root, query, cb) ->
+            cb.greaterThanOrEqualTo(root.get("createdAt"), createdAtAfter));
+    }
+
+    List<User> users = userRepository.findAll(spec);
+    return ResponseEntity.ok(users);
+}
+```
+
+*4. 字段选择*
+
+减少网络传输，提高性能。
 
 ```text
 GET /api/users?fields=id,name,email
 ```
 
-==== HATEOAS（可选）
+```java
+@GetMapping("/api/users")
+public ResponseEntity<List<Map<String, Object>>> getUsers(
+    @RequestParam(required = false) String fields
+) {
+    List<User> users = userService.findAll();
 
-Hypermedia as the Engine of Application State，在响应中包含相关链接。
+    if (fields != null) {
+        String[] fieldArray = fields.split(",");
+        List<Map<String, Object>> result = users.stream()
+            .map(user -> {
+                Map<String, Object> map = new HashMap<>();
+                for (String field : fieldArray) {
+                    map.put(field, getFieldvalue(user, field));
+                }
+                return map;
+            })
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(result);
+    }
+
+    return ResponseEntity.ok(users);
+}
+```
+
+#note[
+  字段选择会增加代码复杂度，权衡利弊后决定是否实现。对于公共 API，字段选择很有价值；对于内部 API，可以省略。
+]
+
+==== HATEOAS（超媒体即应用状态引擎）
+
+HATEOAS（Hypermedia As The Engine Of Application State）是 REST 的最高成熟度级别（Level 3），通过在响应中包含相关链接，提高 API 的可发现性。
+
+*基本示例*：
 
 ```json
+GET /api/users/1
+
 {
   "id": 1,
-  "name": "John Doe",
+  "name": "张三",
+  "email": "zhangsan@example.com",
   "_links": {
-    "self": { "href": "/api/users/1" },
-    "orders": { "href": "/api/users/1/orders" },
-    "update": { "href": "/api/users/1", "method": "PUT" },
-    "delete": { "href": "/api/users/1", "method": "DELETE" }
+    "self": {
+      "href": "/api/users/1"
+    },
+    "orders": {
+      "href": "/api/users/1/orders"
+    },
+    "update": {
+      "href": "/api/users/1",
+      "method": "PUT"
+    },
+    "delete": {
+      "href": "/api/users/1",
+      "method": "DELETE"
+    }
   }
 }
 ```
+
+*Spring HATEOAS 实现*：
+
+```java
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+
+    @GetMapping("/{id}")
+    public EntityModel<User> getUser(@PathVariable Long id) {
+        User user = userService.findById(id).orElseThrow();
+
+        EntityModel<User> resource = EntityModel.of(user);
+
+        // 添加链接
+        resource.add(WebMvcLinkBuilder.linkTo(
+            WebMvcLinkBuilder.methodOn(UserController.class).getUser(id)
+        ).withSelfRel());
+
+        resource.add(WebMvcLinkBuilder.linkTo(
+            WebMvcLinkBuilder.methodOn(UserController.class).getOrders(id)
+        ).withRel("orders"));
+
+        resource.add(WebMvcLinkBuilder.linkTo(
+            WebMvcLinkBuilder.methodOn(UserController.class).updateUser(id, null)
+        ).withRel("update"));
+
+        return resource;
+    }
+}
+```
+
+*依赖*：
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-hateoas</artifactId>
+</dependency>
+```
+
+*HATEOAS 的优势*：
+
+1. *可发现性*：客户端可以通过链接自主探索 API
+2. *解耦*：客户端不需要硬编码 URL
+3. *灵活性*：服务端可以改变 URL 结构而不影响客户端
+
+*HATEOAS 的劣势*：
+
+1. *复杂性*：实现和维护成本高
+2. *学习曲线*：客户端需要理解 HATEOAS 概念
+3. *过度设计*：对于简单 API 可能不必要
+
+#tip[
+  大多数项目不需要实现完整的 HATEOAS。简单的做法是在响应中添加几个关键链接即可，无需严格遵循 Level 3 REST。
+]
+
+==== 最佳实践总结
+
+*1. 命名规范*
+
+- 使用名词，不使用动词
+- 使用复数形式
+- 使用小写字母和连字符
+- 避免暴露内部实现
+
+*2. HTTP 方法*
+
+- GET：查询（安全、幂等）
+- POST：创建（非幂等）
+- PUT：全量更新（幂等）
+- PATCH：部分更新（非幂等）
+- DELETE：删除（幂等）
+
+*3. 状态码*
+
+- 2xx：成功
+- 4xx：客户端错误
+- 5xx：服务器错误
+- 使用具体的状态码，不要全部返回 200
+
+*4. 数据格式*
+
+- 使用 JSON
+- 日期时间使用 ISO 8601
+- 统一错误响应格式
+
+*5. 版本控制*
+
+- 使用 URL 路径版本（推荐）
+- 保持向后兼容
+- 提前通知旧版本下线
+
+*6. 分页与过滤*
+
+- 支持分页（偏移量或游标）
+- 支持排序
+- 支持过滤
+- 可选支持字段选择
+
+*7. 安全性*
+
+- 使用 HTTPS
+- 实施认证和授权
+- 防止 SQL 注入、XSS 等攻击
+- 实施限流
+
+*8. 文档化*
+
+- 使用 OpenAPI/Swagger
+- 提供示例请求和响应
+- 说明错误码和含义
+
+#note[
+  遵循这些最佳实践可以提高 API 的可用性、可维护性和可扩展性，使 API 更加专业和可靠。
+]
 
 #fancy-divider
 
@@ -315,11 +914,17 @@ Hypermedia as the Engine of Application State，在响应中包含相关链接�
 
 Spring MVC 提供了多种注解来接收 HTTP 请求中的参数，每种注解适用于不同的场景。
 
+#tip[
+  本节同时提供前端 TypeScript + axios 的对应代码，帮助全栈开发者理解前后端交互。
+]
+
 === #text("@PathVariable")：路径变量
 
 从 URL 路径中提取变量值。
 
 ==== 基本用法
+
+*后端代码*：
 
 ```java
 @GetMapping("/api/users/{id}")
@@ -332,7 +937,32 @@ public User getUser(@PathVariable Long id) {
 
 *提取*：`id = 123`
 
+*前端代码（TypeScript + axios）*：
+
+```typescript
+import axios from 'axios';
+
+// 定义用户接口
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+// 获取单个用户
+async function getUser(id: number): Promise<User> {
+  const response = await axios.get<User>(`/api/users/${id}`);
+  return response.data;
+}
+
+// 使用示例
+const user = await getUser(123);
+console.log(user.name);
+```
+
 ==== 多个路径变量
+
+*后端代码*：
 
 ```java
 @GetMapping("/api/users/{userId}/orders/{orderId}")
@@ -346,6 +976,28 @@ public Order getOrder(
 
 *请求*：`GET /api/users/1/orders/100`
 
+*前端代码*：
+
+```typescript
+interface Order {
+  id: number;
+  userId: number;
+  productId: number;
+  amount: number;
+}
+
+async function getOrder(userId: number, orderId: number): Promise<Order> {
+  const response = await axios.get<Order>(
+    `/api/users/${userId}/orders/${orderId}`
+  );
+  return response.data;
+}
+
+// 使用示例
+const order = await getOrder(1, 100);
+console.log(order.amount);
+```
+
 ==== 自定义变量名
 
 当方法参数名与路径变量名不一致时，需要显式指定：
@@ -358,6 +1010,8 @@ public User getUser(@PathVariable("id") Long userId) {
 ```
 
 ==== 可选路径变量
+
+*后端代码*：
 
 ```java
 @GetMapping(value = {"/api/users", "/api/users/{id}"})
@@ -373,11 +1027,32 @@ public Object getUsers(@PathVariable(required = false) Long id) {
   `required = false` 表示该路径变量是可选的，默认为 `true`。
 ]
 
+*前端代码*：
+
+```typescript
+// 方案1：根据是否有id调用不同接口
+async function getUsers(id?: number): Promise<User | User[]> {
+  if (id) {
+    const response = await axios.get<User>(`/api/users/${id}`);
+    return response.data;
+  } else {
+    const response = await axios.get<User[]>('/api/users');
+    return response.data;
+  }
+}
+
+// 使用示例
+const allUsers = await getUsers();       // 获取所有用户
+const oneUser = await getUsers(123);     // 获取单个用户
+```
+
 === #text("@RequestParam")：请求参数
 
 从查询字符串（Query String）或表单数据中提取参数。
 
 ==== 基本用法
+
+*后端代码*：
 
 ```java
 @GetMapping("/api/users")
@@ -391,7 +1066,31 @@ public List<User> getUsers(
 
 *请求*：`GET /api/users?name=John&age=25`
 
+*前端代码*：
+
+```typescript
+async function searchUsers(name: string, age: number): Promise<User[]> {
+  const response = await axios.get<User[]>('/api/users', {
+    params: {
+      name: name,
+      age: age
+    }
+  });
+  return response.data;
+}
+
+// 使用示例
+const users = await searchUsers('John', 25);
+console.log(users.length);
+```
+
+#tip[
+  axios 的 `params` 选项会自动将对象序列化为查询字符串，无需手动拼接 URL。
+]
+
 ==== 可选参数
+
+*后端代码*：
 
 ```java
 @GetMapping("/api/users")
@@ -410,7 +1109,31 @@ public List<User> getUsers(
 - `GET /api/users?age=25` （只有 age）
 - `GET /api/users` （都没有）
 
+*前端代码*：
+
+```typescript
+interface SearchParams {
+  name?: string;
+  age?: number;
+}
+
+async function searchUsers(params: SearchParams = {}): Promise<User[]> {
+  const response = await axios.get<User[]>('/api/users', {
+    params: params  // axios 会自动忽略 undefined 的值
+  });
+  return response.data;
+}
+
+// 使用示例
+const allUsers = await searchUsers();                    // 无参数
+const byName = await searchUsers({ name: 'John' });      // 只有 name
+const byAge = await searchUsers({ age: 25 });            // 只有 age
+const both = await searchUsers({ name: 'John', age: 25 }); // 都有
+```
+
 ==== 默认值
+
+*后端代码*：
 
 ```java
 @GetMapping("/api/users")
@@ -427,7 +1150,38 @@ public Page<User> getUsers(
 
 *等价于*：`GET /api/users?page=0&size=10&sort=name,asc`
 
+*前端代码*：
+
+```typescript
+interface PageParams {
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
+async function getUsers(params: PageParams = {}): Promise<Page<User>> {
+  const response = await axios.get<Page<User>>('/api/users', {
+    params: {
+      page: params.page ?? 0,      // 默认值在前端也可以设置
+      size: params.size ?? 10,
+      sort: params.sort ?? 'name,asc'
+    }
+  });
+  return response.data;
+}
+
+// 使用示例
+const firstPage = await getUsers();                              // 使用默认值
+const customPage = await getUsers({ page: 2, size: 20 });       // 自定义分页
+```
+
+#note[
+  默认值可以在后端设置（推荐），也可以在前端设置。建议在后端设置，保持单一数据源。
+]
+
 ==== 多值参数
+
+*后端代码*：
 
 ```java
 @GetMapping("/api/users")
@@ -440,7 +1194,26 @@ public List<User> getUsers(@RequestParam List<Long> ids) {
 
 *提取*：`ids = [1, 2, 3]`
 
+*前端代码*：
+
+```typescript
+async function getUsersByIds(ids: number[]): Promise<User[]> {
+  const response = await axios.get<User[]>('/api/users', {
+    params: {
+      ids: ids  // axios 会自动序列化为 ?ids=1&ids=2&ids=3
+    }
+  });
+  return response.data;
+}
+
+// 使用示例
+const users = await getUsersByIds([1, 2, 3]);
+console.log(users.length);  // 3
+```
+
 ==== 参数名映射
+
+*后端代码*：
 
 ```java
 @GetMapping("/api/users")
@@ -451,30 +1224,32 @@ public List<User> getUsers(@RequestParam("user_name") String userName) {
 
 *请求*：`GET /api/users?user_name=John`
 
+*前端代码*：
+
+```typescript
+async function searchUsers(userName: string): Promise<User[]> {
+  const response = await axios.get<User[]>('/api/users', {
+    params: {
+      user_name: userName  // 注意参数名要与后端一致
+    }
+  });
+  return response.data;
+}
+```
+
 === #text("@RequestBody")：请求体
 
 将 HTTP 请求体（通常是 JSON）反序列化为 Java 对象。
 
 ==== 基本用法
 
+*后端代码*：
+
 ```java
 @PostMapping("/api/users")
 public ResponseEntity<User> createUser(@RequestBody User user) {
     User saved = userService.save(user);
     return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-}
-```
-
-*请求*：
-
-```http
-POST /api/users
-Content-Type: application/json
-
-{
-  "name": "John Doe",
-  "email": "john@example.com",
-  "age": 25
 }
 ```
 
@@ -489,6 +1264,60 @@ public class User {
     // getters and setters
 }
 ```
+
+*前端代码*：
+
+```typescript
+// 创建用户的请求DTO
+interface CreateUserRequest {
+  name: string;
+  email: string;
+  age: number;
+}
+
+async function createUser(userData: CreateUserRequest): Promise<User> {
+  const response = await axios.post<User>('/api/users', userData);
+  return response.data;
+}
+
+// 使用示例
+const newUser = await createUser({
+  name: 'John Doe',
+  email: 'john@example.com',
+  age: 25
+});
+console.log(newUser.id);  // 返回的用户ID
+```
+
+*完整示例（带错误处理）*：
+
+```typescript
+async function createUser(userData: CreateUserRequest): Promise<User> {
+  try {
+    const response = await axios.post<User>('/api/users', userData, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 400) {
+        throw new Error('请求参数错误：' + error.response.data.message);
+      } else if (error.response?.status === 409) {
+        throw new Error('用户已存在');
+      } else {
+        throw new Error('创建用户失败');
+      }
+    }
+    throw error;
+  }
+}
+```
+
+#tip[
+  axios 默认会自动设置 `Content-Type: application/json`，并序列化 JavaScript 对象为 JSON 字符串。
+]
 
 ==== 可选请求体
 

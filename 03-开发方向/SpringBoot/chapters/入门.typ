@@ -854,26 +854,558 @@ spring init --dependencies=web,data-jpa,mysql myapp
 
 === 标准项目结构
 
+Spring Boot 遵循 Maven/Gradle 标准目录结构，清晰的层次划分有助于团队协作和维护。
+
+*完整项目结构*：
+
 ```
 myapp/
 ├── src/
 │   ├── main/
 │   │   ├── java/
 │   │   │   └── com/example/myapp/
-│   │   │       ├── MyappApplication.java  # 启动类
-│   │   │       ├── controller/            # 控制器层
-│   │   │       ├── service/               # 业务逻辑层
-│   │   │       ├── repository/            # 数据访问层
-│   │   │       ├── model/                 # 实体类
-│   │   │       └── config/                # 配置类
+│   │   │       ├── MyappApplication.java      # 启动类（入口）
+│   │   │       ├── controller/                # 控制器层（Web层）
+│   │   │       │   ├── UserController.java
+│   │   │       │   └── OrderController.java
+│   │   │       ├── service/                   # 业务逻辑层
+│   │   │       │   ├── UserService.java
+│   │   │       │   ├── impl/
+│   │   │       │   │   └── UserServiceImpl.java
+│   │   │       │   └── OrderService.java
+│   │   │       ├── repository/                # 数据访问层（DAO）
+│   │   │       │   ├── UserRepository.java
+│   │   │       │   └── OrderRepository.java
+│   │   │       ├── model/                     # 实体类/领域模型
+│   │   │       │   ├── User.java
+│   │   │       │   ├── Order.java
+│   │   │       │   └── dto/                   # 数据传输对象
+│   │   │       │       ├── UserDTO.java
+│   │   │       │       └── OrderDTO.java
+│   │   │       ├── config/                    # 配置类
+│   │   │       │   ├── SecurityConfig.java
+│   │   │       │   └── WebConfig.java
+│   │   │       ├── exception/                 # 全局异常处理
+│   │   │       │   ├── GlobalExceptionHandler.java
+│   │   │       │   └── BusinessException.java
+│   │   │       └── util/                      # 工具类
+│   │   │           └── DateUtils.java
 │   │   └── resources/
-│   │       ├── application.properties     # 配置文件
-│   │       ├── static/                    # 静态资源
-│   │       └── templates/                 # 模板文件
-│   └── test/                              # 测试代码
-├── pom.xml                                # Maven配置
-└── README.md
+│   │       ├── application.yml                # 主配置文件
+│   │       ├── application-dev.yml            # 开发环境配置
+│   │       ├── application-prod.yml           # 生产环境配置
+│   │       ├── static/                        # 静态资源（CSS、JS、图片）
+│   │       │   ├── css/
+│   │       │   ├── js/
+│   │       │   └── images/
+│   │       ├── templates/                     # 模板文件（Thymeleaf）
+│   │       │   ├── index.html
+│   │       │   └── user/
+│   │       │       └── list.html
+│   │       └── db/migration/                  # 数据库迁移脚本（Flyway）
+│   │           └── V1__init.sql
+│   └── test/
+│       ├── java/
+│       │   └── com/example/myapp/
+│       │       ├── MyappApplicationTests.java # 集成测试
+│       │       ├── controller/                # 控制器测试
+│       │       │   └── UserControllerTest.java
+│       │       ├── service/                   # 服务层测试
+│       │       │   └── UserServiceTest.java
+│       │       └── repository/                # 仓库层测试
+│       │           └── UserRepositoryTest.java
+│       └── resources/
+│           └── application-test.yml           # 测试环境配置
+├── pom.xml                                    # Maven配置（或build.gradle）
+├── README.md                                  # 项目说明
+├── .gitignore                                 # Git忽略文件
+└── Dockerfile                                 # Docker镜像构建文件（可选）
 ```
+
+==== 核心目录详解
+
+*1. `src/main/java/` - Java源代码*
+
+这是项目的核心代码目录，采用分层架构设计。
+
+*包命名规范*：
+
+```java
+com.example.myapp          // 根包（通常与域名反向对应）
+├── controller             // 控制器层：接收HTTP请求，返回响应
+├── service                // 服务层：业务逻辑处理
+├── repository             // 数据访问层：数据库操作
+├── model                  // 模型层：实体类、DTO、VO
+├── config                 // 配置层：Bean定义、框架配置
+├── exception              // 异常层：自定义异常、全局异常处理
+└── util                   // 工具层：通用工具类
+```
+
+#tip[
+  包名应使用小写字母，避免使用下划线。推荐使用公司域名的反向形式，如 `com.alibaba`、`org.springframework`。
+]
+
+*2. `src/main/resources/` - 资源文件*
+
+存放非Java代码的资源文件，包括配置、静态资源、模板等。
+
+*配置文件*：
+
+```yaml
+# application.yml - 主配置文件
+spring:
+  profiles:
+    active: dev  # 激活的环境
+
+server:
+  port: 8080
+
+# application-dev.yml - 开发环境
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/myapp_dev
+    username: root
+    password: root
+
+# application-prod.yml - 生产环境
+spring:
+  datasource:
+    url: jdbc:mysql://prod-server:3306/myapp_prod
+    username: ${DB_USERNAME}  # 从环境变量读取
+    password: ${DB_PASSWORD}
+```
+
+*静态资源*：
+
+```
+static/
+├── css/
+│   ├── bootstrap.min.css
+│   └── custom.css
+├── js/
+│   ├── jquery.min.js
+│   └── app.js
+├── images/
+│   ├── logo.png
+│   └── banner.jpg
+└── favicon.ico
+```
+
+访问路径：`http://localhost:8080/css/custom.css`
+
+*模板文件*（使用 Thymeleaf）：
+
+```html
+<!-- templates/user/list.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>用户列表</title>
+</head>
+<body>
+    <h1>用户列表</h1>
+    <table>
+        <tr th:each="user : ${users}">
+            <td th:text="${user.name}">用户名</td>
+            <td th:text="${user.email}">邮箱</td>
+        </tr>
+    </table>
+</body>
+</html>
+```
+
+*3. `src/test/` - 测试代码*
+
+测试代码结构与主代码保持一致，便于维护。
+
+*测试分层*：
+
+```java
+// 单元测试：测试单个类的方法
+@SpringBootTest
+class UserServiceTest {
+    @Autowired
+    private UserService userService;
+
+    @Test
+    void testCreateUser() {
+        User user = new User("张三", "zhangsan@example.com");
+        User saved = userService.createUser(user);
+        assertNotNull(saved.getId());
+    }
+}
+
+// 集成测试：测试完整的请求流程
+@SpringBootTest
+@AutoConfigureMockMvc
+class UserControllerTest {
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    void testGetUsers() throws Exception {
+        mockMvc.perform(get("/api/users"))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.length()").value(10));
+    }
+}
+```
+
+==== 分层架构详解
+
+*典型三层架构*：
+
+```text
+浏览器/客户端
+    ↓ HTTP请求
+Controller（控制器层）
+    ↓ 调用
+Service（业务逻辑层）
+    ↓ 调用
+Repository（数据访问层）
+    ↓ SQL
+数据库
+```
+
+*1. Controller 层（控制器层）*
+
+*职责*：
+- 接收HTTP请求
+- 参数验证
+- 调用Service层
+- 返回HTTP响应
+
+```java
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+
+    @Autowired
+    private UserService userService;
+
+    @GetMapping
+    public ResponseEntity<List<UserDTO>> getUsers() {
+        List<UserDTO> users = userService.findAll();
+        return ResponseEntity.ok(users);
+    }
+
+    @PostMapping
+    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody CreateUserRequest request) {
+        UserDTO user = userService.createUser(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+    }
+}
+```
+
+#note[
+  Controller层应该*薄*，只负责请求处理和响应，不包含业务逻辑。
+]
+
+*2. Service 层（业务逻辑层）*
+
+*职责*：
+- 业务逻辑处理
+- 事务管理
+- 调用多个Repository
+- 数据转换（Entity ↔ DTO）
+
+```java
+@Service
+@Transactional
+public class UserServiceImpl implements UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Override
+    public UserDTO createUser(CreateUserRequest request) {
+        // 1. 业务验证
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new BusinessException("邮箱已存在");
+        }
+
+        // 2. 数据转换
+        User user = new User();
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+
+        // 3. 持久化
+        User saved = userRepository.save(user);
+
+        // 4. 返回DTO
+        return convertToDTO(saved);
+    }
+}
+```
+
+*3. Repository 层（数据访问层）*
+
+*职责*：
+- 数据库CRUD操作
+- 自定义查询
+- 数据持久化
+
+```java
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+
+    // Spring Data JPA自动实现
+    Optional<User> findByEmail(String email);
+
+    boolean existsByEmail(String email);
+
+    // 自定义查询
+    @Query("SELECT u FROM User u WHERE u.name LIKE %:keyword%")
+    List<User> searchByName(@Param("keyword") String keyword);
+}
+```
+
+#tip[
+  使用 Spring Data JPA 时，Repository通常是接口，无需实现类。Spring会自动生成代理实现。
+]
+
+*4. Model 层（模型层）*
+
+*实体类（Entity）*：
+
+```java
+@Entity
+@Table(name = "users")
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 50)
+    private String name;
+
+    @Column(unique = true, nullable = false)
+    private String email;
+
+    // getter/setter
+}
+```
+
+*DTO（Data Transfer Object）*：
+
+```java
+public class UserDTO {
+    private Long id;
+    private String name;
+    private String email;
+
+    // 用于API响应，隐藏敏感字段（如密码）
+}
+```
+
+*VO（View Object）*：
+
+```java
+public class CreateUserRequest {
+    @NotBlank(message = "姓名不能为空")
+    private String name;
+
+    @Email(message = "邮箱格式不正确")
+    private String email;
+
+    // 用于接收前端参数，包含验证注解
+}
+```
+
+#caution[
+  *不要*在Controller层直接返回Entity！应该转换为DTO，避免暴露敏感字段和内部结构。
+]
+
+==== 其他重要目录
+
+*1. Config 配置类*
+
+```java
+@Configuration
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.authorizeHttpRequests(auth -> auth
+            .requestMatchers("/api/public/**").permitAll()
+            .anyRequest().authenticated()
+        );
+        return http.build();
+    }
+}
+```
+
+*2. Exception 异常处理*
+
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException ex) {
+        ErrorResponse error = new ErrorResponse("BUSINESS_ERROR", ex.getMessage());
+        return ResponseEntity.badRequest().body(error);
+    }
+}
+```
+
+*3. Util 工具类*
+
+```java
+@Component
+public class DateUtils {
+
+    public static String formatDate(LocalDate date) {
+        return date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    }
+}
+```
+
+==== 项目结构最佳实践
+
+*1. 按功能模块分包（适合大型项目）*
+
+```
+com.example.myapp/
+├── user/                    # 用户模块
+│   ├── controller/
+│   ├── service/
+│   ├── repository/
+│   └── model/
+├── order/                   # 订单模块
+│   ├── controller/
+│   ├── service/
+│   ├── repository/
+│   └── model/
+└── product/                 # 商品模块
+    ├── controller/
+    ├── service/
+    ├── repository/
+    └── model/
+```
+
+*优势*：
+- 模块内聚性高
+- 便于团队协作
+- 易于微服务拆分
+
+*2. 按技术层次分包（适合小型项目）*
+
+```
+com.example.myapp/
+├── controller/              # 所有控制器
+├── service/                 # 所有服务
+├── repository/              # 所有仓库
+└── model/                   # 所有模型
+```
+
+*优势*：
+- 结构简单清晰
+- 易于理解
+- 适合单体应用
+
+#tip[
+  小型项目推荐按技术层次分包，大型项目推荐按功能模块分包。也可以混合使用：核心模块按功能，通用模块按层次。
+]
+
+*3. 配置文件管理*
+
+```yaml
+# 推荐：使用多环境配置
+application.yml          # 公共配置
+application-dev.yml      # 开发环境
+application-test.yml     # 测试环境
+application-prod.yml     # 生产环境
+
+# 激活方式
+spring.profiles.active=dev
+```
+
+*4. 测试代码组织*
+
+```
+test/
+├── unit/                # 单元测试（快速、无依赖）
+├── integration/         # 集成测试（需要数据库等）
+└── e2e/                 # 端到端测试（完整流程）
+```
+
+==== 常见错误与避免
+
+*错误1：Controller层包含业务逻辑*
+
+```java
+// ❌ 错误做法
+@RestController
+public class UserController {
+    @Autowired
+    private UserRepository userRepository;
+
+    @PostMapping
+    public User createUser(@RequestBody User user) {
+        // 业务逻辑不应该在Controller中
+        if (user.getEmail() == null) {
+            throw new RuntimeException("邮箱不能为空");
+        }
+        return userRepository.save(user);
+    }
+}
+
+// ✅ 正确做法
+@RestController
+public class UserController {
+    @Autowired
+    private UserService userService;
+
+    @PostMapping
+    public UserDTO createUser(@RequestBody CreateUserRequest request) {
+        return userService.createUser(request);  // 委托给Service层
+    }
+}
+```
+
+*错误2：直接返回Entity*
+
+```java
+// ❌ 错误做法
+@GetMapping("/{id}")
+public User getUser(@PathVariable Long id) {
+    return userRepository.findById(id).orElseThrow();  // 暴露所有字段
+}
+
+// ✅ 正确做法
+@GetMapping("/{id}")
+public UserDTO getUser(@PathVariable Long id) {
+    User user = userRepository.findById(id).orElseThrow();
+    return convertToDTO(user);  // 转换为DTO
+}
+```
+
+*错误3：循环依赖*
+
+```java
+// ❌ 错误做法：UserService依赖OrderService，OrderService又依赖UserService
+@Service
+class UserService {
+    @Autowired OrderService orderService;  // 循环依赖
+}
+
+@Service
+class OrderService {
+    @Autowired UserService userService;    // 循环依赖
+}
+
+// ✅ 正确做法：提取共同逻辑到第三个Service
+@Service
+class UserOrderService {
+    @Autowired UserService userService;
+    @Autowired OrderService orderService;
+}
+```
+
+#caution[
+  循环依赖会导致Spring容器启动失败。如果出现循环依赖，说明设计有问题，应该重新审视职责划分。
+]
 
 === `@SpringBootApplication`注解
 
@@ -908,37 +1440,7 @@ public class MyappApplication {
   ("`@ComponentScan`", "组件扫描", "扫描当前包及子包"),
 )
 
-=== 常用注解速查
 
-==== 分层注解
-
-```java
-@RestController      // REST控制器(@Controller + @ResponseBody)
-@Service             // 服务层
-@Repository          // 数据访问层
-@Component           // 通用组件
-```
-
-==== 依赖注入
-
-```java
-@Autowired           // 自动注入(字段注入)
-@Resource            // JSR-250标准
-@Inject              // JSR-330标准
-```
-
-#tip[
-  推荐使用构造器注入而非字段注入，更易于测试。
-]
-
-==== 配置相关
-
-```java
-@Configuration       // 配置类
-@Bean                // 定义Bean
-@Value               // 注入配置值
-@ConfigurationProperties // 类型安全配置绑定
-```
 
 == 内嵌Web容器与启动原理初探
 
