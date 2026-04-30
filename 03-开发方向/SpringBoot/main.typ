@@ -35,7 +35,7 @@
 #include "chapters/数据访问与持久层框架.typ"
 #include "chapters/安全与认证授权.typ"
 #include "chapters/定时任务与异步处理.typ"
-#include "chapters/日志系统.typ"
+
 
 #include "chapters/监控与可观测性.typ"
 
