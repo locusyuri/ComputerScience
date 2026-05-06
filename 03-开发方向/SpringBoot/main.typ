@@ -23,7 +23,7 @@
 )
 
 // 目录
-#make-outline(depth: 3)
+#make-outline(depth: 2)
 
 
 #part("Spring Boot 基础")
@@ -101,13 +101,15 @@
 // % 6.5 多数据源与动态数据源实现
 // % 6.6 事务管理基础（@Transactional、传播行为、隔离级别、声明式事务）
 //
-// % Chapter 7：安全与认证授权
-// % 7.1 Spring Security 核心概念与架构
-// % 7.2 基于表单的认证与授权
-// % 7.3 JWT 无状态认证（登录接口、令牌生成与校验、过滤器集成）
-// % 7.4 方法级安全控制（@PreAuthorize、@Secured）
-// % 7.5 自定义 UserDetailsService 与密码编码器
-// % 7.6 OAuth2 客户端与资源服务器入门
+
+// Chapter 7：安全与认证授权
+// 7.1：Spring Security 核心概念与架构 🔶
+// 7.2：基于表单的认证与授权 🔶
+// 7.3：JWT 无状态认证 🔶
+// 7.4：方法级安全控制 🔶
+// 7.5：Sa-Token 轻量级认证框架 🔶
+// 7.6：OAuth2 客户端与资源服务器 🔶
+
 //
 // % Chapter 8：定时任务与异步处理
 // % 8.1 定时任务（@Scheduled、cron 表达式、固定延迟与固定速率）
