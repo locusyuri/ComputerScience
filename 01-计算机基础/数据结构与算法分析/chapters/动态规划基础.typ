@@ -119,7 +119,7 @@ int rob(vector<int>& nums) {
     if (nums.empty()) return 0;
     int n = nums.size();
     if (n == 1) return nums[0];
-    
+
     vector<int> dp(n);
     dp[0] = nums[0];
     dp[1] = max(nums[0], nums[1]);
@@ -350,29 +350,29 @@ int mergeStones(vector<int>& stones) {
     int n = stones.size();
     vector<vector<int>> dp(n, vector<int>(n, INT_MAX));
     vector<int> prefixSum(n + 1, 0);
-    
+
     // 计算前缀和
     for (int i = 0; i < n; ++i) {
         prefixSum[i + 1] = prefixSum[i] + stones[i];
     }
-    
+
     // 初始化：单堆石子代价为0
     for (int i = 0; i < n; ++i) {
         dp[i][i] = 0;
     }
-    
+
     // 按区间长度从小到大计算
     for (int len = 2; len <= n; ++len) {
         for (int i = 0; i <= n - len; ++i) {
             int j = i + len - 1;
             int sum = prefixSum[j + 1] - prefixSum[i];
-            
+
             for (int k = i; k < j; ++k) {
                 dp[i][j] = min(dp[i][j], dp[i][k] + dp[k + 1][j] + sum);
             }
         }
     }
-    
+
     return dp[0][n - 1];
 }
 ```
@@ -398,12 +398,12 @@ int mergeStones(vector<int>& stones) {
 int longestPalindromeSubseq(string s) {
     int n = s.size();
     vector<vector<int>> dp(n, vector<int>(n, 0));
-    
+
     // 单个字符的回文长度为1
     for (int i = 0; i < n; ++i) {
         dp[i][i] = 1;
     }
-    
+
     // 按区间长度从小到大计算
     for (int len = 2; len <= n; ++len) {
         for (int i = 0; i <= n - len; ++i) {
@@ -415,10 +415,94 @@ int longestPalindromeSubseq(string s) {
             }
         }
     }
-    
+
     return dp[0][n - 1];
 }
 ```
+
+==== 戳气球问题（Burst Balloons）
+
+有 n 个气球，编号为 0 到 n-1，每个气球上都标有一个数字，存在数组 nums 中。
+
+现在要求你戳破所有的气球。戳破第 i 个气球，你可以获得 $"nums"[i-1] * "nums"[i] * "nums"[i+1]$ 枚硬币。这里的 i-1 和 i+1 代表和 i 相邻的两个气球的序号。如果 i-1 或 i+1 超出了数组的边界，那么就当它是一个数字为 1 的气球。
+
+求所能获得硬币的最大数量。
+
+*示例*：
+
+输入：nums = [3,1,5,8]
+
+输出：167
+
+解释：
+```
+nums = [3,1,5,8] --> [3,5,8] --> [3,8] --> [8] --> []
+coins =  3*1*5    +   3*5*8   +  1*3*8  + 1*8*1 = 167
+```
+
+*问题分析*：
+
+这道题的关键在于*逆向思维*：不是考虑先戳哪个气球，而是考虑*最后戳哪个气球*。
+
+如果我们定义 $"dp"[i][j]$ 为戳破区间 $(i, j)$ 内所有气球能获得的最大硬币数（注意：i 和 j 本身不戳破），那么：
+
+- 假设最后戳破的气球是 k（$i < k < j$）
+- 此时 i 和 j 都没有被戳破，所以获得的硬币数是 $"nums"[i] * "nums"[k] * "nums"[j]$
+- 再加上戳破 $(i, k)$ 和 $(k, j)$ 两个子区间的最大硬币数
+
+*状态定义*：$"dp"[i][j]$ 表示戳破开区间 $(i, j)$ 内所有气球能获得的最大硬币数
+
+*状态转移方程*：
+
+$"dp"[i][j] = max("dp"[i][k] + "dp"[k][j] + "nums"[i] * "nums"[k] * "nums"[j])$，其中 $i < k < j$
+
+*初始条件*：$"dp"[i][i+1] = 0$（开区间内没有气球）
+
+*计算顺序*：按区间长度从小到大计算
+
+```cpp
+int maxCoins(vector<int>& nums) {
+    int n = nums.size();
+
+    // 在首尾添加虚拟气球（值为1）
+    vector<int> balloons(n + 2, 1);
+    for (int i = 0; i < n; ++i) {
+        balloons[i + 1] = nums[i];
+    }
+
+    // dp[i][j] 表示戳破开区间 (i, j) 内所有气球的最大硬币数
+    vector<vector<int>> dp(n + 2, vector<int>(n + 2, 0));
+
+    // 按区间长度从小到大计算
+    // len 表示开区间 (i, j) 的长度，即 j - i
+    for (int len = 2; len <= n + 1; ++len) {
+        for (int i = 0; i <= n + 1 - len; ++i) {
+            int j = i + len;
+
+            // 枚举最后戳破的气球 k
+            for (int k = i + 1; k < j; ++k) {
+                dp[i][j] = max(dp[i][j],
+                              dp[i][k] + dp[k][j] +
+                              balloons[i] * balloons[k] * balloons[j]);
+            }
+        }
+    }
+
+    return dp[0][n + 1];
+}
+```
+
+#note[
+  *关键技巧*：
+  1. *逆向思维*：考虑最后戳哪个气球，而不是第一个
+  2. *添加边界*：在数组首尾添加值为1的虚拟气球，简化边界处理
+  3. *开区间定义*：$"dp"[i][j]$ 表示开区间 $(i, j)$，避免边界混淆
+  4. *时间复杂度*：$O(n^3)$，空间复杂度 $O(n^2)$
+]
+
+#tip[
+  戳气球问题是区间DP的经典难题，关键在于理解「最后戳破」的逆向思维。这种思维方式在很多DP问题中都有应用。
+]
 
 === 优化技巧
 
@@ -474,13 +558,13 @@ int diameter = 0;
 
 int dfs(TreeNode* node) {
     if (!node) return 0;
-    
+
     int leftDepth = dfs(node->left);
     int rightDepth = dfs(node->right);
-    
+
     // 更新直径
     diameter = max(diameter, leftDepth + rightDepth);
-    
+
     // 返回当前节点的深度
     return max(leftDepth, rightDepth) + 1;
 }
@@ -515,11 +599,11 @@ vector<vector<int>> dp;
 void dfs(int u, int parent) {
     dp[u][0] = 0;
     dp[u][1] = weight[u];
-    
+
     for (int v : adj[u]) {
         if (v == parent) continue;
         dfs(v, u);
-        
+
         dp[u][0] += max(dp[v][0], dp[v][1]);
         dp[u][1] += dp[v][0];
     }
@@ -610,16 +694,16 @@ int tsp(vector<vector<int>>& dist) {
     int n = dist.size();
     int fullMask = (1 << n) - 1;
     vector<vector<int>> dp(fullMask + 1, vector<int>(n, INT_MAX));
-    
+
     // 初始状态：从城市0出发
     dp[1][0] = 0;
-    
+
     // 枚举所有状态
     for (int mask = 1; mask <= fullMask; ++mask) {
         for (int i = 0; i < n; ++i) {
             if (!(mask & (1 << i))) continue; // 城市i不在mask中
             if (dp[mask][i] == INT_MAX) continue;
-            
+
             // 尝试前往未访问的城市
             for (int j = 0; j < n; ++j) {
                 if (mask & (1 << j)) continue; // 城市j已访问
@@ -628,7 +712,7 @@ int tsp(vector<vector<int>>& dist) {
             }
         }
     }
-    
+
     // 回到起点
     int ans = INT_MAX;
     for (int i = 1; i < n; ++i) {
@@ -636,7 +720,7 @@ int tsp(vector<vector<int>>& dist) {
             ans = min(ans, dp[fullMask][i] + dist[i][0]);
         }
     }
-    
+
     return ans;
 }
 ```
@@ -731,22 +815,22 @@ string binary;
 
 int dfs(int pos, bool prevOne, bool tight) {
     if (pos == binary.size()) return 1;
-    if (!tight && memo[pos][prevOne][0] != -1) 
+    if (!tight && memo[pos][prevOne][0] != -1)
         return memo[pos][prevOne][0];
     if (tight && memo[pos][prevOne][1] != -1)
         return memo[pos][prevOne][1];
-    
+
     int limit = tight ? (binary[pos] - '0') : 1;
     int result = 0;
-    
+
     for (int digit = 0; digit <= limit; ++digit) {
         if (prevOne && digit == 1) continue; // 不能有连续的1
         result += dfs(pos + 1, digit == 1, tight && (digit == limit));
     }
-    
+
     if (!tight) memo[pos][prevOne][0] = result;
     else memo[pos][prevOne][1] = result;
-    
+
     return result;
 }
 
@@ -758,7 +842,7 @@ int countNumbers(int n) {
         n /= 2;
     }
     if (binary.empty()) binary = "0";
-    
+
     memo.assign(binary.size(), vector<vector<int>>(2, vector<int>(2, -1)));
     return dfs(0, false, true);
 }
@@ -844,7 +928,7 @@ int countNumbers(int n) {
 int longestCommonSubsequence(string text1, string text2) {
     int m = text1.size(), n = text2.size();
     vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
-    
+
     for (int i = 1; i <= m; ++i) {
         for (int j = 1; j <= n; ++j) {
             if (text1[i - 1] == text2[j - 1]) {
@@ -854,7 +938,7 @@ int longestCommonSubsequence(string text1, string text2) {
             }
         }
     }
-    
+
     return dp[m][n];
 }
 ```
@@ -883,11 +967,11 @@ int longestCommonSubsequence(string text1, string text2) {
 int minDistance(string word1, string word2) {
     int m = word1.size(), n = word2.size();
     vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
-    
+
     // 初始化边界
     for (int i = 0; i <= m; ++i) dp[i][0] = i;
     for (int j = 0; j <= n; ++j) dp[0][j] = j;
-    
+
     for (int i = 1; i <= m; ++i) {
         for (int j = 1; j <= n; ++j) {
             if (word1[i - 1] == word2[j - 1]) {
@@ -899,7 +983,7 @@ int minDistance(string word1, string word2) {
             }
         }
     }
-    
+
     return dp[m][n];
 }
 ```
@@ -926,16 +1010,16 @@ int minDistance(string word1, string word2) {
 int maxProfit(vector<int>& prices) {
     int n = prices.size();
     if (n == 0) return 0;
-    
+
     vector<vector<int>> dp(n, vector<int>(2, 0));
     dp[0][0] = 0;
     dp[0][1] = -prices[0];
-    
+
     for (int i = 1; i < n; ++i) {
         dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] + prices[i]);
         dp[i][1] = max(dp[i - 1][1], -prices[i]);
     }
-    
+
     return dp[n - 1][0];
 }
 ```
@@ -988,11 +1072,11 @@ $d p[i] = frac{i}{n} dot d p[i] + frac{n-i}{n} dot d p[i+1] + 1$
 double expectedRolls(int n) {
     vector<double> dp(n + 1, 0);
     dp[n] = 0;
-    
+
     for (int i = n - 1; i >= 0; --i) {
         dp[i] = dp[i + 1] + (double)n / (n - i);
     }
-    
+
     return dp[0];
 }
 ```
