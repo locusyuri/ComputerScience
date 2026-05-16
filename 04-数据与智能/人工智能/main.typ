@@ -151,6 +151,13 @@
 // 5.4 双向 RNN：前向 + 后向、上下文信息
 // 5.5 RNN 应用：语言模型、机器翻译、语音识别
 
+// Chapter 6：可解释 AI 与模型治理 🔶
+// 6.1 可解释性的重要性：黑盒问题、信任、监管
+// 6.2 事后解释方法：LIME、SHAP、Grad-CAM、Integrated Gradients
+// 6.3 内在可解释模型：决策树、规则列表、注意力可视化
+// 6.4 公平性与偏见：群体公平、个体公平、去偏见技术
+// 6.5 AI 安全基础：对抗样本（FGSM、PGD）、数据投毒、模型窃取
+
 
 // ─────────────────────────────────────────────────────────────────────
 // Part 4：计算机视觉
@@ -277,9 +284,8 @@
 // Chapter 3：MLOps ⚪
 // 3.1 数据版本控制：DVC、LakeFS
 // 3.2 持续集成/持续部署：GitHub Actions、Jenkins、Kubeflow
-// 3.3 模型注册表：MLflow Model Registry、SageMaker Model Registry
-// 3.4 A/B 测试：流量分割、指标对比、灰度发布
-// 3.5 模型治理：合规性、审计、可解释性
+// 3.4 模型压缩：量化、剪枝、知识蒸馏
+// 3.5 模型治理：合规性、审计、可解释性、公平性与偏见
 
 // Chapter 4：云计算与 AI 平台 ⚪
 // 4.1 GPU 云计算：AWS EC2、Azure VM、GCP Compute Engine
@@ -289,29 +295,46 @@
 
 
 // ─────────────────────────────────────────────────────────────────────
-// Part 8：AI 前沿与伦理
+// Part 8：AI 编程实践与 Agent 理论
 // ─────────────────────────────────────────────────────────────────────
 
-// Chapter 1：可解释 AI（XAI）⚪
-// 1.1 可解释性的重要性：黑盒问题、信任、监管
-// 1.2 事后解释：LIME、SHAP、Grad-CAM、Integrated Gradients
-// 1.3 内在可解释模型：决策树、规则列表、注意力可视化
-// 1.4 公平性与偏见：群体公平、个体公平、去偏见技术
+// Chapter 1：AI 编程工具概述 ⚪
+// 1.1 Claude Code：Anthropic 的 AI 编程助手，原生支持 Agent-Skill 标准
+// 1.2 Trae IDE：国产 AI 原生 IDE，规则系统与 MCP 集成
+// 1.3 Kiro：AWS AI IDE，Spec 驱动开发与三阶段工作流
+// 1.4 Cursor IDE：AI 代码编辑器，MDC 规则与链式 Agent 调用
+// 1.5 GitHub Copilot：代码补全与生成，仓库级指令支持
 
-// Chapter 2：AI 安全与对抗攻击 ⚪
-// 2.1 对抗样本：FGSM、PGD、CW Attack、防御方法
-// 2.2 数据投毒：后门攻击、标签翻转、防御策略
-// 2.3 模型窃取：模型提取攻击、水印保护
-// 2.4 隐私保护：差分隐私、联邦学习、同态加密
+// Chapter 2：Agent-Skill 开放标准（行业事实标准）🔶
+// 2.1 核心术语定义：Skill（最小可复用能力单元）、Agent（调度单元）、Command（用户入口）
+// 2.2 目录结构标准：全局目录 ~/.anthropic/、项目目录 .claude/.trae/.kiro.claude/
+// 2.3 SKILL.md 规范：YAML 元数据（name、description、version、tags）+ Markdown 正文
+// 2.4 AGENTS.md 智能体调度标准：技能绑定、规划策略、约束规则
+// 2.5 渐进式披露机制：Discovery → Activation → Execution 分层加载
+// 2.6 作用域分层：全局级、项目级、文件级
 
-// Chapter 3：多模态学习 ⚪
-// 3.1 多模态融合：早期融合、晚期融合、中间融合
-// 3.2 CLIP：对比学习、图文匹配、零样本分类
-// 3.3 DALL-E / Midjourney：文生图、扩散模型
-// 3.4 多模态大模型：GPT-4V、Gemini、Qwen-VL
+// Chapter 3：MCP（Model Context Protocol）工具调用标准 🔶
+// 3.1 MCP 定位：Agent 与本地工具的统一接口（USB-C 级通用协议）
+// 3.2 三大核心能力：Tools（可执行操作）、Resources（读取文件）、Prompts（模板）
+// 3.3 协议架构：JSON-RPC 2.0、客户端-主机-服务器模式
+// 3.4 安全机制：最小权限原则、工具白名单、用户授权流程
+// 3.5 各工具实现：.trae/mcp.json、Claude Code MCP 配置
 
-// Chapter 4：AI 未来展望 ⚪
-// 4.1 AGI 通用人工智能：定义、挑战、路径
-// 4.2 神经符号 AI：结合符号推理与深度学习
-// 4.3 脑机接口：Neuralink、EEG 解码、应用前景
-// 4.4 AI 与社会：就业变革、教育、医疗、法律
+// Chapter 4：A2A（Agent-to-Agent）通信标准 ⚪
+// 4.1 A2A 定位：Agent 间跨工具/跨平台通信协议
+// 4.2 核心概念：AgentCard、消息格式、RPC 方法
+// 4.3 应用场景：多智能体分工协作、任务委托、工件传递
+// 4.4 多智能体模式：前端 Agent + 后端 Agent + 测试 Agent 协作
+
+// Chapter 5：Rules 与 Spec 工作流标准 ⚪
+// 5.1 Rules 标准：长期静态约束（编码规范、框架偏好）
+// 5.2 加载模式：always（全局加载）、filematch（文件匹配）、manual（手动调用）
+// 5.3 Spec 工作流（Kiro）：requirements.md → design.md → tasks.md 三段式
+// 5.4 各工具规则实现对比：Trae 的 rules 嵌套、Cursor 的 MDC 格式
+
+// Chapter 6：Skill 开发实践 🔶
+// 6.1 Skill 目录结构：SKILL.md、scripts/、references/、assets/
+// 6.2 SKILL.md 设计原则：元数据精准化、指令分层、Token 优化
+// 6.3 本地测试 Skill 设计：Maven 打包 → JAR 启动 → cURL 测试 → 进程清理
+// 6.4 脚本封装：确定性任务 vs AI 生成任务、Shell/Python 脚本集成
+// 6.5 技能分发：团队共享、版本控制、社区模板复用
