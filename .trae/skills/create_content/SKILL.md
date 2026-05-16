@@ -1,4 +1,5 @@
 ---
+name: create_content
 description: 根据笔记主题（如 Python、Java、数据结构等）在 main.typ 中生成注释形式的三层目录结构（Part-Chapter-Section）
 ---
 

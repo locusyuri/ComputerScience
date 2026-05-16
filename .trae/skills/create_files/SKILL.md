@@ -1,8 +1,9 @@
 ---
+name: create_files
 description: 根据 main.typ 中的目录草稿，为每个 Part 创建对应的章节文件并引入
 ---
 
-# Python 笔记目录生成流程
+# 笔记目录生成流程
 
 ## 任务说明
 
@@ -106,7 +107,7 @@ description: 根据 main.typ 中的目录草稿，为每个 Part 创建对应的
 
 ## 关键原则
 （除非用户有特殊要求）
-1. **一个 Part 一个文件**：每个 Part 对应一个 `.typ` 文件 
+1. **一个 Part 一个文件**：每个 Part 对应一个 `.typ` 文件
 2. **只写 Chapter 标题**：文件中只包含一级标题（`= Chapter`）
 3. **相对路径正确**：模板引用使用 `../../../99-索引与模板/TypstTemplate/computer-notes.typ`
 4. **文件名简洁**：不需要完全对应 Part 名称，简短清晰即可
