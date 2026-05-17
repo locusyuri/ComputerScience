@@ -786,9 +786,9 @@ Java字符串处理的核心要点：
 
 Java 集合框架用于统一管理数据集合，核心目标是：统一操作接口、屏蔽底层实现差异、提供可组合的遍历与算法能力。
 
-#info[
-  图示占位：这里应有“Java 集合框架概览图（Collection / List / Set / Map 及常见实现类）”。
-]
+#figure(
+  image("../img/img.png"),
+)
 
 === 分类与定位
 
@@ -815,37 +815,105 @@ Java 集合框架用于统一管理数据集合，核心目标是：统一操作
 
 
 == List 接口与实现
+在 Java 集合框架中，`List` 接口继承自 `Collection` 接口，代表一个有序、可重复的集合（也称为序列）。核心特性包括：
 
-=== List 接口特点
+- 有序性：元素按照插入顺序存储，可通过整数索引精确访问
+- 可重复性：允许存储多个相同的元素
+- 索引访问：提供 `get(int index)`、`set(int index, E element)` 等方法
 
-`List` 是有序集合，允许重复元素，支持按索引访问。
+`List` 接口的主要实现类包括：`ArrayList`、`LinkedList`、`Vector`、`Stack` 以及并发包下的 `CopyOnWriteArrayList`。
 
+🧱 类图与继承体系:
+```text
+Iterable (接口)
+    │
+    └── Collection (接口)
+            │
+            └── List (接口)
+                    │
+                    ├── AbstractList (抽象类)
+                    │       │
+                    │       ├── ArrayList (类)          // JDK 1.2
+                    │       ├── AbstractSequentialList (抽象类)
+                    │       │       └── LinkedList (类) // JDK 1.2
+                    │       └── Vector (类)             // JDK 1.0
+                    │               └── Stack (类)      // JDK 1.0
+                    │
+                    └── CopyOnWriteArrayList (类)        // JDK 1.5 (java.util.concurrent)
+```
+#note[
+  - `AbstractList` 实现了 `List` 接口中除 `size()` 和 `get(int)` 之外的大部分方法
+  - `AbstractSequentialList` 专为链表结构优化，`LinkedList` 继承自它
+]
+
+=== 通用方法
+`List` 接口继承自 `Collection`，除了拥有 `Collection` 的所有方法外，还增加了一组基于索引位置的操作方法。以下按功能分类列出常用通用方法（所有 `List` 实现类均支持）。
+
+==== 添加元素
 #tex-table(
   ("方法", "作用", "备注"),
-  (`add(E e)`, "末尾添加元素", "可重复"),
-  (`get(int index)`, "按索引读取", "随机访问"),
-  (`set(int index, E e)`, "替换元素", "返回旧值"),
-  (`remove(int index)`, "按索引删除", "后续元素前移"),
-  (`subList(int from, int to)`, "截取子列表", "左闭右开"),
+  (`boolean add(E e)`, "末尾添加元素", [总是返回 `true` (符合 `Collection` 接口规范)]),
+  (
+    `boolean add(int index, E e)`,
+    "指定索引插入元素, 后续元素后移1位",
+    "如果索引超出范围，会抛出 `IndexOutOfBoundsException`",
+  ),
+  (`boolean addAll(int index, Collection<? extends E> c)`, "在指定索引插入所有元素", "返回是否成功插入所有元素"),
+  (`boolean addAll(Collection<? extends E> c)`, "末尾添加所有元素", "返回是否成功添加所有元素"),
 )
 
-==== Collection 基础方法（父接口）
-
+==== 删除元素
 #tex-table(
-  ("方法", "描述", "注意点"),
-  (`add`, "添加元素", "返回是否成功"),
-  (`remove`, "删除匹配元素", "通常删首个匹配"),
-  (`contains`, "是否包含元素", "依赖 equals"),
-  (`size`, "元素个数", ""),
-  (`iterator`, "获取迭代器", "遍历入口"),
-  (`toArray`, "转数组", ""),
+  ("方法", "作用", "备注"),
+  (`boolean remove(int index)`, "按索引删除元素", "返回是否成功删除"),
+  (`boolean remove(Object o)`, "根据元素删除", "返回是否成功删除"),
+  (`boolean removeAll(Collection<?> c)`, "删除所有匹配元素", "返回是否成功删除所有匹配元素"),
+  (`boolean retainAll(Collection<?> c)`, "保留所有匹配元素", "返回是否成功保留所有匹配元素"),
 )
+
+==== 获取/查询元素
+#tex-table(
+  ("方法", "作用", "备注"),
+  (`E get(int index)`, "按索引读取元素", "随机访问"),
+  (`E set(int index, E e)`, "替换元素", "返回旧值"),
+  (`boolean contains(Object o)`, "判断是否包含元素", "返回是否包含"),
+  (`boolean containsAll(Collection<?> c)`, "判断是否包含所有元素", "返回是否包含所有元素"),
+)
+
+==== 修改元素
+#tex-table(
+  ("方法", "作用", "备注"),
+  (`E set(int index, E e)`, "替换元素", "返回旧值"),
+)
+
+==== 遍历/视图/排序（Java 8+）
+#tex-table(
+  ("方法", "作用", "备注"),
+  (`Stream<E> stream()`, "返回流", "按元素顺序遍历"),
+  (`Stream<E> parallelStream()`, "返回并行流", "并行遍历"),
+  (`boolean sort(Comparator<? super E> comparator)`, "按比较器排序", "修改原列表"),
+)
+
+==== 其他批量操作
+#tex-table(
+  ("方法", "作用", "备注"),
+  (`boolean isEmpty()`, "判断是否为空", "返回是否为空"),
+  (`boolean clear()`, "清空列表", "返回是否成功清空"),
+)
+
+
+#note[
+  - 索引越界：所有带 `index` 参数的方法，若 `index < 0` 或 `index >= size()`，会抛出 `IndexOutOfBoundsException`。
+  - `subList` 视图特性：返回的是原列表的视图，对子列表的修改（增、删、改）会直接反映到原列表。反之，原列表结构改变后，子列表会变得不可用（抛出 `ConcurrentModificationException`）。
+  - `equals` 方法：`indexOf`、`contains`、`remove(Object)` 等依赖元素的 equals 方法进行比较，自定义对象需正确重写 equals 和 hashCode。
+  - `remove(int) vs remove(Object)`：若传入的是 `int` 字面量，优先匹配 `remove(int)`；若要删除值为整数的 `Integer` 对象，需强制转换：`list.remove((Integer) 42)`。
+  - `List` 的相等判断：两个 `List` 对象相等，当且仅当它们元素数量相同，且对应位置的元素 equals 比较都为 `true`。
+]
+
 
 === ArrayList
 
 `ArrayList` 底层是动态数组，特点是读取快、扩容有成本。
-
-==== 核心特征
 
 1. 随机访问 $O(1)$
 2. 末尾追加均摊 $O(1)$
@@ -863,8 +931,6 @@ System.out.println(names);
 === LinkedList
 
 `LinkedList` 底层是双向链表，支持头尾快速操作，也实现了 `Deque`。
-
-==== 核心特征
 
 1. 头尾插删效率高
 2. 中间插删更友好（定位后修改链接）
