@@ -175,6 +175,346 @@ auto base_it = it.base();  // 转换为正向迭代器，位置差一
 
 = STL算法
 
+== 算法分类概述
+
+STL 算法根据是否修改元素可分为三大类：
+
+- **非修改式算法**：不修改容器元素，仅读取或查找
+- **修改式算法**：修改容器元素值或顺序
+- **排序与关联算法**：排序、二分查找、集合操作
+
+所有算法均定义在 `<algorithm>` 头文件中。
+
+== 非修改式算法
+
+=== 查找算法
+
+```cpp
+std::vector<int> v = {1, 2, 3, 4, 5, 3};
+
+// find：查找第一个等于值的元素
+auto it = std::find(v.begin(), v.end(), 3);  // 指向第一个 3
+
+// find_if：查找第一个满足条件的元素
+auto even = std::find_if(v.begin(), v.end(), [](int x) { return x % 2 == 0; });
+
+// find_if_not：查找第一个不满足条件的元素
+auto odd = std::find_if_not(v.begin(), v.end(), [](int x) { return x % 2 == 0; });
+```
+
+=== 计数算法
+
+```cpp
+// count：统计等于值的元素个数
+int cnt = std::count(v.begin(), v.end(), 3);  // 返回 2
+
+// count_if：统计满足条件的元素个数
+int even_cnt = std::count_if(v.begin(), v.end(), [](int x) { return x % 2 == 0; });
+```
+
+=== 遍历算法
+
+```cpp
+// for_each：对每个元素执行操作
+std::for_each(v.begin(), v.end(), [](int& x) { x *= 2; });
+
+// all_of：所有元素满足条件返回 true
+bool all_positive = std::all_of(v.begin(), v.end(), [](int x) { return x > 0; });
+
+// any_of：任一元素满足条件返回 true
+bool has_even = std::any_of(v.begin(), v.end(), [](int x) { return x % 2 == 0; });
+
+// none_of：所有元素都不满足条件返回 true
+bool no_negative = std::none_of(v.begin(), v.end(), [](int x) { return x < 0; });
+```
+
+=== 搜索子序列
+
+```cpp
+std::vector<int> pattern = {2, 3};
+
+// search：在序列中查找子序列
+auto pos = std::search(v.begin(), v.end(), pattern.begin(), pattern.end());
+
+// search_n：查找连续 n 个满足条件的元素
+auto three_consecutive = std::search_n(v.begin(), v.end(), 3, 1);
+```
+
+== 修改式算法
+
+=== 变换算法
+
+```cpp
+std::vector<int> src = {1, 2, 3, 4};
+std::vector<int> dst(4);
+
+// transform：对元素进行变换并存储到另一个序列
+std::transform(src.begin(), src.end(), dst.begin(), [](int x) { return x * x; });
+
+// replace：替换等于值的元素
+std::replace(v.begin(), v.end(), 3, 0);
+
+// replace_if：替换满足条件的元素
+std::replace_if(v.begin(), v.end(), [](int x) { return x < 0; }, 0);
+```
+
+=== 复制与移动
+
+```cpp
+// copy：复制元素到目标序列
+std::copy(src.begin(), src.end(), std::back_inserter(dst));
+
+// copy_if：复制满足条件的元素
+std::copy_if(src.begin(), src.end(), std::back_inserter(dst),
+             [](int x) { return x % 2 == 0; });
+
+// move：移动元素（C++11）
+std::vector<std::string> src_str = {"a", "b", "c"};
+std::vector<std::string> dst_str;
+std::move(src_str.begin(), src_str.end(), std::back_inserter(dst_str));
+```
+
+=== 填充与生成
+
+```cpp
+// fill：填充指定值
+std::fill(v.begin(), v.end(), 0);
+
+// fill_n：填充前 n 个元素
+std::fill_n(v.begin(), 3, 1);
+
+// generate：用生成器填充
+int i = 0;
+std::generate(v.begin(), v.end(), [&i]() { return ++i; });
+
+// generate_n：生成前 n 个元素
+std::generate_n(std::back_inserter(v), 5, []() { return rand() % 100; });
+```
+
+=== 删除算法
+
+```cpp
+// remove：移除等于值的元素（实际不删除，返回新末尾）
+auto new_end = std::remove(v.begin(), v.end(), 3);
+v.erase(new_end, v.end());  // 真正删除
+
+// remove_if：移除满足条件的元素
+auto new_end = std::remove_if(v.begin(), v.end(), [](int x) { return x % 2 == 0; });
+v.erase(new_end, v.end());
+
+// unique：移除连续重复元素
+std::sort(v.begin(), v.end());
+auto new_end = std::unique(v.begin(), v.end());
+v.erase(new_end, v.end());
+```
+
+== 排序与搜索算法
+
+=== 排序算法
+
+排序算法是 STL 中最常用的算法之一，掌握它们的区别和适用场景至关重要。
+
+==== std::sort
+
+`std::sort` 是最常用的排序函数，采用*快速排序*或*内省排序*（Introsort）实现，平均时间复杂度为 `O(n log n)`。
+
+*特点：*
+- *不稳定排序*：相等元素的相对顺序可能改变
+- *就地排序*：直接修改原序列
+- *时间复杂度*：平均 `O(n log n)`，最坏 `O(n log n)`（内省排序优化）
+
+```cpp
+std::vector<int> nums = {3, 1, 4, 1, 5, 9, 2, 6};
+
+// 默认升序排序
+std::sort(nums.begin(), nums.end());
+// 结果：{1, 1, 2, 3, 4, 5, 6, 9}
+
+// 使用自定义比较器（降序）
+std::sort(nums.begin(), nums.end(), std::greater<int>());
+// 结果：{9, 6, 5, 4, 3, 2, 1, 1}
+
+// 使用 lambda 自定义排序规则
+struct Person { std::string name; int age; };
+std::vector<Person> people = {{"Alice", 30}, {"Bob", 25}, {"Charlie", 35}};
+std::sort(people.begin(), people.end(),
+          [](const Person& a, const Person& b) { return a.age < b.age; });
+```
+
+==== std::stable_sort
+
+`std::stable_sort` 保证*稳定排序*，即相等元素的相对顺序保持不变。
+
+*特点：*
+- *稳定排序*：保持相等元素的原始顺序
+- *时间复杂度*：`O(n log² n)`，若有足够额外内存则 `O(n log n)`
+- *适用场景*：需要保持原有顺序的排序场景
+
+```cpp
+std::vector<std::pair<int, std::string>> data = {
+    {2, "apple"}, {1, "banana"}, {2, "cherry"}, {1, "date"}
+};
+
+// 按第一个元素排序，保持相等元素的相对顺序
+std::stable_sort(data.begin(), data.end(),
+                 [](const auto& a, const auto& b) { return a.first < b.first; });
+// 结果：{{1, "banana"}, {1, "date"}, {2, "apple"}, {2, "cherry"}}
+// "banana" 在 "date" 之前，"apple" 在 "cherry" 之前，保持原始顺序
+```
+
+==== std::partial_sort
+
+`std::partial_sort` 只对序列的前 `n` 个元素进行排序，其余元素位置不确定。
+
+*特点：*
+- *部分排序*：只保证前 n 个元素有序且为最小的 n 个元素
+- *时间复杂度*：`O(n log k)`，其中 k 是需要排序的元素数量
+- *适用场景*：只关心前几名的场景（如取 Top K）
+
+```cpp
+std::vector<int> nums = {3, 1, 4, 1, 5, 9, 2, 6};
+
+// 将最小的 3 个元素排序放到前 3 个位置
+std::partial_sort(nums.begin(), nums.begin() + 3, nums.end());
+// 结果：{1, 1, 2, 4, 5, 9, 3, 6}
+// 前 3 个元素是最小的且有序，后面元素顺序不确定
+```
+
+==== std::nth_element
+
+`std::nth_element` 使第 n 个位置的元素处于"正确"位置（即排序后该位置应有的元素）。
+
+*特点：*
+- *选择算法*：第 n 个元素左边都 ≤ 它，右边都 ≥ 它
+- *时间复杂度*：平均 `O(n)`
+- *适用场景*：快速找到中位数或分位数
+
+```cpp
+std::vector<int> nums = {3, 1, 4, 1, 5, 9, 2, 6};
+
+// 使第 2 个位置（0-based）的元素处于正确位置
+std::nth_element(nums.begin(), nums.begin() + 2, nums.end());
+// 结果：{1, 1, 2, 3, 5, 9, 4, 6}
+// nums[2] = 2 是第 3 小的元素，左边都 ≤ 2，右边都 ≥ 2
+
+// 找到中位数
+std::nth_element(nums.begin(), nums.begin() + nums.size()/2, nums.end());
+int median = nums[nums.size()/2];
+```
+
+==== 排序算法对比
+
+| 算法 | 稳定性 | 时间复杂度 | 适用场景 |
+|------|--------|-----------|---------|
+| `sort` | 不稳定 | O(n log n) | 通用排序，不关心稳定性 |
+| `stable_sort` | 稳定 | O(n log² n) | 需要保持相等元素顺序 |
+| `partial_sort` | - | O(n log k) | 只需要前 k 个有序元素 |
+| `nth_element` | - | O(n) | 找中位数、分位数 |
+
+*选择建议：*
+- 一般情况用 `std::sort`
+- 需要稳定排序用 `std::stable_sort`
+- 只需要前几名用 `std::partial_sort`
+- 找中位数或分位数用 `std::nth_element`（效率最高）
+
+=== 二分查找（要求序列已排序）
+
+```cpp
+std::vector<int> sorted = {1, 2, 3, 4, 5, 6, 7};
+
+// binary_search：判断元素是否存在
+bool found = std::binary_search(sorted.begin(), sorted.end(), 4);
+
+// lower_bound：返回第一个 >= 值的位置
+auto lb = std::lower_bound(sorted.begin(), sorted.end(), 4);
+
+// upper_bound：返回第一个 > 值的位置
+auto ub = std::upper_bound(sorted.begin(), sorted.end(), 4);
+
+// equal_range：返回等于值的范围 [lower_bound, upper_bound)
+auto range = std::equal_range(sorted.begin(), sorted.end(), 4);
+```
+
+=== 集合操作（要求序列已排序）
+
+```cpp
+std::vector<int> a = {1, 2, 3, 4, 5};
+std::vector<int> b = {4, 5, 6, 7, 8};
+std::vector<int> result;
+
+// merge：合并两个有序序列
+std::merge(a.begin(), a.end(), b.begin(), b.end(), std::back_inserter(result));
+
+// set_union：求并集
+std::set_union(a.begin(), a.end(), b.begin(), b.end(), std::back_inserter(result));
+
+// set_intersection：求交集
+std::set_intersection(a.begin(), a.end(), b.begin(), b.end(), std::back_inserter(result));
+
+// set_difference：求差集
+std::set_difference(a.begin(), a.end(), b.begin(), b.end(), std::back_inserter(result));
+```
+
+== 数值算法
+
+数值算法定义在 `<numeric>` 头文件中。
+
+=== 累加与内积
+
+```cpp
+std::vector<int> nums = {1, 2, 3, 4, 5};
+
+// accumulate：累加求和
+int sum = std::accumulate(nums.begin(), nums.end(), 0);  // 初始值为 0
+
+// accumulate with custom operation
+int product = std::accumulate(nums.begin(), nums.end(), 1, std::multiplies<int>());
+
+// inner_product：内积（点积）
+std::vector<int> a = {1, 2, 3};
+std::vector<int> b = {4, 5, 6};
+int dot = std::inner_product(a.begin(), a.end(), b.begin(), 0);  // 1*4 + 2*5 + 3*6 = 32
+```
+
+=== 前缀和与相邻差
+
+```cpp
+std::vector<int> v = {1, 2, 3, 4, 5};
+std::vector<int> result(v.size());
+
+// partial_sum：前缀和
+std::partial_sum(v.begin(), v.end(), result.begin());  // {1, 3, 6, 10, 15}
+
+// adjacent_difference：相邻元素差
+std::adjacent_difference(v.begin(), v.end(), result.begin());  // {1, 1, 1, 1, 1}
+```
+
+== C++20 范围接口（Ranges）
+
+C++20 引入了范围概念，简化算法调用：
+
+```cpp
+#include <ranges>
+
+std::vector<int> nums = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+// 范围适配器
+auto even_squares = nums | std::views::filter([](int x) { return x % 2 == 0; })
+                         | std::views::transform([](int x) { return x * x; });
+
+// 范围算法（C++20）
+std::ranges::sort(nums);
+std::ranges::for_each(nums, [](int x) { std::cout << x << ' '; });
+```
+
+常用范围适配器：
+- `views::filter`：过滤元素
+- `views::transform`：变换元素
+- `views::take`：取前 n 个元素
+- `views::drop`：跳过前 n 个元素
+- `views::reverse`：反转序列
+- `views::split`：分割序列
+
 = 智能指针与内存管理
 
 = 常用库组件
