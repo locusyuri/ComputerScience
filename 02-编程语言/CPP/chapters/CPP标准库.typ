@@ -146,12 +146,12 @@ std::priority_queue<int, std::vector<int>, std::greater<int>> min_pq;  // 最小
 === 迭代器类型
 
 #tex-table(
-  ("类型", "支持操作", "容器示例"),
-  ("Input/Output", "`++`, `*`", "-"),
-  ("Forward", "`++`, 多次解引用", "`forward_list`"),
-  ("Bidirectional", "`++`, `--`", "`list`, `set`, `map`"),
-  ("RandomAccess", "`++`, `--`, `+`, `-`, `[]`", "`vector`, `deque`"),
-  ("Contiguous", "内存连续", "`vector`, `array`, `string`"),
+  ([类型], [支持操作], [容器示例]),
+  ([Input/Output], [`++`, `*`], [-]),
+  ([Forward], [`++`, 多次解引用], [`forward_list`]),
+  ([Bidirectional], [`++`, `--`], [`list`, `set`, `map`]),
+  ([RandomAccess], [`++`, `--`, `+`, `-`, `[]`], [`vector`, `deque`]),
+  ([Contiguous], [内存连续], [`vector`, `array`, `string`]),
 )
 
 === 迭代器失效
@@ -187,28 +187,151 @@ auto base_it = it.base();  // 转换为正向迭代器，位置差一
 下面的操作*适用于所有 STL 容器*：
 
 #tex-table(
-  ("方法", "功能", "示例"),
-  ("构造函数", "创建容器", "`vector<int> v;`"),
-  ("`size()`", "返回元素数量", "`v.size();`"),
-  ("`empty()`", "判断容器是否为空", "`if (v.empty()) ...`"),
-  ("`clear()`", "清空所有元素", "`v.clear();`"),
-  ("迭代器操作", "遍历元素", "`for (auto it = v.begin(); ...)`"),
-  ("`swap(c2)`", "交换两个容器内容", "`v1.swap(v2);`"),
-  ("比较运算符", "`==`, `!=`, `<` 等", "`if (v1 == v2) ...`"),
+  ([方法], [功能], [示例]),
+  ([构造函数], [创建容器], [`vector<int> v;`]),
+  ([`size()`], [返回元素数量], [`v.size();`]),
+  ([`empty()`], [判断容器是否为空], [`if (v.empty()) ...`]),
+  ([`clear()`], [清空所有元素], [`v.clear();`]),
+  ([迭代器操作], [遍历元素], [`for (auto it = v.begin(); ...)`]),
+  ([`swap(c2)`], [交换两个容器内容], [`v1.swap(v2);`]),
+  ([比较运算符], [`==`, `!=`, `<` 等], [`if (v1 == v2) ...`]),
 )
+
+```cpp
+#include <vector>
+#include <list>
+#include <set>
+#include <iostream>
+
+// 1. 构造函数
+std::vector<int> v1;                // 空容器
+std::vector<int> v2(5);             // 5 个默认值元素
+std::vector<int> v3{1, 2, 3, 4, 5}; // 初始化列表
+
+// 2. size()：返回元素数量
+std::cout << "Size: " << v3.size() << std::endl;  // 输出：5
+
+// 3. empty()：判断容器是否为空
+if (v1.empty()) {
+    std::cout << "v1 is empty" << std::endl;
+}
+
+// 4. clear()：清空所有元素
+v3.clear();
+std::cout << "After clear, size: " << v3.size() << std::endl;  // 输出：0
+
+// 5. 迭代器遍历
+std::list<int> lst{10, 20, 30};
+for (auto it = lst.begin(); it != lst.end(); ++it) {
+    std::cout << *it << " ";
+}
+// 范围 for 循环（C++11）
+for (int x : lst) {
+    std::cout << x << " ";
+}
+
+// 6. swap()：交换两个容器内容
+std::vector<int> a{1, 2, 3};
+std::vector<int> b{4, 5, 6};
+a.swap(b);  // a = {4,5,6}, b = {1,2,3}
+
+// 7. 比较运算符
+if (a == b) {
+    std::cout << "a and b are equal" << std::endl;
+} else if (a < b) {
+    std::cout << "a is less than b" << std::endl;
+}
+```
+
+
 
 === 序列容器专用接口
 
 #tex-table(
-  ("方法", "功能", "支持容器"),
-  ("`front()`", "访问首元素", "除 `array` 外所有"),
-  ("`back()`", "访问尾元素", "除 `forward_list` 外"),
-  ("`push_back(x)`", "尾部插入元素", "除 `array`/`forward_list` 外"),
-  ("`pop_back()`", "删除尾部元素", "除 `array`/`forward_list` 外"),
-  ("`insert(pos, x)`", "指定位置插入", "所有序列容器"),
-  ("`erase(pos)`", "删除指定元素", "所有序列容器"),
-  ("`[]` 和 `at(i)`", "随机访问元素", "`vector`/`deque`/`array`"),
+  ([方法], [功能], [支持容器]),
+  ([`front()`], [访问首元素], [除 `array` 外所有]),
+  ([`back()`], [访问尾元素], [除 `forward_list` 外]),
+  ([`push_back(x)`], [尾部插入元素], [除 `array`/`forward_list` 外]),
+  ([`pop_back()`], [删除尾部元素], [除 `array`/`forward_list` 外]),
+  ([`insert(pos, x)`], [指定位置插入], [所有序列容器]),
+  ([`erase(pos)`], [删除指定元素], [所有序列容器]),
+  ([`[]` 和 `at(i)`], [随机访问元素], [`vector`/`deque`/`array`]),
 )
+
+```cpp
+// 序列容器专用接口示例
+#include <vector>
+#include <deque>
+#include <list>
+#include <array>
+#include <forward_list>
+#include <iostream>
+
+// 1. front()：访问首元素
+std::vector<int> vec{1, 2, 3, 4, 5};
+std::cout << "vec.front() = " << vec.front() << std::endl;  // 输出：1
+
+std::list<int> lst{10, 20, 30};
+std::cout << "lst.front() = " << lst.front() << std::endl;  // 输出：10
+
+// 2. back()：访问尾元素（forward_list 不支持）
+std::deque<int> dq{100, 200, 300};
+std::cout << "dq.back() = " << dq.back() << std::endl;  // 输出：300
+
+// 3. push_back()：尾部插入元素
+vec.push_back(6);           // vec = {1,2,3,4,5,6}
+dq.push_back(400);          // dq = {100,200,300,400}
+lst.push_back(40);          // lst = {10,20,30,40}
+
+// 4. pop_back()：删除尾部元素
+vec.pop_back();             // vec = {1,2,3,4,5}
+dq.pop_back();             // dq = {100,200,300}
+
+// 5. insert()：指定位置插入
+auto insert_it = vec.insert(vec.begin() + 2, 99);  // 在索引 2 处插入 99
+// vec = {1,2,99,3,4,5}
+
+lst.insert(std::next(lst.begin(), 1), 15);  // 在第2个位置插入 15
+// lst = {10,15,20,30,40}
+
+// 6. erase()：删除指定元素
+auto erase_it = vec.erase(vec.begin() + 2);  // 删除索引 2 的元素
+// vec = {1,2,3,4,5}
+
+lst.erase(std::next(lst.begin(), 1));  // 删除第2个元素
+// lst = {10,20,30,40}
+
+// 7. [] 和 at()：随机访问（仅 vector/deque/array）
+std::array<int, 5> arr{1, 2, 3, 4, 5};
+std::cout << "arr[2] = " << arr[2] << std::endl;       // 输出：3（无边界检查）
+std::cout << "arr.at(3) = " << arr.at(3) << std::endl; // 输出：4（有边界检查）
+
+vec[0] = 100;              // 修改第一个元素
+try {
+    vec.at(10) = 0;        // 抛出 std::out_of_range 异常
+} catch (const std::out_of_range& e) {
+    std::cout << "Out of range: " << e.what() << std::endl;
+}
+
+// 8. deque 专用：push_front() / pop_front()
+dq.push_front(50);         // dq = {50,100,200,300}
+dq.pop_front();            // dq = {100,200,300}
+
+// 9. list/forward_list 专用操作
+std::list<int> lst1{1, 2, 3};
+std::list<int> lst2{4, 5, 6};
+
+// splice：移动元素
+lst1.splice(lst1.end(), lst2);  // lst1 = {1,2,3,4,5,6}, lst2 为空
+
+// merge：合并两个有序链表（需先排序）
+std::list<int> a{1, 3, 5};
+std::list<int> b{2, 4, 6};
+a.merge(b);  // a = {1,2,3,4,5,6}, b 为空
+
+// remove：删除指定值的所有元素
+a.remove(3);  // a = {1,2,4,5,6}
+```
 
 *特殊操作：*
 - `list`/`forward_list`：`splice()`、`merge()`、`remove()`
@@ -225,52 +348,190 @@ auto base_it = it.base();  // 转换为正向迭代器，位置差一
   ([`equal_range(k)`], [返回 key 的区间范围], [有序容器专用]),
 )
 
+以下是常用接口的详细示例：
+
+```cpp
+#include <set>
+#include <map>
+#include <iostream>
+
+// set 的查找操作
+std::set<int> s = {1, 3, 5, 7, 9};
+
+// find(key)：查找等于 key 的元素
+// - 找到：返回指向该元素的迭代器，通过 *it 解引用获取元素值
+// - 没找到：返回容器的 end() 迭代器（尾后迭代器，表示无效位置）
+auto it = s.find(5);
+if (it != s.end()) {           // 判断是否找到
+    std::cout << "Found: " << *it << std::endl;  // 解引用迭代器获取元素，输出: Found: 5
+} else {
+    std::cout << "Not found" << std::endl;
+}
+
+// count(key)：统计 key 出现次数（set 中只能是 0 或 1）
+if (s.count(3)) {
+    std::cout << "3 exists in set" << std::endl;
+}
+
+// lower_bound(k)：返回第一个 ≥key 的位置
+auto lb = s.lower_bound(4);  // 指向 5
+std::cout << "First >= 4: " << *lb << std::endl;  // 输出: 5
+
+// upper_bound(k)：返回第一个 >key 的位置
+auto ub = s.upper_bound(5);  // 指向 7
+std::cout << "First > 5: " << *ub << std::endl;    // 输出: 7
+
+// equal_range(k)：返回 key 的区间 [lower_bound, upper_bound)
+auto range = s.equal_range(5);
+for (auto it = range.first; it != range.second; ++it) {
+    std::cout << *it << " ";  // 输出: 5
+}
+```
+
+*multiset 的范围查找：*
+
+```cpp
+std::multiset<int> ms = {1, 2, 2, 2, 3};
+
+// 在 multiset 中查找所有等于 2 的元素
+auto range = ms.equal_range(2);
+for (auto it = range.first; it != range.second; ++it) {
+    std::cout << *it << " ";  // 输出: 2 2 2
+}
+```
+
 *`map`/`unordered_map` 特有操作：*
 
 ```cpp
+#include <map>
+#include <unordered_map>
+
 std::map<std::string, int> m;
-m["key"] = 10;           // 插入或修改
-m.emplace("key", 42);    // 直接构造元素
+
+// 下标访问：不存在则插入默认值
+m["one"] = 1;              // 插入 {"one", 1}
+int val = m["two"];        // 插入 {"two", 0}，返回 0
+
+// emplace：直接构造元素，避免拷贝
+m.emplace("three", 3);     // 构造 pair<const string, int>
+
+// insert：插入 pair
+m.insert({"four", 4});
+
+// 遍历 map
+for (const auto& pair : m) {
+    std::cout << pair.first << ": " << pair.second << std::endl;
+}
+
+// 结构化绑定（C++17）
+for (const auto& [key, value] : m) {
+    std::cout << key << ": " << value << std::endl;
+}
 ```
 
 === 无序容器专用接口
 
 #tex-table(
-  ("方法", "功能"),
-  ("`bucket_count()`", "返回桶数量"),
-  ("`load_factor()`", "返回负载因子（元素数/桶数）"),
-  ("`rehash(n)`", "设置桶数量为 n"),
-  ("`reserve(n)`", "预留至少 n 个元素的空间"),
+  ([方法], [功能]),
+  ([`bucket_count()`], [返回桶数量]),
+  ([`load_factor()`], [返回负载因子（元素数/桶数）]),
+  ([`rehash(n)`], [设置桶数量为 n]),
+  ([`reserve(n)`], [预留至少 n 个元素的空间]),
 )
+
+无序容器基于哈希表实现，提供了桶管理和负载因子相关的操作：
+
+```cpp
+#include <unordered_set>
+#include <unordered_map>
+#include <iostream>
+
+// unordered_set 的基本操作
+std::unordered_set<int> us = {10, 20, 30, 40, 50};
+
+// bucket_count()：返回桶数量
+std::cout << "Bucket count: " << us.bucket_count() << std::endl;
+
+// load_factor()：返回负载因子（元素数/桶数）
+std::cout << "Load factor: " << us.load_factor() << std::endl;
+
+// max_load_factor()：返回/设置最大负载因子
+std::cout << "Max load factor: " << us.max_load_factor() << std::endl;
+us.max_load_factor(0.7);  // 设置最大负载因子为 0.7
+
+// rehash(n)：重新分配桶数量为 n
+us.rehash(100);
+std::cout << "After rehash, bucket count: " << us.bucket_count() << std::endl;
+
+// reserve(n)：预留至少 n 个元素的空间（会自动计算所需桶数）
+us.reserve(1000);
+```
+
+*桶操作示例：*
+
+```cpp
+// bucket(key)：返回 key 所在的桶索引
+size_t bucket_idx = us.bucket(30);
+std::cout << "30 is in bucket: " << bucket_idx << std::endl;
+
+// bucket_size(n)：返回第 n 个桶中的元素数量
+std::cout << "Bucket " << bucket_idx << " size: " << us.bucket_size(bucket_idx) << std::endl;
+```
+
+*unordered_map 的哈希策略调整：*
+
+```cpp
+std::unordered_map<std::string, int> um;
+
+// 预分配桶数，避免频繁扩容
+um.reserve(1000);
+
+// 调整负载因子平衡性能与内存
+um.max_load_factor(0.8);
+
+// 插入大量元素
+for (int i = 0; i < 500; ++i) {
+    um["key" + std::to_string(i)] = i;
+}
+
+std::cout << "Elements: " << um.size() << std::endl;
+std::cout << "Buckets: " << um.bucket_count() << std::endl;
+std::cout << "Load factor: " << um.load_factor() << std::endl;
+```
+
+*性能提示：*
+- 合理设置 `reserve()` 可减少哈希表扩容次数
+- 负载因子越小，哈希碰撞概率越低，但内存占用越大
+- 默认最大负载因子通常为 1.0，可根据场景调整
 
 == 容器选择指南
 
 #tex-table(
-  ("容器", "适用场景"),
-  ("`vector`", "需要动态调整大小的数组，频繁随机访问元素"),
-  ("`deque`", "需要在两端频繁插入和删除元素的场景"),
-  ("`list`", "需要频繁插入和删除元素，但不需要随机访问的场景"),
-  ("`forward_list`", "需要节省内存空间的单向链表场景"),
-  ("`array`", "大小固定且已知的数组场景"),
-  ("`set`", "需要存储唯一元素并进行排序的场景"),
-  ("`multiset`", "需要存储重复元素并进行排序的场景"),
-  ("`map`", "需要存储键值对并通过键快速查找值的场景"),
-  ("`multimap`", "需要存储键值对，允许一个键映射到多个值的场景"),
-  ("`unordered_set`", "需要快速查找唯一元素的场景"),
-  ("`unordered_multiset`", "需要快速查找重复元素的场景"),
-  ("`unordered_map`", "需要快速查找键值对的场景"),
-  ("`unordered_multimap`", "需要快速查找键值对，允许一个键映射到多个值的场景"),
+  ([容器], [适用场景]),
+  ([`vector`], [需要动态调整大小的数组，频繁随机访问元素]),
+  ([`deque`], [需要在两端频繁插入和删除元素的场景]),
+  ([`list`], [需要频繁插入和删除元素，但不需要随机访问的场景]),
+  ([`forward_list`], [需要节省内存空间的单向链表场景]),
+  ([`array`], [大小固定且已知的数组场景]),
+  ([`set`], [需要存储唯一元素并进行排序的场景]),
+  ([`multiset`], [需要存储重复元素并进行排序的场景]),
+  ([`map`], [需要存储键值对并通过键快速查找值的场景]),
+  ([`multimap`], [需要存储键值对，允许一个键映射到多个值的场景]),
+  ([`unordered_set`], [需要快速查找唯一元素的场景]),
+  ([`unordered_multiset`], [需要快速查找重复元素的场景]),
+  ([`unordered_map`], [需要快速查找键值对的场景]),
+  ([`unordered_multimap`], [需要快速查找键值对，允许一个键映射到多个值的场景]),
 )
 
 == Java 集合框架 vs C++ STL 容器
 
 #plain-table(
-  ("维度", "Java 集合框架 (JCF)", "C++ STL 容器"),
-  ("核心理念", "面向对象 OOP", "泛型编程 GP"),
-  ("基础架构", "基于接口和类的继承", "基于模板和值语义"),
-  ("多态实现", "运行时多态（接口 `Collection`、`Map`）", "编译时多态（模板机制）"),
-  ("内存管理", "GC 自动管理", "RAII 手工管理"),
-  ("异常机制", "统一异常处理", "不强制异常"),
+  ([维度], [Java 集合框架 (JCF)], [C++ STL 容器]),
+  ([核心理念], [面向对象 OOP], [泛型编程 GP]),
+  ([基础架构], [基于接口和类的继承], [基于模板和值语义]),
+  ([多态实现], [运行时多态（接口 `Collection`、`Map`）], [编译时多态（模板机制）]),
+  ([内存管理], [GC 自动管理], [RAII 手工管理]),
+  ([异常机制], [统一异常处理], [不强制异常]),
 )
 
 *C++ STL 容器设计特点：*
