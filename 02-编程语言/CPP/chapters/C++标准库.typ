@@ -179,9 +179,9 @@ auto base_it = it.base();  // 转换为正向迭代器，位置差一
 
 STL 算法根据是否修改元素可分为三大类：
 
-- **非修改式算法**：不修改容器元素，仅读取或查找
-- **修改式算法**：修改容器元素值或顺序
-- **排序与关联算法**：排序、二分查找、集合操作
+- *非修改式算法*：不修改容器元素，仅读取或查找
+- *修改式算法*：修改容器元素值或顺序
+- *排序与关联算法*：排序、二分查找、集合操作
 
 所有算法均定义在 `<algorithm>` 头文件中。
 
@@ -239,6 +239,7 @@ auto pos = std::search(v.begin(), v.end(), pattern.begin(), pattern.end());
 // search_n：查找连续 n 个满足条件的元素
 auto three_consecutive = std::search_n(v.begin(), v.end(), 3, 1);
 ```
+
 
 == 修改式算法
 
@@ -316,30 +317,166 @@ v.erase(new_end, v.end());
 
 ==== std::sort
 
-`std::sort` 是最常用的排序函数，采用*快速排序*或*内省排序*（Introsort）实现，平均时间复杂度为 `O(n log n)`。
+`std::sort` 是 STL 中最常用的排序函数，用于对指定范围内的元素进行排序。
 
-*特点：*
-- *不稳定排序*：相等元素的相对顺序可能改变
-- *就地排序*：直接修改原序列
-- *时间复杂度*：平均 `O(n log n)`，最坏 `O(n log n)`（内省排序优化）
+===== 函数签名与重载
+
+`std::sort` 提供三个重载版本：
 
 ```cpp
-std::vector<int> nums = {3, 1, 4, 1, 5, 9, 2, 6};
+// 1. 使用默认比较器（operator<），升序排列
+template<class RandomIt>
+void sort(RandomIt first, RandomIt last);
 
-// 默认升序排序
-std::sort(nums.begin(), nums.end());
-// 结果：{1, 1, 2, 3, 4, 5, 6, 9}
+// 2. 使用自定义比较器
+template<class RandomIt, class Compare>
+void sort(RandomIt first, RandomIt last, Compare comp);
 
-// 使用自定义比较器（降序）
-std::sort(nums.begin(), nums.end(), std::greater<int>());
-// 结果：{9, 6, 5, 4, 3, 2, 1, 1}
+// 3. C++20 起：使用默认比较器，指定执行策略
+template<class ExecutionPolicy, class RandomIt>
+void sort(ExecutionPolicy&& policy, RandomIt first, RandomIt last);
 
-// 使用 lambda 自定义排序规则
-struct Person { std::string name; int age; };
-std::vector<Person> people = {{"Alice", 30}, {"Bob", 25}, {"Charlie", 35}};
-std::sort(people.begin(), people.end(),
-          [](const Person& a, const Person& b) { return a.age < b.age; });
+// 4. C++20 起：使用自定义比较器 + 执行策略
+template<class ExecutionPolicy, class RandomIt, class Compare>
+void sort(ExecutionPolicy&& policy, RandomIt first, RandomIt last, Compare comp);
 ```
+
+*执行策略*（C++17/20）：
+- `std::execution::seq`：顺序执行
+- `std::execution::par`：并行执行
+- `std::execution::par_unseq`：并行且向量化
+
+```cpp
+#include <execution>
+
+std::vector<int> v = {3, 1, 4, 1, 5, 9, 2, 6};
+
+// C++17 并行排序（多核加速）
+std::sort(std::execution::par, v.begin(), v.end());
+```
+
+===== 迭代器要求
+
+`std::sort` 要求 RandomAccessIterator（随机访问迭代器），这是最高级的迭代器类型。
+
+*支持的容器*：
+- `std::vector`
+- `std::deque`
+- `std::array`
+- 普通数组（通过指针）
+
+*不支持*：
+- `std::list`（双向迭代器，不支持随机访问）
+- `std::set`、`std::map`（关联容器，本身有序）
+- `std::forward_list`（单向迭代器）
+
+```cpp
+// ✅ 支持的用法
+std::vector<int> v = {3, 1, 4};
+std::sort(v.begin(), v.end());
+
+int arr[] = {3, 1, 4};
+std::sort(std::begin(arr), std::end(arr));
+
+// ❌ 不支持的用法
+std::list<int> lst = {3, 1, 4};
+std::sort(lst.begin(), lst.end());  // 编译错误！
+// 正确做法：lst.sort()（list 自带的成员函数）
+```
+
+===== 底层算法：内省排序（Introsort）
+
+`std::sort` 的底层实现采用*内省排序*（Introsort），这是一种混合排序算法，结合了多种排序算法的优点。
+
+*算法流程*：
+
+```
+内省排序
+├── 阶段 1：快速排序（Quick Sort）
+│   └── 当递归深度 < 2 × log₂n 时使用
+├── 阶段 2：堆排序（Heap Sort）
+│   └── 当递归深度超过阈值时切换，避免最坏情况
+└── 阶段 3：插入排序（Insertion Sort）
+    └── 当分区大小 ≤ 16 时使用，优化小规模数据
+```
+
+*为什么选择内省排序？*
+
+| 纯算法 | 优点 | 缺点 |
+|--------|------|------|
+| 快速排序 | 平均 $O("n log n")$，缓存友好 | 最坏 $O("n"^2)$，不稳定 |
+| 堆排序 | 最坏 $O("n log n")$，稳定 | 缓存不友好，交换次数多 |
+| 插入排序 | 对有序数据 $O(n)$，小规模高效 | 最坏 $O("n"^2)$ |
+
+内省排序综合了快速排序的平均性能和堆排序的最坏情况保障。
+
+===== 比较器（Compare）
+
+比较器可以是函数指针、函数对象或 Lambda 表达式。
+
+*返回类型要求*：`bool comp(const T& a, const T& b)`
+- 返回 `true` 表示 `a` 应排在 `b` 之前
+
+*常用比较器*：
+
+```cpp
+std::vector<int> v = {3, 1, 4, 1, 5};
+
+// 1. std::greater（降序）
+std::sort(v.begin(), v.end(), std::greater<int>());
+// 结果：{5, 4, 3, 1, 1}
+
+// 2. std::less（显式升序，默认）
+std::sort(v.begin(), v.end(), std::less<int>());
+// 结果：{1, 1, 3, 4, 5}
+
+// 3. Lambda 表达式
+std::sort(v.begin(), v.end(), [](int a, int b) { return a > b; });
+// 结果：{5, 4, 3, 1, 1}
+
+// 4. 自定义结构（按绝对值排序）
+std::vector<int> nums = {-3, 1, -4, 1, -5, 9, 2, -6};
+std::sort(nums.begin(), nums.end(),
+          [](int a, int b) { return std::abs(a) < std::abs(b); });
+// 结果：{1, 1, 2, -3, -4, -5, -6, 9}
+```
+
+*稳定排序需求*：若需要保持相等元素顺序，应使用 `std::stable_sort`。
+
+===== 复杂度分析
+
+- *时间复杂度*：平均 $O("n log n")$，最坏 $O("n log n")$
+- *空间复杂度*：$O("log n")$（递归调用栈）
+- *交换次数*：约 $n log n$ 次
+
+```cpp
+// 验证复杂度：对不同规模数据计时
+std::vector<int> v(1000000);
+// 填充随机数据...
+auto start = std::chrono::high_resolution_clock::now();
+std::sort(v.begin(), v.end());
+auto end = std::chrono::high_resolution_clock::now();
+// n = 10⁶ 时，约 100-200ms（取决于硬件）
+```
+
+===== 注意事项
+
+1. *就地排序*：直接修改原序列，不返回新容器
+
+2. *不稳定*：相等元素的相对顺序可能改变
+  ```cpp
+  std::vector<std::pair<int, std::string>> v = {
+      {1, "a"}, {2, "b"}, {1, "c"}
+  };
+  std::sort(v.begin(), v.end(),
+            [](auto& a, auto& b) { return a.first < b.first; });
+  // 结果可能是：{1, "c"}, {1, "a"}, {2, "b"}
+  // 或：{1, "a"}, {1, "c"}, {2, "b"}
+  ```
+
+3. *要求可交换*：元素类型必须满足 `MoveConstructible` 和 `MoveAssignable`
+
+4. *异常安全*：C++11 起，要求比较器不抛出异常
 
 ==== std::stable_sort
 

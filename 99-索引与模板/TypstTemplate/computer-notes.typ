@@ -116,7 +116,7 @@
 /// 幼圆字体 - 用于强调文字
 #let font-yuan = "未来圆SC"
 
-#let font-yuan2 = "极影毁片圆"
+#let font-yuan2 = "极影毁片圆 Medium"
 
 // 苹方字体 - 用于 Callout 提示框
 #let font-pingfang = "PingFang SC"
@@ -756,7 +756,7 @@
   set text(font: (font-latin-main, font-cjk-main), size: font-main-size, fill: color-main-text, lang: "zh")
 
   // ── 重写加粗样式（*xxx*）- 使用超粗字重 + 幼圆字体 ──
-  show strong: it => text(weight: 100, font: font-yuan2, fill: color-main-text)[#it]
+  show strong: it => text(weight: 100, font: font-yuan, fill: color-main-text)[#it]
 
   // ── 标题编号规则: level 1 不编号, level 2+ 只显示本级编号 ──
   set heading(numbering: (..nums) => {
