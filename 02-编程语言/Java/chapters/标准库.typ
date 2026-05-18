@@ -315,7 +315,7 @@ end = System.currentTimeMillis();
 System.out.println("StringBuilder: " + (end - start) + "ms"); // ~5ms
 ```
 
-*性能差异*：**StringBuilder比String快1000倍以上**
+*性能差异*：StringBuilder比String快1000倍以上
 
 #caution[
   在循环中拼接字符串时，永远不要使用 `+=`，必须使用StringBuilder。
