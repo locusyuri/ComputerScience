@@ -311,7 +311,6 @@ class MyClass {
 `@JvmStatic` 注解用于在伴生对象中声明 `val`，确保在字节码中生成 `public static final` `getter` 方法。
 
 === 两种数据类型
-==== 值类型与引用类型
 在编程语言中，变量往往可以分为值类型（基本类型）和引用类型。
 + *值类型*：变量直接包含数据。赋值时复制数据。修改一个变量不会影响另一个。例如 C\# 的   `struct`、Java 的 `int`、Python 的 `int`（不可变对象，表现似值）。
 + *引用类型*：变量包含指向数据的地址。赋值时复制引用（地址），而不是复制对象本身。多个变量可以指向同一个对象，通过一个变量修改对象内容，另一个变量也能看到变化。
@@ -354,26 +353,60 @@ Java 中值类型（基本类型）有以下八种：`byte`、`short`、`int`、
 
 引用类型有：`String`、`Object`、`Map`、`List`、`Set`、`Enum`、`Class`、`Interface`。引用类型的默认值为 `null`。
 
+=== 基本类型详解
+==== 数字
+==== 布尔
+==== 字符
 ==== 基本类型的包装类
+===== Java 包装类
+Java 的基本类型（`int`, `double`, `boolean` 等）不是对象，无法直接参与泛型、不能放在集合中（如 `ArrayList<int>` 非法），也不能调用方法。包装类将这些基本类型“包装”成对象，使它们融入面向对象体系。
 
-Kotlin 没有基本类型和包装类型的区分，统一为对象：
+将基本类型转换为包装类称为装箱（Boxing），或从包装类转换为基本类型，称为拆箱（Unboxing）。频繁装箱/拆箱会创建大量临时对象，增加 GC 压力，在热点代码路径中应避免。
 
-```kotlin
-val i: Int = 42
-val l: Long = 42L
-val d: Double = 3.14
-val f: Float = 3.14f
-val b: Boolean = true
-val c: Char = 'A'
-val s: Short = 100
-val by: Byte = 10
+从 Java 5 开始，编译器自动在基本类型和包装类之间转换。
+```java
+Integer i = 42;          // 自动装箱：int → Integer
+int j = i;               // 自动拆箱：Integer → int
 ```
+底层实现：编译后实际调用 `Integer.valueOf(42)` 和 `i.intValue()`。
 
-#tip[
-  Kotlin 编译器会在 JVM 字节码层面优化为基本类型，性能与 Java 相同。
+#tex-table(
+  ([基本类型], [包装类], [装箱], [拆箱]),
+  ("byte", "Byte", [`Byte.valueOf((byte) 10)`], [`byte b = byteValue.intValue()`]),
+  ("short", "Short", [`Short.valueOf((short) 10)`], [`short s = shortValue.intValue()`]),
+  ("int", "Integer", [`Integer.valueOf(10)`], [`int i = intValueValue.intValue()`]),
+  ("long", "Long", [`Long.valueOf(10)`], [`long l = longValue.longValue()`]),
+  ("float", "Float", [`Float.valueOf(10.0f)`], [`float f = floatValueValue.floatValue()`]),
+  ("double", "Double", [`Double.valueOf(10.0)`], [`double d = doubleValue.doubleValue()`]),
+  ("boolean", "Boolean", [`Boolean.valueOf(true)`], [`boolean b = booleanValue.booleanValue()`]),
+  ("char", "Character", [`Character.valueOf('a')`], [`char c = characterValue.charValue()`]),
+)
+
+
+Java 对部分包装类提供了缓存，复用常用对象。
+
+#tex-table(
+  ([包装类], [缓存范围], [说明]),
+  [`Inte`],
+)
+
+#caution[
+  `==` 比较两个包装类对象时，比较的是引用（除非一个基本类型另一个包装类，则拆箱后比较值），应该用 `equals()`。
+  ```
+  Integer a = 100;
+  Integer b = 100;
+  System.out.println(a == b);   // true（因为缓存）
+  Integer c = 200;
+  Integer d = 200;
+  System.out.println(c == d);   // false（超出缓存范围）
+  ```
 ]
 
-=== 基本类型详解
+
+===== Kotlin 包装类
+
+
+
 
 === 类型推断
 
@@ -432,6 +465,45 @@ val num: Int? = str?.toIntOrNull()  // 转换失败返回 null
 #note[
   Kotlin 禁止隐式数值转换，避免意外的精度丢失，提高代码安全性。
 ]
+
+=== 深拷贝与浅拷贝
+- *浅拷贝 (Shallow Copy)*：只复制对象本身，如果对象内部有字段引用其他对象，则只复制引用（地址），不复制引用的对象。结果：原对象和副本共享内部的子对象。
+- *深拷贝 (Deep Copy)*：复制对象本身，并递归复制对象内部所有引用的对象，形成完全独立的副本。
+
+Java 中所有类都继承 `Object.clone()`，默认是浅拷贝。要实现深拷贝需自行处理。
+```java
+class Address {
+    String city;
+    Address(String city) { this.city = city; }
+}
+
+class Person implements Cloneable {
+    String name;
+    Address addr;
+
+    // 浅拷贝：默认实现
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();  // 只复制 addr 引用
+    }
+
+    // 深拷贝：手动复制 addr
+    public Person deepCopy() {
+        Person p = new Person();
+        p.name = this.name;
+        p.addr = new Address(this.addr.city);  // 新建 Address
+        return p;
+    }
+}
+
+// 使用
+Person p1 = new Person();
+p1.addr = new Address("北京");
+Person p2 = (Person) p1.clone();   // 浅拷贝
+p2.addr.city = "上海";
+System.out.println(p1.addr.city);  // 输出 "上海" —— 被影响了
+```
+
 
 == 空安全体系
 
