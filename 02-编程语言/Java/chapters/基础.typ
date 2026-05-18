@@ -387,24 +387,67 @@ Java 对部分包装类提供了缓存，复用常用对象。
 
 #tex-table(
   ([包装类], [缓存范围], [说明]),
-  [`Inte`],
+  ([`Integer`], [-128 ~ 127], [可通过 `-XX:AutoBoxCacheMax=<size>` 调整上限]),
+  ([`Byte`, `Short`, `Character`], [-128 ~ 127], [固定，不可调整]),
+  ([`Character`], [0 ~ 127], [ASCII 范围]),
+  ([`Boolean`], [True, False], [永远缓存]),
+  ([`Float`, `Double`], [无缓存], [因为浮点数范围太大]),
 )
 
-#caution[
-  `==` 比较两个包装类对象时，比较的是引用（除非一个基本类型另一个包装类，则拆箱后比较值），应该用 `equals()`。
-  ```
-  Integer a = 100;
-  Integer b = 100;
-  System.out.println(a == b);   // true（因为缓存）
-  Integer c = 200;
-  Integer d = 200;
-  System.out.println(c == d);   // false（超出缓存范围）
-  ```
-]
+
+`==` 比较两个包装类对象时，比较的是引用（除非一个基本类型另一个包装类，则拆箱后比较值），应该用 `equals()`。
+
+```java
+Integer i1 = 127;
+Integer i2 = 127;
+System.out.println(i1 == i2);   // true
+Integer i3 = 128;
+Integer i4 = 128;
+System.out.println(i3 == i4);   // false
+```
+其他方法：
+```java
+Integer.parseInt("123");        // 字符串转 int
+Integer.toString(456);          // int 转字符串
+Integer.valueOf("789");         // 返回 Integer 对象
+Integer.MAX_VALUE, Integer.MIN_VALUE;
+```
 
 
 ===== Kotlin 包装类
+Kotlin 没有显式的包装类语法，但在 JVM 平台上，一切编译后仍是 Java 的基本类型和包装类。Kotlin 通过类型系统统一处理。
 
+Kotlin 中直接使用 `Int`, `Double`, `Boolean` 等，不区分基本类型和包装类。编译器会根据上下文自动决定使用基本类型还是对象。
+```kotlin
+val a: Int = 10        // 在大部分情况下是基本类型 int
+val b: Int? = null     // 可空类型，必然被装箱为 Integer
+val c: Int = 10
+```
+`Int` 会被尽可能映射为 Java 基本类型 `int`，但在某些场景下会被装箱：
+- 作为泛型类型参数（如 `List<Int>`）时，`Int` 会被装箱为 `Integer`（JVM 泛型擦除导致）
+- 可空类型 `Int?` 永远对应 `Integer`（因为基本类型不能为 `null`）
+
+
+Kotlin 中没有明确的包装类名称，但可以通过 `.javaClass` 观察
+```kotlin
+val a: Int = 42
+println(a.javaClass)           // int （基本类型，但这里显示为 int.class）
+val b: Int? = 42
+println(b.javaClass)           // class java.lang.Integer
+```
+
+
+为了减少包装类的对象分配，Kotlin 提供了内联类（inline class，现已稳定为 `@JvmInline value class`）。它包装一个值，但编译时尽可能替换为底层类型，避免创建包装对象。
+
+```kotlin
+@JvmInline
+value class UserId(val id: Int)
+
+fun process(id: UserId) { ... }
+
+// 调用处 process(UserId(123)) 编译后可能直接使用 int 123，不创建对象
+```
+内联类解决了需要类型安全但又不想承担对象分配开销的问题，可以看作是一种自定义的“轻量级包装类”。
 
 
 
