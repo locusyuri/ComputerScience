@@ -69,3 +69,6 @@ svg-inkscape/
 
 # Build folders often used in this repo
 # **/tmp/
+
+*.pdf
+!**/main.pdf
