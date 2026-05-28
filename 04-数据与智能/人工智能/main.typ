@@ -297,6 +297,7 @@
 // ─────────────────────────────────────────────────────────────────────
 // Part 8：Agent 理论与 AI 编程实践
 // ─────────────────────────────────────────────────────────────────────
+#part("Agent 理论与 AI 编程实践")
 
 // Chapter 1：AI 编程工具概述 ⚪
 // 1.1 Claude Code：Anthropic 的 AI 编程助手，原生支持 Agent-Skill 标准
@@ -304,6 +305,7 @@
 // 1.3 Kiro：AWS AI IDE，Spec 驱动开发与三阶段工作流
 // 1.4 Cursor IDE：AI 代码编辑器，MDC 规则与链式 Agent 调用
 // 1.5 GitHub Copilot：代码补全与生成，仓库级指令支持
+= AI 编程工具概述
 
 // Chapter 2：Agent-Skill 开放标准（行业事实标准）🔶
 // 2.1 核心术语定义：Skill（最小可复用能力单元）、Agent（调度单元）、Command（用户入口）
@@ -312,6 +314,7 @@
 // 2.4 AGENTS.md 智能体调度标准：技能绑定、规划策略、约束规则
 // 2.5 渐进式披露机制：Discovery → Activation → Execution 分层加载
 // 2.6 作用域分层：全局级、项目级、文件级
+= Agent-Skill 开放标准
 
 // Chapter 3：MCP（Model Context Protocol）工具调用标准 🔶
 // 3.1 MCP 定位：Agent 与本地工具的统一接口（USB-C 级通用协议）
@@ -319,18 +322,21 @@
 // 3.3 协议架构：JSON-RPC 2.0、客户端-主机-服务器模式
 // 3.4 安全机制：最小权限原则、工具白名单、用户授权流程
 // 3.5 各工具实现：.trae/mcp.json、Claude Code MCP 配置
+= MCP（Model Context Protocol）工具调用标准
 
 // Chapter 4：A2A（Agent-to-Agent）通信标准 ⚪
 // 4.1 A2A 定位：Agent 间跨工具/跨平台通信协议
 // 4.2 核心概念：AgentCard、消息格式、RPC 方法
 // 4.3 应用场景：多智能体分工协作、任务委托、工件传递
 // 4.4 多智能体模式：前端 Agent + 后端 Agent + 测试 Agent 协作
+= A2A（Agent-to-Agent）通信标准
 
 // Chapter 5：Rules 与 Spec 工作流标准 ⚪
 // 5.1 Rules 标准：长期静态约束（编码规范、框架偏好）
 // 5.2 加载模式：always（全局加载）、filematch（文件匹配）、manual（手动调用）
 // 5.3 Spec 工作流（Kiro）：requirements.md → design.md → tasks.md 三段式
 // 5.4 各工具规则实现对比：Trae 的 rules 嵌套、Cursor 的 MDC 格式
+= Rules 与 Spec 工作流标准
 
 // Chapter 6：Skill 开发实践 🔶
 // 6.1 Skill 目录结构：SKILL.md、scripts/、references/、assets/
