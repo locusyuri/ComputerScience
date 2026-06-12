@@ -183,40 +183,61 @@
 // Part 4：计算机视觉
 // ─────────────────────────────────────────────────────────────────────
 #part("计算机视觉")
-// Chapter 1：图像分类 🔶
-// 1.1 图像分类任务：单标签、多标签、细粒度分类
-// 1.2 数据增强：翻转、旋转、裁剪、颜色抖动、Mixup、CutMix
-// 1.3 迁移学习：预训练模型、微调策略、特征提取
-= 图像分类
 
-// Chapter 2：目标检测 🔶
-// 2.1 目标检测概述：边界框、IoU、mAP、NMS
-// 2.2 Two-Stage 检测器：R-CNN、Fast R-CNN、Faster R-CNN
-// 2.3 One-Stage 检测器：YOLO 系列、SSD、RetinaNet
-// 2.4 Anchor-Free 检测器：FCOS、CenterNet、DETR
-// 2.5 检测优化：FPN、PANet、BiFPN
+// Chapter 1：图像分类与识别 🔶
+// 1.1 图像分类任务概述：ImageNet、CIFAR、评估指标（Top-1、Top-5）
+// 1.2 经典分类器回顾：k-NN 决策边界、线性分类器 score function（参见 Part 2 Ch2/Ch4）
+// 1.3 损失与正则化：折叶损失（SVM）、交叉熵损失、L1/L2 正则（参见 Part 2 Ch2）
+// 1.4 优化算法回顾：SGD、Momentum、Adam、学习率调度（参见 Part 3 Ch1/Ch3）
+// 1.5 数据增强：几何变换、颜色抖动、Mixup、CutMix、AutoAugment、RandAugment
+// 1.6 迁移学习与微调：冻结策略、判别式微调、线性探测、LoRA
+= 图像分类与识别
+
+// Chapter 2：卷积神经网络进阶 🔶
+// 2.1 卷积与池化回顾：卷积核、步长、填充、通道（参见 Part 3 Ch4）
+// 2.2 经典 CNN 架构演进：LeNet → AlexNet → VGGNet → GoogLeNet → ResNet
+// 2.3 现代 CNN 设计：EfficientNet、ConvNeXt、MobileNet、Swin Transformer
+// 2.4 CNN 可视化：特征图可视化、滤波器可视化、Grad-CAM、DeepDream
+// 2.5 轻量化技术：深度可分离卷积、分组卷积、模型剪枝、知识蒸馏
+= 卷积神经网络进阶
+
+// Chapter 3：目标检测 🔶
+// 3.1 目标检测概述：边界框、IoU、mAP、NMS
+// 3.2 Two-Stage 检测器：R-CNN、Fast R-CNN、Faster R-CNN
+// 3.3 One-Stage 检测器：YOLO 系列、SSD、RetinaNet
+// 3.4 Anchor-Free 检测器：FCOS、CenterNet、DETR
+// 3.5 检测优化：FPN、PANet、BiFPN
 = 目标检测
 
-// Chapter 3：语义分割与实例分割 🔶
-// 3.1 语义分割：FCN、U-Net、DeepLab 系列
-// 3.2 实例分割：Mask R-CNN、SOLO、YOLACT
-// 3.3 全景分割：结合语义与实例、Panoptic FPN
-// 3.4 分割评估：IoU、Dice Coefficient、Pixel Accuracy
-= 语义分割与实例分割
+// Chapter 4：图像分割 🔶
+// 4.1 语义分割：FCN、U-Net、DeepLab 系列
+// 4.2 实例分割：Mask R-CNN、SOLO、YOLACT
+// 4.3 全景分割：Panoptic FPN
+// 4.4 分割评估：IoU、Dice Coefficient、Pixel Accuracy
+= 图像分割
 
-// Chapter 4：图像生成 ⚪
-// 4.1 自编码器（AE）：编码-解码、潜在空间
-// 4.2 变分自编码器（VAE）：重参数化技巧、KL 散度
-// 4.3 生成对抗网络（GAN）：Generator、Discriminator、训练技巧
-// 4.4 扩散模型（Diffusion）：前向过程、反向过程、DDPM、Stable Diffusion
-// 4.5 图像超分辨率：SRCNN、ESRGAN、Real-ESRGAN
-= 图像生成
+// Chapter 5：图卷积网络（GCN）🔶
+// 5.1 图数据基础：图结构表示、邻接矩阵、度矩阵、拉普拉斯矩阵
+// 5.2 图卷积原理：谱图卷积（ChebNet、GCN）vs 空间图卷积（消息传递范式）
+// 5.3 经典 GCN 模型：GCN、GraphSAGE、GAT（图注意力网络）
+// 5.4 点云处理：PointNet、PointNet++、DGCNN
+// 5.5 场景图生成：目标关系推理、Visual Genome 数据集
+// 5.6 图结构在视觉推理中的应用：视觉问答、关系检测
+= 图卷积网络（GCN）
 
-// Chapter 5：视频理解 ⚪
-// 5.1 视频分类：3D CNN、Two-Stream Network、SlowFast
-// 5.2 动作检测：时空定位、Tubelet 检测
-// 5.3 视频目标跟踪：Siamese Network、Transformer Tracker
-// 5.4 视频生成：Video GAN、Diffusion Video
+// Chapter 6：生成模型与视觉生成 ⚪
+// 6.1 自编码器与 VAE：编码-解码、重参数化技巧、KL 散度
+// 6.2 生成对抗网络：GAN 训练技巧、DCGAN、StyleGAN、CycleGAN
+// 6.3 扩散模型：前向过程、反向过程、DDPM、Stable Diffusion
+// 6.4 图像超分辨率：SRCNN、ESRGAN、Real-ESRGAN
+// 6.5 视觉生成评估：Inception Score（IS）、FID、CLIP Score
+= 生成模型与视觉生成
+
+// Chapter 7：视频理解 ⚪
+// 7.1 视频分类：3D CNN、Two-Stream Network、SlowFast
+// 7.2 动作检测：时空定位、Tubelet 检测
+// 7.3 视频目标跟踪：Siamese Network、Transformer Tracker
+// 7.4 视频生成：Video GAN、Diffusion Video
 = 视频理解
 
 // ─────────────────────────────────────────────────────────────────────
