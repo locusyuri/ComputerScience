@@ -183,40 +183,36 @@
 // Part 4：计算机视觉
 // ─────────────────────────────────────────────────────────────────────
 #part("计算机视觉")
-// Chapter 1：图像分类 🔶
-// 1.1 图像分类任务：单标签、多标签、细粒度分类
-// 1.2 数据增强：翻转、旋转、裁剪、颜色抖动、Mixup、CutMix
-// 1.3 迁移学习：预训练模型、微调策略、特征提取
-= 图像分类
 
-// Chapter 2：目标检测 🔶
-// 2.1 目标检测概述：边界框、IoU、mAP、NMS
-// 2.2 Two-Stage 检测器：R-CNN、Fast R-CNN、Faster R-CNN
-// 2.3 One-Stage 检测器：YOLO 系列、SSD、RetinaNet
-// 2.4 Anchor-Free 检测器：FCOS、CenterNet、DETR
-// 2.5 检测优化：FPN、PANet、BiFPN
+// Chapter 1：目标检测 🔶
+// 1.1 目标检测概述：边界框、IoU、mAP、NMS
+// 1.2 Two-Stage 检测器：R-CNN、Fast R-CNN、Faster R-CNN
+// 1.3 One-Stage 检测器：YOLO 系列、SSD、RetinaNet
+// 1.4 Anchor-Free 检测器：FCOS、CenterNet、DETR
+// 1.5 检测优化：FPN、PANet、BiFPN
 = 目标检测
 
-// Chapter 3：语义分割与实例分割 🔶
-// 3.1 语义分割：FCN、U-Net、DeepLab 系列
-// 3.2 实例分割：Mask R-CNN、SOLO、YOLACT
-// 3.3 全景分割：结合语义与实例、Panoptic FPN
-// 3.4 分割评估：IoU、Dice Coefficient、Pixel Accuracy
-= 语义分割与实例分割
+// Chapter 2：图像分割 🔶
+// 2.1 语义分割：FCN、U-Net、DeepLab 系列
+// 2.2 实例分割：Mask R-CNN、SOLO、YOLACT
+// 2.3 全景分割：Panoptic FPN
+// 2.4 分割评估：IoU、Dice Coefficient、Pixel Accuracy
+= 图像分割
 
-// Chapter 4：图像生成 ⚪
-// 4.1 自编码器（AE）：编码-解码、潜在空间
-// 4.2 变分自编码器（VAE）：重参数化技巧、KL 散度
-// 4.3 生成对抗网络（GAN）：Generator、Discriminator、训练技巧
-// 4.4 扩散模型（Diffusion）：前向过程、反向过程、DDPM、Stable Diffusion
-// 4.5 图像超分辨率：SRCNN、ESRGAN、Real-ESRGAN
-= 图像生成
+// Chapter 3：图卷积网络（GCN）🔶
+// 3.1 图数据基础：图结构表示、邻接矩阵、度矩阵、拉普拉斯矩阵
+// 3.2 图卷积原理：谱图卷积（ChebNet、GCN）vs 空间图卷积（消息传递范式）
+// 3.3 经典 GCN 模型：GCN、GraphSAGE、GAT（图注意力网络）
+// 3.4 点云处理：PointNet、PointNet++、DGCNN
+// 3.5 场景图生成：目标关系推理、Visual Genome 数据集
+// 3.6 图结构在视觉推理中的应用：视觉问答、关系检测
+= 图卷积网络（GCN）
 
-// Chapter 5：视频理解 ⚪
-// 5.1 视频分类：3D CNN、Two-Stream Network、SlowFast
-// 5.2 动作检测：时空定位、Tubelet 检测
-// 5.3 视频目标跟踪：Siamese Network、Transformer Tracker
-// 5.4 视频生成：Video GAN、Diffusion Video
+// Chapter 4：视频理解 ⚪
+// 4.1 视频分类：3D CNN、Two-Stream Network、SlowFast
+// 4.2 动作检测：时空定位、Tubelet 检测
+// 4.3 视频目标跟踪：Siamese Network、Transformer Tracker
+// 4.4 视频生成：Video GAN、Diffusion Video
 = 视频理解
 
 // ─────────────────────────────────────────────────────────────────────
