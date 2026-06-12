@@ -162,12 +162,13 @@
 // ─────────────────────────────────────────────────────────────────────
 // Part 4：计算机视觉
 // ─────────────────────────────────────────────────────────────────────
-
+#part("计算机视觉")
 // Chapter 1：图像分类 🔶
 // 1.1 图像分类任务：单标签、多标签、细粒度分类
 // 1.2 数据增强：翻转、旋转、裁剪、颜色抖动、Mixup、CutMix
 // 1.3 迁移学习：预训练模型、微调策略、特征提取
 // 1.4 模型压缩：剪枝、量化、知识蒸馏
+= 图像分类
 
 // Chapter 2：目标检测 🔶
 // 2.1 目标检测概述：边界框、IoU、mAP、NMS
@@ -175,12 +176,14 @@
 // 2.3 One-Stage 检测器：YOLO 系列、SSD、RetinaNet
 // 2.4 Anchor-Free 检测器：FCOS、CenterNet、DETR
 // 2.5 检测优化：FPN、PANet、BiFPN
+= 目标检测
 
 // Chapter 3：语义分割与实例分割 🔶
 // 3.1 语义分割：FCN、U-Net、DeepLab 系列
 // 3.2 实例分割：Mask R-CNN、SOLO、YOLACT
 // 3.3 全景分割：结合语义与实例、Panoptic FPN
 // 3.4 分割评估：IoU、Dice Coefficient、Pixel Accuracy
+= 语义分割与实例分割
 
 // Chapter 4：图像生成 ⚪
 // 4.1 自编码器（AE）：编码-解码、潜在空间
@@ -188,13 +191,14 @@
 // 4.3 生成对抗网络（GAN）：Generator、Discriminator、训练技巧
 // 4.4 扩散模型（Diffusion）：前向过程、反向过程、DDPM、Stable Diffusion
 // 4.5 图像超分辨率：SRCNN、ESRGAN、Real-ESRGAN
+= 图像生成
 
 // Chapter 5：视频理解 ⚪
 // 5.1 视频分类：3D CNN、Two-Stream Network、SlowFast
 // 5.2 动作检测：时空定位、Tubelet 检测
 // 5.3 视频目标跟踪：Siamese Network、Transformer Tracker
 // 5.4 视频生成：Video GAN、Diffusion Video
-
+= 视频理解
 
 // ─────────────────────────────────────────────────────────────────────
 // Part 5：自然语言处理（NLP）
