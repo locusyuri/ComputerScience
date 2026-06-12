@@ -171,12 +171,12 @@
 // 5.5 RNN 应用：语言模型、机器翻译、语音识别
 = 循环神经网络（RNN）
 
-// Chapter 6：Transformer 架构 🔶
+// Chapter 6：Transformer 架构原理 🔶
 // 6.1 Self-Attention 机制：Scaled Dot-Product、Multi-Head Attention
 // 6.2 Positional Encoding：绝对位置编码、相对位置编码、RoPE
 // 6.3 Encoder-Decoder 架构：Pre-LN、Post-LN、FFN
 // 6.4 高效 Transformer：Linformer、Performer、Reformer、FlashAttention
-= Transformer 架构
+= Transformer 架构原理
 
 
 // ─────────────────────────────────────────────────────────────────────
@@ -234,18 +234,18 @@
 // 2.4 文本摘要：抽取式摘要、生成式摘要、ROUGE 评分
 = 序列到序列模型
 
-// Chapter 3：Transformer 架构 🔶
-// 3.1 Transformer 详解：Self-Attention、Positional Encoding、FFN
-// 3.2 BERT：预训练任务（MLM、NSP）、微调策略
-// 3.3 GPT 系列：自回归语言模型、提示工程、In-Context Learning
-// 3.4 T5：Text-to-Text 框架、统一 NLP 任务
-// 3.5 高效 Transformer：Linformer、Performer、Reformer
-= Transformer 架构
+// Chapter 3：预训练语言模型 🔶
+// 3.1 BERT：预训练任务（MLM、NSP）、微调策略
+// 3.2 GPT 系列：自回归语言模型、提示工程、In-Context Learning
+// 3.3 T5：Text-to-Text 框架、统一 NLP 任务
+// 3.4 模型轻量化：DistilBERT、TinyBERT、ALBERT
+// 3.5 高效推理：KV Cache、Speculative Decoding、量化
+= 预训练语言模型
 
 // Chapter 4：大语言模型（LLM）🔶
 // 4.1 LLM 概述：规模定律、涌现能力、指令跟随
 // 4.2 预训练语料：Common Crawl、The Pile、清洗与去重
-// 4.3 对齐技术：SFT（监督微调）、RLHF、DPO
+// 4.3 监督微调（SFT）：指令微调、数据构建、损失函数（RLHF/DPO 见 Part 8 Ch4）
 // 4.4 提示工程：Zero-Shot、Few-Shot、Chain-of-Thought
 // 4.5 LLM 应用：问答系统、代码生成、Agent、RAG
 = 大语言模型
@@ -319,7 +319,7 @@
 // 3.2 持续集成/持续部署：GitHub Actions、Jenkins、Kubeflow
 // 3.3 实验追踪与注册：MLflow、Weights & Biases、Model Registry
 // 3.4 模型压缩：量化、剪枝、知识蒸馏
-// 3.5 模型治理：合规性、审计、可解释性、公平性与偏见
+// 3.5 模型治理：合规性、审计、公平性与偏见
 = MLOps
 
 // Chapter 4：云计算与 AI 平台 ⚪
