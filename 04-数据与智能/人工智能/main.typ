@@ -71,6 +71,27 @@
 // 1.4 模型评估指标：准确率、精确率、召回率、F1、AUC-ROC
 = 机器学习概述
 
+== 过拟合与欠拟合
+// - 过拟合：训练集好、测试集差（高方差）
+// - 欠拟合：训练集就差（高偏差）
+// - 偏差-方差权衡（Bias-Variance Tradeoff）：模型复杂度 vs 总误差曲线
+// - 过拟合检测：训练 loss ↓ 验证 loss ↑
+// - 欠拟合检测：训练和验证 loss 都高
+// - 缓解策略：正则化 L1/L2（Ch2）、早停法、Dropout、增加数据
+
+== 模型评估指标
+// - 混淆矩阵：TP / TN / FP / FN
+// - 分类指标：准确率（Accuracy）、精确率（Precision）、召回率（Recall）
+//   F1-Score、Specificity、AUC-ROC
+// - 多分类指标：Macro / Micro / Weighted 平均
+// - 回归指标：MSE / RMSE（对异常值敏感）、MAE（鲁棒）
+//   R²（决定系数）、MAPE
+// - 如何选择：
+//   - 类别平衡 → Accuracy
+//   - 类别不平衡 → Precision / Recall / F1
+//   - 排序任务 → AUC-ROC
+//   - 回归任务 → RMSE / MAE / R²
+
 // Chapter 2：线性模型 🔶
 // 2.1 线性回归：最小二乘法、正规方程、梯度下降
 // 2.2 逻辑回归：sigmoid 函数、交叉熵损失、多分类
