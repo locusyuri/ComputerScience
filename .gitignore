@@ -72,3 +72,10 @@ svg-inkscape/
 
 *.pdf
 !**/main.pdf
+
+# =========================
+# AtomCode / Agent runtime
+# =========================
+.atomcode/
+.agents/graph.bin
+.agents/commands/
