@@ -82,6 +82,23 @@ description: 本技能文件规定了在本项目中使用 Typst 编写笔记时
 | `\chi_A`（特征函数） | `chi_A` |
 | `\backslash` | `backslash` |
 
+**新增映射（根据实际写作经验）**：
+
+| LaTeX | Typst | 说明 |
+|-------|-------|------|
+| `\sim` | `tilde` | 波浪号，如 `$epsilon tilde "Normal"(0,1)$` |
+| `\ll` | `lt.lt` | 远小于 |
+| `\gg` | `gt.gt` | 远大于 |
+| `\pm` | `plus.minus` | 加减号，如 `$plus.minus 1$` |
+| `\leftarrow` | `arrow(l)` | 左箭头，如 `$w arrow(l) w + eta x$` |
+| `\rightarrow` | `->` 或 `arrow(r)` | 右箭头 |
+| `\uparrow` | `arrow(u)` | 上箭头，如 `$lambda arrow(u)$` |
+| `\downarrow` | `arrow(d)` | 下箭头 |
+| `\prod` | `product` | 乘积符号，如 `$product_(i) P(y_i)$` |
+| `\implies` | `=>` | 推出符号，如 `$lambda => ...$` |
+| `\Rightarrow` | `=>` | 右双箭头 |
+| `\to` | `->` | 到符号 |
+
 ### 硬规则（必须遵守）
 
 1. **不属于符号**：写 `$in.not$`，不要写 `$notin$`
@@ -91,6 +108,10 @@ description: 本技能文件规定了在本项目中使用 Typst 编写笔记时
 5. **函数复合**：`$compose$`
 6. **微分符号**：使用正体 `dif x`、`dif t`
 7. **导数点记号**：`dot(x)`、`dot.double(x)`、`dot.triple(x)`
+8. **远大于/远小于**：`$gt.gt$`、`$lt.lt$`，不要用 `>>` 或 `\gg`
+9. **加减号**：`$plus.minus$`，不要用 `pm` 或 `\pm`
+10. **箭头修饰**：`arrow(l)`、`arrow(r)`、`arrow(u)`、`arrow(d)`，不要用 `larr`、`uparrow`
+11. **乘积符号**：`product`，不要用 `prod`
 
 ### 常见陷阱
 
@@ -353,3 +374,8 @@ $liminf_(n->infinity) integral_X f_n dif mu$
 8. 不删除或修改已有内容，除非明确要求
 9. 章节文件（`chapters/*.typ`）开头需要 `#import` 模板（因为它们可能被独立引用）
 10. 正文中的过渡段落（连接定理之间的逻辑）直接写为普通文本，不使用组件包裹
+11. **数学符号必须用 Typst 原生语法**：`tilde`（非 `sim`）、`arrow(l)`（非 `larr`）、`gt.gt`（非 `>>`）、`plus.minus`（非 `pm`）、`product`（非 `prod`）
+12. **多字母变量加引号才能用中文**：`"RSS"`、`"Normal"`、`"en"`
+13. **不可用 LaTeX 宏名**：`\alpha` 等宏名在 Typst 中直接写 `alpha`，无反斜杠
+14. **Callout 使用节制**：每个 `===` 内 1-2 个 Callout，过多则冗余
+15. **禁止 `**粗体**` 在普通文本与数学公式交界处**：`**调整 $R^2$**` 会导致 warning，应改为 `*调整 $R^2$*`
