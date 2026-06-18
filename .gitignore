@@ -78,5 +78,3 @@ svg-inkscape/
 # =========================
 .atomcode/
 .agents/graph.bin
-.agents/commands/
-.mcp.json
