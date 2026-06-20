@@ -1747,6 +1747,319 @@ $
 // 2.5 TensorBoard 可视化：损失曲线、计算图、 embeddings
 = 深度学习框架
 
+== PyTorch 基础
+
+=== Tensor
+// PyTorch 的核心数据结构，类似 NumPy 的 ndarray
+// 支持 GPU 加速和自动求导
+
+Tensor 是 PyTorch 中的核心数据结构，类似 NumPy 的 ndarray，但增加了 GPU 加速和自动求导的能力。
+
+```python
+import torch
+
+# 从列表创建
+x = torch.tensor([[1, 2], [3, 4]])
+
+# 特殊初始化
+zeros = torch.zeros(3, 4)
+ones = torch.ones(3, 4)
+rand = torch.randn(3, 4)  # 标准正态分布
+
+# 设备迁移
+x = x.to("cuda")   # 转移到 GPU
+x = x.to("cpu")    # 转移到 CPU
+```
+
+#info[
+  PyTorch Tensor 与 NumPy 共享内存：`torch.from_numpy(ndarray)` 返回的 Tensor 与原始 NumPy 数组共享底层内存，修改一方会影响另一方。
+]
+
+=== 自动求导
+// autograd 机制：记录计算图，自动计算梯度
+// requires_grad、backward()
+
+PyTorch 的自动求导机制自动跟踪所有对 Tensor 的操作，构建计算图，然后自动计算梯度。
+
+```python
+x = torch.tensor([2.0, 3.0], requires_grad=True)
+y = x[0] ** 2 + x[1] ** 3
+y.backward()          # 自动计算梯度
+print(x.grad)         # tensor([4., 27.])
+```
+
+- `requires_grad=True`：标记需要计算梯度的 Tensor
+- `.backward()`：从当前 Tensor 开始反向传播
+- `.grad`：访问梯度值
+- `.grad_fn`：查看创建该 Tensor 的操作（用于调试计算图）
+- `with torch.no_grad():`：禁用梯度跟踪（推理时使用，节省内存）
+
+=== nn.Module
+// 所有神经网络模型的基类
+// 封装网络层、参数和 forward 方法
+
+`nn.Module` 是所有神经网络模型的基类，通过继承它来定义模型。
+
+```python
+import torch.nn as nn
+
+class MLP(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, output_dim),
+        )
+
+    def forward(self, x):
+        return self.net(x)
+```
+
+#tip[
+  `nn.Sequential` 适合简单的前馈网络。更复杂的结构（如 ResNet 的残差连接）需在 `forward` 中自定义计算流程。
+]
+
+== PyTorch 数据加载
+
+=== Dataset
+// 封装数据集的抽象类
+// 需实现 __len__ 和 __getitem__
+
+`Dataset` 是 PyTorch 中数据加载的抽象接口，自定义数据集需继承并实现两个方法：
+
+```python
+from torch.utils.data import Dataset
+
+class MyDataset(Dataset):
+    def __init__(self, data, labels):
+        self.data = data
+        self.labels = labels
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        return self.data[idx], self.labels[idx]
+```
+
+PyTorch 也内置了常用数据集（`torchvision.datasets`、`torchtext.datasets`）。
+
+=== DataLoader
+// 自动批量加载、打乱、多进程
+// batch_size、shuffle、num_workers
+
+`DataLoader` 自动将 Dataset 包装为可迭代的批量加载器：
+
+```python
+from torch.utils.data import DataLoader
+
+loader = DataLoader(
+    dataset,
+    batch_size=32,
+    shuffle=True,
+    num_workers=4,     # 多进程加载
+    pin_memory=True,   # 加速 GPU 传输
+)
+
+for batch_x, batch_y in loader:
+    # 每个 batch 大小为 (32, ...)
+    ...
+```
+
+#note[
+  `num_workers` 的设置：数据集较小时设为 0（主进程加载），大数据集时设为 CPU 核心数（如 4 或 8）。`pin_memory=True` 配合 GPU 训练可显著加速数据传输。
+]
+
+=== transforms
+// 数据预处理、数据增强
+// torchvision.transforms 组合
+
+`transforms` 用于数据的预处理和增强：
+
+```python
+from torchvision import transforms
+
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.RandomHorizontalFlip(),     # 训练时随机翻转
+    transforms.RandomRotation(10),         # 随机旋转
+    transforms.ToTensor(),                 # PIL → Tensor
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                         std=[0.229, 0.224, 0.225]),
+])
+```
+
+- 训练时：使用随机增强（翻转、旋转、裁剪、颜色抖动）提升泛化
+- 验证/测试时：只使用 Resize + ToTensor + Normalize，不加随机增强
+
+== 模型训练循环
+
+=== 训练流程
+// 一个 epoch 的标准流程
+// model.train()、zero_grad、loss.backward、optimizer.step
+
+标准训练循环的模板：
+
+```python
+model.train()  # 切换到训练模式（启用 Dropout、BatchNorm 更新）
+
+for epoch in range(num_epochs):
+    total_loss = 0.0
+    for x, y in train_loader:
+        x, y = x.to(device), y.to(device)
+
+        outputs = model(x)               # forward
+        loss = criterion(outputs, y)      # 计算损失
+
+        optimizer.zero_grad()            # 清空梯度
+        loss.backward()                   # 反向传播
+        optimizer.step()                  # 更新参数
+
+        total_loss += loss.item()
+
+    avg_loss = total_loss / len(train_loader)
+    print(f"Epoch {epoch}: loss = {avg_loss:.4f}")
+```
+
+=== 验证流程
+// 推理模式、不计算梯度
+// model.eval()、torch.no_grad()
+
+验证循环与训练循环略有不同：
+
+```python
+model.eval()  # 切换到评估模式（禁用 Dropout，BatchNorm 固定）
+
+total_correct = 0
+total_samples = 0
+
+with torch.no_grad():  # 不计算梯度，节省内存和加速
+    for x, y in val_loader:
+        x, y = x.to(device), y.to(device)
+        outputs = model(x)
+        _, predicted = torch.max(outputs, dim=1)
+        total_correct += (predicted == y).sum().item()
+        total_samples += y.size(0)
+
+accuracy = total_correct / total_samples
+print(f"Validation accuracy: {accuracy:.4f}")
+```
+
+#info[
+  `model.eval()` 和 `torch.no_grad()` 的区别：
+  - `model.eval()`：影响 BatchNorm（使用运行均值/方差）和 Dropout（不再随机失活）
+  - `torch.no_grad()`：不构建计算图，节省内存和计算
+  - 验证时两者都需使用
+]
+
+== 模型保存与加载
+
+=== state_dict
+// 保存模型参数（推荐方式）
+// 仅保存参数字典，不保存模型结构
+
+`state_dict` 保存模型的*学习参数*（权重和偏置），不保存模型结构：
+
+```python
+# 保存
+torch.save(model.state_dict(), "model_weights.pth")
+
+# 加载
+model = MLP(input_dim=784, hidden_dim=256, output_dim=10)
+model.load_state_dict(torch.load("model_weights.pth"))
+model.eval()  # 加载后需调用 eval() 切换到推理模式
+```
+
+#tip[
+  保存 `state_dict`（而非整个模型）是推荐方式：(1) 文件更小，只存参数不存代码；(2) 兼容性更好，模型结构升级后仍可加载旧参数；(3) 安全（避免加载恶意代码）。
+]
+
+=== checkpoint
+// 保存完整训练状态以便恢复
+// 包括模型参数、优化器状态、epoch 等
+
+Checkpoint 保存完整的训练状态，用于中断后恢复训练：
+
+```python
+# 保存 checkpoint
+checkpoint = {
+    "epoch": epoch,
+    "model_state_dict": model.state_dict(),
+    "optimizer_state_dict": optimizer.state_dict(),
+    "loss": best_loss,
+}
+torch.save(checkpoint, "checkpoint.pth")
+
+# 加载 checkpoint
+checkpoint = torch.load("checkpoint.pth")
+model.load_state_dict(checkpoint["model_state_dict"])
+optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+start_epoch = checkpoint["epoch"] + 1
+```
+
+#caution[
+  保存 checkpoint 时需注意：(1) 确保训练代码版本与加载时的代码版本一致（模型结构变化会导致加载失败）；(2) 定期清理旧的 checkpoint，只保留最优的几份；(3) 分布式训练时保存的是 `module.state_dict()` 而非 `model.state_dict()`。
+]
+
+== TensorBoard 可视化
+
+=== 损失曲线
+// SummaryWriter 记录训练/验证指标
+// add_scalar
+
+TensorBoard 提供训练过程的可视化：
+
+```python
+from torch.utils.tensorboard import SummaryWriter
+
+writer = SummaryWriter("runs/experiment_01")
+
+# 每个 epoch 记录损失和精度
+for epoch in range(num_epochs):
+    train_loss = train_one_epoch()
+    val_loss, val_acc = validate()
+
+    writer.add_scalar("Loss/train", train_loss, epoch)
+    writer.add_scalar("Loss/val", val_loss, epoch)
+    writer.add_scalar("Accuracy/val", val_acc, epoch)
+
+writer.close()
+```
+
+启动 TensorBoard：`tensorboard --logdir=runs`
+
+通过损失曲线可以判断模型状态：
+
+- 训练 loss ↓、验证 loss ↓：正常训练
+- 训练 loss ↓、验证 loss ↑：过拟合（需正则化/早停）
+- 训练 loss 和验证 loss 都高：欠拟合（需增加模型复杂度）
+
+=== 模型结构
+// add_graph 可视化计算图
+// add_histogram 观察权重分布
+
+```python
+# 可视化模型计算图
+writer.add_graph(model, dummy_input)
+
+# 观察权重和梯度分布
+for name, param in model.named_parameters():
+    writer.add_histogram(f"Weights/{name}", param, epoch)
+    if param.grad is not None:
+        writer.add_histogram(f"Gradients/{name}", param.grad, epoch)
+```
+
+#tip[
+  权重分布直方图是诊断训练问题的利器：(1) 权重快速趋近 0 → 梯度消失；(2) 权重快速增大 → 梯度爆炸；(3) 权重不变化 → 学习率过小或神经元死亡。可视化这些分布可以快速定位问题所在。
+]
+
+TensorBoard 还支持：
+
+- `add_images`：可视化输入图像（检查数据增强效果）
+- `add_embedding`：可视化高维特征（PCA/t-SNE 投影）
+- `add_pr_curve`：PR 曲线（二分类评估）
+
 // Chapter 3：训练技巧与调优 🔶
 // 3.1 权重初始化：Xavier、He、正交初始化
 // 3.2 批量归一化（BatchNorm）：原理、实现、LayerNorm
