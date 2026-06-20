@@ -1407,6 +1407,338 @@ $
 // 1.5 优化器：SGD、Momentum、Adam、AdamW、LAMB
 = 神经网络基础
 
+== 感知机与多层感知机
+
+=== 神经元模型
+// 生物神经元启发：输入 → 加权求和 → 激活 → 输出
+// MP 神经元：McCulloch-Pitts（1943）
+
+人工神经元受生物神经元启发，是深度学习的基本计算单元：
+
+$
+  y = f(sum_i w_i x_i + b)
+$
+
+- $x_i$：输入信号
+- $w_i$：权重（可学习参数）
+- $b$：偏置
+- $f(dot)$：激活函数，引入非线性
+
+最早的数学模型是 McCulloch-Pitts 神经元（1943）：输入加权求和后通过阈值函数输出 0/1。但 MP 神经元的权重需手动设定，无法学习。
+
+#info[
+  Rosenblatt（1958）提出的感知机（Perceptron）是关键突破：它使用误分类驱动的学习规则自动更新权重。感知机是第一个具有学习能力的神经网络模型。
+]
+
+=== 多层感知机
+// 单层感知机的局限：只能处理线性可分
+// 引入隐藏层 → 万能近似定理
+// 层间全连接，激活函数引入非线性
+
+单层感知机只能解决线性可分问题（如 AND、OR），无法处理 XOR。*引入隐藏层*后，网络获得拟合非线性决策边界的能力。
+
+多层感知机（MLP）的结构：
+
+- *输入层*：接收特征向量
+- *隐藏层*：一到多个全连接层，每层后跟非线性激活函数
+- *输出层*：根据任务选择输出（分类用 softmax，回归用线性）
+
+*万能近似定理*（Universal Approximation Theorem）：一个包含足够多神经元的单隐藏层前馈网络，可以任意精度逼近任意连续函数（Hornik, 1991）。
+
+#tip[
+  理论保证了 MLP 的表达能力，但实践中找到正确的权重需要：(1) 足够的数据；(2) 合适的激活函数；(3) 有效的优化算法。三者缺一不可。
+]
+
+== 反向传播算法
+
+=== 链式法则
+// 复合函数求导的核心工具
+// 计算图：前向传播 + 反向传播
+
+反向传播（Backpropagation）是训练神经网络的核心算法，本质是*对复合函数反复应用链式法则*。
+
+假设一个三层网络：$L = L(y, f_3(f_2(f_1(x))))$，链式法则给出梯度：
+
+$
+  (partial L)/(partial w_1) = (partial L)/(partial f_3) dot (partial f_3)/(partial f_2) dot (partial f_2)/(partial f_1) dot (partial f_1)/(partial w_1)
+$
+
+#info[
+  计算图视角：前向传播从输入到输出计算损失，反向传播从输出到输入传播梯度。现代框架（PyTorch、TensorFlow）的自动求导机制正是基于这一原理。
+]
+
+=== 梯度计算
+// 逐层计算各参数的梯度
+// 局部梯度 × 上游梯度
+
+反向传播中，每个神经元接收"上游梯度"，乘以该节点的*局部梯度*（即该节点输出对输入的导数），得到"下游梯度"：
+
+$
+  delta_i^l = f'(z_i^l) dot sum_j delta_j^(l+1) w_(j i)^(l+1)
+$
+
+其中 $delta_i^l$ 是第 $l$ 层第 $i$ 个神经元的误差项，$z_i^l$ 是激活前的加权和。
+
+#caution[
+  梯度消失（Vanishing Gradient）和梯度爆炸（Exploding Gradient）是深度网络中的核心问题。sigmoid/tanh 在饱和区梯度接近零，深层网络的前几层几乎无法更新。ReLU 和残差连接是主要的缓解手段。
+]
+
+=== 权重更新
+// 梯度下降：w ← w - η∇L
+// 学习率控制步长
+
+获得梯度后，使用梯度下降更新参数：
+
+$
+  w_(i j)^(l) arrow(l) w_(i j)^(l) - eta (partial L)/(partial w_(i j)^(l))
+$
+
+其中 $eta$ 是学习率。权重更新是逐层进行的，从输出层反向传播到输入层。
+
+#tip[
+  反向传播的四个步骤总结：
+  1. 前向传播：输入 → 隐藏层 → 输出，计算损失
+  2. 计算输出层梯度（损失对输出层的导数）
+  3. 反向传播梯度：逐层将上游梯度乘以局部梯度
+  4. 更新所有参数：$w arrow(l) w - eta nabla L$
+]
+
+== 激活函数
+
+=== Sigmoid
+// σ(x) = 1 / (1 + e^{-x})，输出 (0,1)
+// 梯度饱和问题
+
+$
+  sigma(x) = 1 / (1 + e^(-x)), quad sigma'(x) = sigma(x)(1 - sigma(x))
+$
+
+输出范围 $(0, 1)$，适合作为二分类输出层的概率估计。
+
+- *优点*：输出归一化，平滑可导
+- *缺点*：梯度饱和（$|x|$ 大时梯度接近 0）、输出非零中心（导致梯度更新呈锯齿状）
+
+=== Tanh
+// tanh(x) ∈ (-1, 1)，零中心
+// 仍存在梯度饱和
+
+$
+  tanh(x) = (e^x - e^(-x)) / (e^x + e^(-x)), quad tanh'(x) = 1 - tanh^2(x)
+$
+
+输出范围 $(-1, 1)$，是零中心的（解决了 Sigmoid 非零中心的问题）。
+
+- *优点*：零中心、梯度更强
+- *缺点*：仍存在饱和区梯度消失问题
+
+=== ReLU
+// ReLU(x) = max(0, x)
+// 非饱和、高效、稀疏激活
+
+$
+  "ReLU"(x) = max(0, x), quad "ReLU"'(x) = cases(1, "if" x > 0, 0, "if" x < 0)
+$
+
+ReLU（Rectified Linear Unit）是现代深度学习的默认激活函数。
+
+- *优点*：正区间梯度恒为 1（不饱和），计算极快，诱导稀疏激活
+- *缺点*："神经元死亡"（Dead ReLU）——负区间梯度为 0，一旦权重更新使输入永远为负，该神经元永不恢复
+
+=== Leaky ReLU / PReLU
+// Leaky ReLU: max(αx, x)，α 为小正数
+// PReLU：α 可学习
+
+为解决 Dead ReLU 问题，负区间不再直接置零：
+
+$
+  "LeakyReLU"(x) = max(alpha x, x), quad alpha " 通常取 " 0.01
+$
+
+- Leaky ReLU：$alpha$ 为固定小常数（如 0.01）
+- PReLU（Parametric ReLU）：$alpha$ 为可学习参数
+
+=== Swish / SiLU
+// Swish(x) = x · σ(x)
+// Google 发现的自门控激活函数
+
+$
+  "Swish"(x) = x dot sigma(x) = x / (1 + e^(-x))
+$
+
+Swish（Ramachandran et al., 2017）通过神经架构搜索发现，在深层网络上往往优于 ReLU。
+
+- 特点：非单调（在 $x < 0$ 时先降后升）、处处可导、平滑
+- SiLU（Sigmoid Linear Unit）：与 Swish 等价，是 Swish 的另一个名称
+
+#note[
+  激活函数选择经验：
+  - 隐藏层默认用 ReLU（简单、高效、足够好）
+  - 若出现大量 Dead ReLU → 换 Leaky ReLU 或 PReLU
+  - 深层网络（如 100+ 层）可尝试 Swish
+  - 输出层：二分类 → Sigmoid，多分类 → Softmax，回归 → 无/线性
+]
+
+== 损失函数
+
+=== 均方误差（MSE）
+// L = ½Σ(y - ŷ)²
+// 回归任务默认
+
+$
+  L = 1/2 sum_i (y_i - hat(y)_i)^2
+$
+
+- 适用于回归任务
+- 梯度：$partial L / partial hat(y) = -(y - hat(y))$（乘以 $-1$ 后即为残差）
+- 对异常值敏感（平方放大了大误差的权重）
+
+=== 交叉熵损失
+// 分类任务的标准损失
+// L = -Σ y log ŷ
+
+对于分类任务：
+
+$
+  L = - sum_i y_i log hat(y)_i
+$
+
+- 二分类：$L = -[y log hat(y) + (1 - y) log(1 - hat(y))]$
+- 多分类：$L = - sum_k y_k log hat(y)_k$（其中 $hat(y)_k$ 来自 softmax 输出）
+
+交叉熵的梯度形式简洁：$partial L / partial z_k = hat(y)_k - y_k$（配合 softmax 时）。
+
+=== Huber Loss
+// 结合 MSE 和 MAE 的优点
+// δ 阈值控制平滑区域
+
+$
+  L_delta(y, hat(y)) = cases(1/2(y - hat(y))^2, "if" |y - hat(y)| <= delta, delta |y - hat(y)| - 1/2 delta^2, "otherwise")
+$
+
+- $|"误差"| <= delta$：使用 MSE（二次），收敛快  
+- $|"误差"| > delta$：使用 MAE（线性），对异常值鲁棒
+
+#tip[
+  Huber Loss 是为回归任务设计的鲁棒损失函数。$delta$ 控制"鲁棒区间"的大小：$delta arrow(u)$ 更接近 MSE，$delta arrow(d)$ 更接近 MAE。通常 $delta = 1.0$ 是合理起点。
+]
+
+=== Focal Loss
+// 聚焦于难分类样本
+// 引入调制因子 (1-p)ᵞ
+
+$
+  L = -alpha (1 - p_t)^gamma log(p_t)
+$
+
+其中 $p_t = cases(p, "if" y = 1, 1 - p, "if" y = 0)$。
+
+- $gamma = 0$：退化为标准交叉熵
+- $gamma > 0$：降低易分类样本的损失权重，使模型专注于难分类样本
+- $alpha$：类别权重，处理类别不平衡
+
+Focal Loss 由 Lin et al.（2017）在 RetinaNet 中提出，用于解决目标检测中正负样本极端不平衡的问题。
+
+#info[
+  Focal Loss 的设计直觉：假设一个易分类样本 $p_t = 0.9$，$gamma = 2$ 时调制因子为 $(1 - 0.9)^2 = 0.01$，损失降低 100 倍；而难分类样本 $p_t = 0.1$ 时调制因子为 $(1 - 0.1)^2 = 0.81$，损失仅降低约 1.2 倍。模型自然地把注意力转移到难样本上。
+]
+
+== 优化器
+
+=== SGD
+// w ← w - η∇L
+// 基础版，更新公式简单，但收敛慢
+
+标准 SGD 及其改进构成了深度学习优化的基础。
+
+$
+  w_(t+1) = w_t - eta nabla L(w_t)
+$
+
+随机梯度下降（Stochastic GD）每次使用一个 mini-batch 计算梯度：
+
+- *优点*：简单，内存占用小
+- *缺点*：收敛慢，梯度噪声大，难以逃离局部极小/鞍点
+
+=== Momentum
+// 引入动量项加速收敛
+// vₜ = γvₜ₋₁ + η∇L，w ← w - vₜ
+
+SGD with Momentum（Polyak, 1964）通过累积历史梯度方向，加速收敛和平滑震荡：
+
+$
+  v_(t+1) = gamma v_t + eta nabla L(w_t)
+$
+$
+  w_(t+1) = w_t - v_(t+1)
+$
+
+$gamma$（通常取 0.9）控制历史梯度的衰减速度。
+
+#note[
+  动量项的物理类比：参数更新如同小球滚下山坡，动量使其在梯度方向一致时加速，梯度震荡时互相抵消。Nesterov 动量（NAG）在此基础上增加了"向前看"一步的修正。
+]
+
+=== Adam
+// 自适应学习率 + 动量
+// 一阶矩估计（动量）+ 二阶矩估计（RMSProp）
+
+Adam（Kingma & Ba, 2014）结合了 Momentum（动量）和 RMSProp（自适应学习率）两者的优点。
+
+$
+  m_t = beta_1 m_(t-1) + (1 - beta_1) nabla L
+$
+$
+  v_t = beta_2 v_(t-1) + (1 - beta_2) (nabla L)^2
+$
+$
+  hat(m)_t = m_t / (1 - beta_1^t), quad hat(v)_t = v_t / (1 - beta_2^t)
+$
+$
+  w_(t+1) = w_t - eta hat(m)_t / (sqrt(hat(v)_t) + epsilon)
+$
+
+- $beta_1 = 0.9$：动量衰减率
+- $beta_2 = 0.999$：梯度平方衰减率
+- $epsilon = 10^(-8)$：数值稳定项
+
+Adam 是深度学习的默认优化器，自适应学习率使其对超参数选择相对鲁棒。
+
+=== AdamW
+// Adam + 解耦权重衰减
+// 权重衰减 vs L2 正则化的区别
+
+AdamW（Loshchilov & Hutter, 2017）修正了 Adam 中权重衰减（Weight Decay）的实现方式。
+
+关键发现：Adam 中的 $"L" 2$ 正则化与权重衰减在自适应学习率下*不等价*——$"L" 2$ 正则化的梯度被自适应学习率缩放后，失去了正则化效果。
+
+$
+  w_(t+1) = w_t - eta (hat(m)_t / (sqrt(hat(v)_t) + epsilon) + lambda w_t)
+$
+
+AdamW 将权重衰减从梯度计算中解耦，直接在更新步骤中加入 $lambda w_t$ 项，使正则化不受自适应学习率影响。
+
+#tip[
+  实践中：AdamW 通常优于 Adam，尤其在训练 Transformer 结构时。HuggingFace Transformers 的默认优化器就是 AdamW。
+]
+
+=== LAMB
+// 大规模分布式训练的优化器
+// Layer-wise 自适应学习率
+
+LAMB（You et al., 2019）专为大 batch size 分布式训练设计。
+
+核心思想：为每一层计算自适应学习率缩放因子，使得较大的 batch size（如 $B = 32768$）也能稳定训练。
+
+$
+  r_t = (phi(norm(w_t))) / (norm(m_t / sqrt(v_t) + epsilon)), quad w_(t+1) = w_t - eta r_t (m_t / sqrt(v_t) + epsilon)
+$
+
+其中 $phi$ 是 clip 函数，$r_t$ 是逐层的自适应学习率缩放因子。
+
+#info[
+  传统 Adam 在大 batch size 下精度下降（泛化差距），LAMB 通过逐层自适应学习率缩放解决了这一问题。LAMB 使得 BERT 的训练时间从 3 天缩短到 76 分钟。
+]
+
 // Chapter 2：深度学习框架 🔶
 // 2.1 PyTorch 基础：Tensor、自动求导、nn.Module
 // 2.2 PyTorch 数据加载：Dataset、DataLoader、transforms
