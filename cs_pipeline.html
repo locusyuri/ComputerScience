@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS Repo · Pipeline Index</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;800&family=Noto+Sans+SC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg:       #050E09;
+            --bg-unit:  #091510;
+            --bg-exp:   #0C1D14;
+            --border:   #172D20;
+            --text-hi:  #DEF0E8;
+            --text-mid: #5A8F72;
+            --text-lo:  #2A5240;
+            --mono:     'JetBrains Mono', monospace;
+            --sans:     'Noto Sans SC', sans-serif;
+            --ease:     cubic-bezier(0.23, 0.93, 0.77, 1);
+            --t:        0.52s;
+        }
+
+        body {
+            font-family: var(--mono);
+            background: var(--bg);
+            color: var(--text-hi);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* PCB grid overlay */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image:
+                linear-gradient(rgba(0, 200, 90, 0.018) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 200, 90, 0.018) 1px, transparent 1px);
+            background-size: 28px 28px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Header ─────────────────────────────────────── */
+        .hd {
+            position: relative; z-index: 10;
+            padding: 2rem 2.5rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hd-left { display: flex; flex-direction: column; gap: 0.3rem; }
+
+        .status {
+            display: inline-flex; align-items: center; gap: 0.45rem;
+            font-size: 9.5px; font-weight: 600;
+            letter-spacing: 0.2em; color: var(--text-mid);
+            text-transform: uppercase; margin-bottom: 0.35rem;
+        }
+
+        .status-dot {
+            width: 5px; height: 5px; border-radius: 50%;
+            background: #00D96A;
+            animation: blink 2.4s ease-in-out infinite;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+        h1 {
+            font-family: var(--sans);
+            font-size: clamp(1.75rem, 3.5vw, 3rem);
+            font-weight: 900;
+            letter-spacing: -0.01em;
+            line-height: 1;
+            color: var(--text-hi);
+        }
+
+        .hd-sub {
+            font-size: 10.5px; font-weight: 400;
+            letter-spacing: 0.14em; color: var(--text-mid);
+            text-transform: uppercase; margin-top: 0.25rem;
+        }
+
+        .hd-right { text-align: right; }
+        .meta-line {
+            font-size: 10px; letter-spacing: 0.08em; color: var(--text-lo);
+            line-height: 1.8;
+        }
+        .meta-line b { color: var(--text-mid); font-weight: 600; }
+
+        /* ── Data bus strip ─────────────────────────────── */
+        .bus {
+            position: relative; z-index: 10;
+            margin: 0 2.5rem;
+            height: 22px;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .bus-label {
+            font-size: 8px; font-weight: 600;
+            letter-spacing: 0.22em; color: var(--text-lo);
+            text-transform: uppercase; white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .bus-line {
+            flex: 1; height: 1px;
+            background: var(--border);
+            position: relative; overflow: hidden;
+        }
+        .bus-line::after {
+            content: '';
+            position: absolute; top: 0; left: -40%; width: 40%; height: 1px;
+            background: linear-gradient(90deg, transparent, #00D96A 50%, transparent);
+            animation: flow 3.2s linear infinite;
+        }
+        @keyframes flow { to { left: 140%; } }
+
+        /* ── Pipeline wrapper ───────────────────────────── */
+        .wrap {
+            position: relative; z-index: 10;
+            flex: 1;
+            padding: 0 2.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pipeline {
+            display: flex;
+            gap: 4px;
+            height: 70vh;
+            min-height: 480px;
+            flex: 1;
+            margin-top: 0;
+        }
+
+        /* ── Pipeline unit ──────────────────────────────── */
+        .unit {
+            position: relative;
+            flex: 1;
+            min-width: 62px;
+            background: var(--bg-unit);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            transition:
+                flex var(--t) var(--ease),
+                border-color 0.22s ease,
+                background 0.3s ease;
+            animation: appear 0.6s var(--ease) both;
+            outline: none;
+        }
+
+        /* Per-unit accent colors - intentional semantic color coding */
+        .unit:nth-child(1) { --ac: #00D96A; animation-delay: 0.05s; }
+        .unit:nth-child(2) { --ac: #00CEFF; animation-delay: 0.10s; }
+        .unit:nth-child(3) { --ac: #FFB800; animation-delay: 0.15s; }
+        .unit:nth-child(4) { --ac: #FF7B2E; animation-delay: 0.20s; }
+        .unit:nth-child(5) { --ac: #FF3B50; animation-delay: 0.25s; }
+        .unit:nth-child(6) { --ac: #A8FF3E; animation-delay: 0.30s; }
+
+        @keyframes appear {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .unit:hover,
+        .unit.open {
+            flex: 3.5;
+            border-color: var(--ac);
+            background: var(--bg-exp);
+        }
+
+        .unit:focus-visible {
+            box-shadow: 0 0 0 2px var(--ac);
+        }
+
+        /* Accent left bar */
+        .bar {
+            position: absolute; left: 0; top: 0;
+            width: 3px; height: 0;
+            background: var(--ac);
+            border-radius: 0 0 3px 3px;
+            transition: height 0.6s var(--ease);
+        }
+        .unit:hover .bar, .unit.open .bar { height: 100%; }
+
+        /* Top edge accent */
+        .unit::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: var(--ac); opacity: 0;
+            transition: opacity 0.22s ease;
+        }
+        .unit:hover::before, .unit.open::before { opacity: 1; }
+
+        /* ── Unit header ──────────────────────────────── */
+        .uhd {
+            padding: 1.25rem 1rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+            overflow: hidden;
+            writing-mode: vertical-rl;
+        }
+        .unit:hover .uhd, .unit.open .uhd {
+            writing-mode: horizontal-tb;
+        }
+
+        .stage-id {
+            font-size: 9.5px; font-weight: 600;
+            letter-spacing: 0.2em; color: var(--ac);
+            text-transform: uppercase; opacity: 0.8;
+        }
+
+        .stage-type {
+            font-size: 8px; font-weight: 400;
+            letter-spacing: 0.2em; color: var(--text-lo);
+            text-transform: uppercase;
+        }
+
+        .uname {
+            font-family: var(--sans);
+            font-size: clamp(1rem, 1.6vw, 1.45rem);
+            font-weight: 900;
+            line-height: 1.1;
+            color: var(--text-hi);
+        }
+
+        .uen {
+            font-size: 10px; font-weight: 400;
+            letter-spacing: 0.12em; color: var(--text-mid);
+            text-transform: uppercase;
+        }
+
+        /* ── Unit content ─────────────────────────────── */
+        .ucnt {
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+            transition:
+                opacity 0.3s ease 0.15s,
+                transform 0.3s var(--ease) 0.15s;
+            padding: 0 1rem 1rem;
+        }
+        .unit:hover .ucnt, .unit.open .ucnt {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin-bottom: 0.9rem;
+            position: relative; overflow: hidden;
+        }
+        .divider::after {
+            content: '';
+            position: absolute; top: 0; left: 0;
+            width: 28%; height: 1px;
+            background: var(--ac); opacity: 0.55;
+        }
+
+        .reg-label {
+            font-size: 8.5px; font-weight: 600;
+            letter-spacing: 0.2em; color: var(--text-lo);
+            text-transform: uppercase;
+            margin-bottom: 0.6rem;
+        }
+
+        .reg-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.28rem;
+        }
+
+        .reg-item {
+            font-size: 12.5px; font-weight: 400;
+            color: var(--text-mid);
+            padding: 0.35rem 0.5rem;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.15s ease, background 0.15s ease;
+            cursor: default;
+        }
+        .reg-item::before {
+            content: '';
+            width: 3px; height: 3px; border-radius: 50%;
+            background: var(--ac); opacity: 0.4;
+            flex-shrink: 0;
+            transition: opacity 0.15s ease;
+        }
+        .reg-item:hover {
+            color: var(--text-hi);
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .reg-item:hover::before { opacity: 1; }
+
+        /* Count badge */
+        .cnt {
+            position: absolute; bottom: 10px; right: 10px;
+            font-size: 9px; font-weight: 600;
+            color: var(--ac); opacity: 0.3;
+            letter-spacing: 0.08em;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+        .unit:hover .cnt, .unit.open .cnt { opacity: 0.65; }
+
+        /* Connector node between units */
+        .node {
+            position: absolute; right: -3px; top: 50%;
+            transform: translateY(-50%);
+            width: 5px; height: 5px; border-radius: 50%;
+            background: var(--border);
+            z-index: 2;
+            transition: background 0.2s ease, box-shadow 0.2s ease;
+        }
+        .unit:last-child .node { display: none; }
+        .unit:hover .node, .unit.open .node {
+            background: var(--ac);
+            box-shadow: 0 0 6px var(--ac);
+        }
+
+        /* ── Footer ──────────────────────────────────── */
+        .ft {
+            position: relative; z-index: 10;
+            padding: 0.65rem 2.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ft-stat {
+            font-size: 9.5px;
+            letter-spacing: 0.12em;
+            color: var(--text-lo);
+            text-transform: uppercase;
+        }
+        .ft-stat b { color: var(--text-mid); font-weight: 600; }
+
+        /* ── Responsive ──────────────────────────────── */
+        @media (max-width: 768px) {
+            .hd {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+                padding: 1.25rem 1.25rem 1rem;
+            }
+
+            .bus { margin: 0 1.25rem; }
+
+            .wrap { padding: 0 1.25rem 1.5rem; }
+
+            .pipeline {
+                flex-direction: column;
+                height: auto;
+                min-height: unset;
+                gap: 4px;
+            }
+
+            .unit {
+                flex: none;
+                min-height: 56px;
+                height: 56px;
+                min-width: unset;
+                transition:
+                    height var(--t) var(--ease),
+                    border-color 0.22s ease,
+                    background 0.3s ease;
+            }
+
+            .unit:hover, .unit.open {
+                flex: none;
+                height: 260px;
+            }
+
+            /* On mobile, header always horizontal */
+            .uhd {
+                writing-mode: horizontal-tb;
+                flex-direction: row;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 0.75rem 1rem;
+            }
+
+            .unit:hover .uhd, .unit.open .uhd {
+                align-items: flex-start;
+                flex-direction: column;
+                padding: 1rem 1rem 0.5rem;
+            }
+
+            .stage-type { display: none; }
+
+            .ft { padding: 0.65rem 1.25rem; }
+
+            .node { display: none; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .unit, .bar, .ucnt { transition: none; animation: none; }
+            .bus-line::after { animation: none; }
+            .status-dot { animation: none; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="hd">
+    <div class="hd-left">
+        <div class="status">
+            <span class="status-dot"></span>
+            CS Repository
+        </div>
+        <h1>计算机科学</h1>
+        <p class="hd-sub">Knowledge Pipeline · Functional Unit Index</p>
+    </div>
+    <div class="hd-right">
+        <p class="meta-line">Stages <b>06</b></p>
+        <p class="meta-line">Sub-modules <b>17</b></p>
+    </div>
+</header>
+
+<div class="bus">
+    <span class="bus-label">Data Bus</span>
+    <div class="bus-line"></div>
+</div>
+
+<main class="wrap">
+    <div class="pipeline">
+
+        <!-- S01 · FETCH · 计算机基础 -->
+        <div class="unit" role="button" tabindex="0" aria-expanded="false">
+            <div class="bar"></div>
+            <div class="uhd">
+                <span class="stage-id">S01</span>
+                <span class="stage-type">FETCH</span>
+                <span class="uname">计算机基础</span>
+                <span class="uen">Fundamentals</span>
+            </div>
+            <div class="ucnt">
+                <div class="divider"></div>
+                <p class="reg-label">Instruction Cache</p>
+                <ul class="reg-list">
+                    <li class="reg-item">计算机基础</li>
+                    <li class="reg-item">计算机组成原理</li>
+                    <li class="reg-item">计算机网络</li>
+                    <li class="reg-item">操作系统</li>
+                    <li class="reg-item">数据结构与算法分析</li>
+                </ul>
+            </div>
+            <span class="cnt">5 REG</span>
+            <div class="node"></div>
+        </div>
+
+        <!-- S02 · DECODE · 编程语言 -->
+        <div class="unit" role="button" tabindex="0" aria-expanded="false">
+            <div class="bar"></div>
+            <div class="uhd">
+                <span class="stage-id">S02</span>
+                <span class="stage-type">DECODE</span>
+                <span class="uname">编程语言</span>
+                <span class="uen">Languages</span>
+            </div>
+            <div class="ucnt">
+                <div class="divider"></div>
+                <p class="reg-label">Instruction Cache</p>
+                <ul class="reg-list">
+                    <li class="reg-item">C++</li>
+                    <li class="reg-item">C#</li>
+                    <li class="reg-item">Java</li>
+                    <li class="reg-item">JavaScript</li>
+                    <li class="reg-item">Python</li>
+                    <li class="reg-item">Rust</li>
+                </ul>
+            </div>
+            <span class="cnt">6 REG</span>
+            <div class="node"></div>
+        </div>
+
+        <!-- S03 · EXECUTE · 开发方向 -->
+        <div class="unit" role="button" tabindex="0" aria-expanded="false">
+            <div class="bar"></div>
+            <div class="uhd">
+                <span class="stage-id">S03</span>
+                <span class="stage-type">EXECUTE</span>
+                <span class="uname">开发方向</span>
+                <span class="uen">Dev Tracks</span>
+            </div>
+            <div class="ucnt">
+                <div class="divider"></div>
+                <p class="reg-label">Instruction Cache</p>
+                <ul class="reg-list">
+                    <li class="reg-item">SpringBoot</li>
+                    <li class="reg-item">Vue</li>
+                </ul>
+            </div>
+            <span class="cnt">2 REG</span>
+            <div class="node"></div>
+        </div>
+
+        <!-- S04 · PROCESS · 数据与智能 -->
+        <div class="unit" role="button" tabindex="0" aria-expanded="false">
+            <div class="bar"></div>
+            <div class="uhd">
+                <span class="stage-id">S04</span>
+                <span class="stage-type">PROCESS</span>
+                <span class="uname">数据与智能</span>
+                <span class="uen">Data &amp; AI</span>
+            </div>
+            <div class="ucnt">
+                <div class="divider"></div>
+                <p class="reg-label">Instruction Cache</p>
+                <ul class="reg-list">
+                    <li class="reg-item">人工智能</li>
+                    <li class="reg-item">数据科学</li>
+                </ul>
+            </div>
+            <span class="cnt">2 REG</span>
+            <div class="node"></div>
+        </div>
+
+        <!-- S05 · VERIFY · 安全与密码 -->
+        <div class="unit" role="button" tabindex="0" aria-expanded="false">
+            <div class="bar"></div>
+            <div class="uhd">
+                <span class="stage-id">S05</span>
+                <span class="stage-type">VERIFY</span>
+                <span class="uname">安全与密码</span>
+                <span class="uen">Security</span>
+            </div>
+            <div class="ucnt">
+                <div class="divider"></div>
+                <p class="reg-label">Instruction Cache</p>
+                <ul class="reg-list">
+                    <li class="reg-item">网络安全</li>
+                </ul>
+            </div>
+            <span class="cnt">1 REG</span>
+            <div class="node"></div>
+        </div>
+
+        <!-- S06 · COMMIT · 工程化与运维 -->
+        <div class="unit" role="button" tabindex="0" aria-expanded="false">
+            <div class="bar"></div>
+            <div class="uhd">
+                <span class="stage-id">S06</span>
+                <span class="stage-type">COMMIT</span>
+                <span class="uname">工程化与运维</span>
+                <span class="uen">Eng &amp; Ops</span>
+            </div>
+            <div class="ucnt">
+                <div class="divider"></div>
+                <p class="reg-label">Instruction Cache</p>
+                <ul class="reg-list">
+                    <li class="reg-item">运行与维护</li>
+                </ul>
+            </div>
+            <span class="cnt">1 REG</span>
+        </div>
+
+    </div>
+</main>
+
+<footer class="ft">
+    <span class="ft-stat"><b>6</b> Stages · <b>17</b> Sub-modules</span>
+    <span class="ft-stat">CS Repo · 2026</span>
+</footer>
+
+<script>
+    const units = document.querySelectorAll('.unit');
+
+    units.forEach(unit => {
+        unit.addEventListener('click', () => {
+            const wasOpen = unit.classList.contains('open');
+            // Collapse all
+            units.forEach(u => {
+                u.classList.remove('open');
+                u.setAttribute('aria-expanded', 'false');
+            });
+            // Toggle clicked unit
+            if (!wasOpen) {
+                unit.classList.add('open');
+                unit.setAttribute('aria-expanded', 'true');
+            }
+        });
+
+        // Keyboard support
+        unit.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                unit.click();
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
